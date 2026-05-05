@@ -534,6 +534,12 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
             <div class="tog-label">Time limit</div>
             <div class="tog-desc">Maximum time allowed per attempt</div>
             <div id="inp-timelimit" style="display:none" class="inp-inline"><input id="s-timelimit" type="number" min="1" max="999" value="45"><span>minutes</span></div>
+            <div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-size:12px;color:var(--muted)">Set</span>
+              <input id="s-mins-per-q" type="number" min="1" max="60" value="3" style="width:56px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;text-align:center">
+              <span style="font-size:12px;color:var(--muted)">min per question</span>
+              <button type="button" class="btn btn-sm" onclick="applyMinsPerQuestion()" style="padding:4px 12px">Set</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2403,7 +2409,7 @@ const APP = {
     quizType: 'course_completion',
     maxAttempts: 2,
     cooldownDays: 7,
-    randomizeQuestions: true,
+    randomizeQuestions: false,
     passingPercentage: 70,
     timeLimitMinutes: 45,
     questionsPerAttempt: 0,
@@ -2413,7 +2419,7 @@ const APP = {
     failMessage: '',
     passExitMessage: '',
     failExitMessage: '',
-    showAnswerReview: false,
+    showAnswerReview: true,
     showCorrectAnswers: false,
     manifestIdentifier: '',
     preserveIdentifier: false
@@ -4133,6 +4139,17 @@ async function deletePreset(id) {
 }
 
 // ── SETTINGS ──────────────────────────────────────────────
+function applyMinsPerQuestion() {
+  const minsPerQ = parseInt(document.getElementById('s-mins-per-q').value) || 3;
+  const qCount = APP.questions.length;
+  if (!qCount) { toast('Add questions first', 'err'); return; }
+  const total = minsPerQ * qCount;
+  document.getElementById('tog-timelimit').checked = true;
+  toggleSettingInput('timelimit', true);
+  document.getElementById('s-timelimit').value = total;
+  toast(qCount + ' questions × ' + minsPerQ + ' min = ' + total + ' min', 'ok');
+}
+
 function toggleSettingInput(key, on) {
   const el = document.getElementById('inp-' + key);
   if (el) el.style.display = on ? 'flex' : 'none';
