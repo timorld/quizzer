@@ -534,12 +534,15 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
             <div class="tog-label">Time limit</div>
             <div class="tog-desc">Maximum time allowed per attempt</div>
             <div id="inp-timelimit" style="display:none" class="inp-inline"><input id="s-timelimit" type="number" min="1" max="999" value="45"><span>minutes</span></div>
-            <div style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;background:#f4f9ec;border:1px solid #d4eaa0;border-radius:var(--radius-sm);padding:6px 10px;white-space:nowrap">
-              <span style="font-size:12px;color:var(--muted)">Set</span>
-              <input id="s-mins-per-q" type="number" min="1" max="60" value="3" style="width:38px;padding:3px 4px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;text-align:center">
-              <span style="font-size:12px;color:var(--muted)">min / question</span>
-              <button type="button" class="btn btn-sm" onclick="applyMinsPerQuestion()" style="padding:3px 10px;font-size:12px">Set</button>
-            </div>
+          </div>
+        </div>
+        <div class="setting-sub active">
+          <div class="tog-label" style="font-size:12px;margin-bottom:6px">Time per question</div>
+          <div style="display:inline-flex;align-items:center;gap:6px;background:#f4f9ec;border:1px solid #d4eaa0;border-radius:var(--radius-sm);padding:6px 10px;white-space:nowrap">
+            <span style="font-size:12px;color:var(--muted)">Set</span>
+            <input id="s-mins-per-q" type="number" min="1" max="60" value="3" style="width:38px;padding:3px 4px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;text-align:center">
+            <span style="font-size:12px;color:var(--muted)">min / question</span>
+            <button type="button" class="btn btn-sm" onclick="applyMinsPerQuestion()" style="padding:3px 10px;font-size:12px">Set</button>
           </div>
         </div>
       </div>
