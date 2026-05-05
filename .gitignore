@@ -1,0 +1,27 @@
+# Server runtime data — never overwrite on the server
+server/data/
+
+# Dependencies
+server/node_modules/
+node_modules/
+
+# Local testing files
+testing/
+
+# TLS certificates — sensitive, keep off GitHub
+TLS certificates/
+
+# Large binary / debugging artifacts not needed in repo
+assets/ALM settings issue/
+assets/SCORMs for example/
+assets/GRAPHICS/illustrations.ai
+assets/Documentation/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+
+# Claude memory (local only)
+.claude/

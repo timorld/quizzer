@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 175.45 230.31">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: 4px;
+      }
+    </style>
+  </defs>
+  <g id="_ëîé_1" data-name="‘ëîé_1">
+    <g>
+      <path d="M30.16,110.89v7.79h12.97v35.45h9.02v-35.45h12.97v-7.79H30.16Z"/>
+      <path d="M93.22,132.2l14.39-21.31h-10.43l-9.33,14.27-9.33-14.27h-10.68l14.39,21.31-14.89,21.93h10.44l9.82-15.01,9.82,15.01h10.69l-14.89-21.93Z"/>
+      <path d="M110.33,110.89v7.79h12.97v35.45h9.02v-35.45h12.97v-7.79h-34.96Z"/>
+    </g>
+    <path class="cls-1" d="M52.02,2L2,52.02v176.29h171.45V2H52.02ZM50.01,13.71v36.3H13.71L50.01,13.71ZM166.59,221.45H8.86V56.86h48V8.86h109.73v212.59Z"/>
+  </g>
+</svg>
