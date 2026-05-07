@@ -2369,7 +2369,7 @@ function showSection(sectionId) {
     applyZoom();
   })();
 
-  function flushStateAndTerminate() { if (timerInterval) clearInterval(timerInterval); saveState(getStateForSave()); scorm.terminate(quizFinished && hasPassed ? '' : 'suspend'); }
+  function flushStateAndTerminate() { if (timerInterval) clearInterval(timerInterval); saveState(getStateForSave()); scorm.terminate('suspend'); }
   window.addEventListener('beforeunload', flushStateAndTerminate);
   window.addEventListener('pagehide', flushStateAndTerminate);
 
