@@ -138,6 +138,7 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .quiz-type-opt.qt-cc.quiz-type-sel{background:#76b90021;border-color:#b3d97a !important}
 .quiz-type-opt.qt-kc.quiz-type-sel{background:#3b82f61f;border-color:#93c5fd !important}
 .quiz-type-opt.qt-fe.quiz-type-sel{background:#a855f71f;border-color:#d8b4fe !important}
+.quiz-type-opt.qt-gg.quiz-type-sel{background:#f59e0b1f;border-color:#fcd34d !important}
 .img-dz{border:2px dashed var(--border);padding:14px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;border-radius:var(--radius-sm);min-height:80px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;position:relative}
 .img-dz:hover{border-color:var(--green);background:var(--green-lt)}
 .img-dz img{max-width:100%;max-height:120px;object-fit:contain;display:block}
@@ -390,6 +391,9 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
           <label class="quiz-type-opt qt-fe" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:500;border-radius:3px;transition:border-color .15s,background .15s" id="q-type-label-fe">
             <input type="radio" name="q-type" id="q-type-fe" value="course_final_exam" style="accent-color:#a855f7" onchange="syncQuizInfo('quizType',this.value)"> Course Final Exam
           </label>
+          <label class="quiz-type-opt qt-gg" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:500;border-radius:3px;transition:border-color .15s,background .15s" id="q-type-label-gg">
+            <input type="radio" name="q-type" id="q-type-gg" value="gpu_genius_fast_track" style="accent-color:#f59e0b" onchange="syncQuizInfo('quizType',this.value)"> GPU Genius Fast Track Exam
+          </label>
         </div>
       </div>
     </div>
@@ -461,6 +465,9 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
           </label>
           <label class="quiz-type-opt qt-fe" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:500;border-radius:3px;transition:border-color .15s,background .15s" id="s-type-label-fe">
             <input type="radio" name="s-type" id="s-type-fe" value="course_final_exam" style="accent-color:#a855f7"> Course Final Exam
+          </label>
+          <label class="quiz-type-opt qt-gg" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:500;border-radius:3px;transition:border-color .15s,background .15s" id="s-type-label-gg">
+            <input type="radio" name="s-type" id="s-type-gg" value="gpu_genius_fast_track" style="accent-color:#f59e0b"> GPU Genius Fast Track Exam
           </label>
         </div>
       </div>
@@ -1217,7 +1224,7 @@ function showSection(sectionId) {
   let lastAttemptQuestionIds = null;
   let lastAttemptAnswers = null;
   let reviewSource = 'result';
-  const _isExam = (typeof CONFIG !== 'undefined' && CONFIG && CONFIG.quizType === 'course_final_exam');
+  const _isExam = (typeof CONFIG !== 'undefined' && CONFIG && (CONFIG.quizType === 'course_final_exam' || CONFIG.quizType === 'gpu_genius_fast_track'));
   const _qN = _isExam ? 'Exam' : 'Quiz';
   const _qn = _isExam ? 'exam' : 'quiz';
   const LABEL_START_QUIZ = 'Start ' + _qN;
@@ -1987,6 +1994,7 @@ function showSection(sectionId) {
     if (exitEl) {
       var defaultPassExit = (CONFIG.quizType === 'course_completion') ? 'Congratulations, you have passed the course completion quiz.'
                           : (CONFIG.quizType === 'course_final_exam') ? 'Congratulations, you have passed the final exam.'
+                          : (CONFIG.quizType === 'gpu_genius_fast_track') ? 'Congratulations, you have passed the GPU Genius Fast Track Exam.'
                           : 'Congratulations, you have passed the knowledge check.';
       var defaultFailExit = canRetry().allowed ? 'Please try again.' : '';
       var exitMsg = passed ? ((CONFIG.passExitMessage && CONFIG.passExitMessage.trim()) ? CONFIG.passExitMessage.trim() : defaultPassExit) : ((CONFIG.failExitMessage && CONFIG.failExitMessage.trim()) ? CONFIG.failExitMessage.trim() : defaultFailExit);
@@ -4419,7 +4427,7 @@ function syncQuizInfo(field, value) {
     document.querySelectorAll('.quiz-type-opt').forEach(l => l.classList.remove('quiz-type-sel'));
     document.querySelectorAll('input[name="s-type"]:checked, input[name="q-type"]:checked').forEach(r => r.closest('.quiz-type-opt').classList.add('quiz-type-sel'));
     const passExitEl = document.getElementById('s-pass-exit');
-    if (passExitEl) passExitEl.placeholder = value === 'topic_quiz' ? 'Congratulations, you have passed the knowledge check.' : value === 'course_final_exam' ? 'Congratulations, you have passed the final exam.' : 'Congratulations, you have passed the course completion quiz.';
+    if (passExitEl) passExitEl.placeholder = value === 'topic_quiz' ? 'Congratulations, you have passed the knowledge check.' : value === 'course_final_exam' ? 'Congratulations, you have passed the final exam.' : value === 'gpu_genius_fast_track' ? 'Congratulations, you have passed the GPU Genius Fast Track Exam.' : 'Congratulations, you have passed the course completion quiz.';
     _updateCertificateToggleForQuizType(value);
   }
 }
@@ -4429,6 +4437,7 @@ function _updateCertificateToggleForQuizType(quizType) {
   const certRow = togCert && togCert.closest('.toggle-row');
   if (!togCert) return;
   const isKnowledgeCheck = quizType === 'topic_quiz';
+  const isExamType = quizType === 'course_final_exam' || quizType === 'gpu_genius_fast_track';
   togCert.disabled = isKnowledgeCheck;
   if (isKnowledgeCheck) {
     togCert.checked = false;
@@ -4437,6 +4446,21 @@ function _updateCertificateToggleForQuizType(quizType) {
     if (togAttempts) { togAttempts.checked = false; toggleSettingInput('attempts', false); }
     const togTimelimit = document.getElementById('tog-timelimit');
     if (togTimelimit) { togTimelimit.checked = false; toggleSettingInput('timelimit', false); }
+  } else if (isExamType) {
+    togCert.checked = false;
+    toggleSettingInput('certificate', false);
+    const togAttempts = document.getElementById('tog-attempts');
+    if (togAttempts) { togAttempts.checked = true; toggleSettingInput('attempts', true); }
+    const sAttempts = document.getElementById('s-attempts');
+    if (sAttempts) sAttempts.value = 2;
+    const togCooldown = document.getElementById('tog-cooldown');
+    if (togCooldown) { togCooldown.checked = true; toggleSettingInput('cooldown', true); }
+    const sCooldown = document.getElementById('s-cooldown');
+    if (sCooldown) sCooldown.value = 7;
+    const togTimelimit = document.getElementById('tog-timelimit');
+    if (togTimelimit) { togTimelimit.checked = true; toggleSettingInput('timelimit', true); }
+    const sTimelimit = document.getElementById('s-timelimit');
+    if (sTimelimit) sTimelimit.value = 60;
   } else {
     togCert.checked = true;
     toggleSettingInput('certificate', true);
@@ -4491,7 +4515,7 @@ function readSettingsToForm() {
   if (_gi('s-warn-blank')) _gi('s-warn-blank').checked = s.warnOnBlankAnswers !== false;
   if (_gi('s-pass-title')) _gi('s-pass-title').value = s.passMessage || '';
   if (_gi('s-fail-title')) _gi('s-fail-title').value = s.failMessage || '';
-  if (_gi('s-pass-exit')) { _gi('s-pass-exit').value = s.passExitMessage || ''; _gi('s-pass-exit').placeholder = (s.quizType === 'topic_quiz') ? 'Congratulations, you have passed the knowledge check.' : (s.quizType === 'course_final_exam') ? 'Congratulations, you have passed the final exam.' : 'Congratulations, you have passed the course completion quiz.'; }
+  if (_gi('s-pass-exit')) { _gi('s-pass-exit').value = s.passExitMessage || ''; _gi('s-pass-exit').placeholder = (s.quizType === 'topic_quiz') ? 'Congratulations, you have passed the knowledge check.' : (s.quizType === 'course_final_exam') ? 'Congratulations, you have passed the final exam.' : (s.quizType === 'gpu_genius_fast_track') ? 'Congratulations, you have passed the GPU Genius Fast Track Exam.' : 'Congratulations, you have passed the course completion quiz.'; }
   if (_gi('s-fail-exit')) _gi('s-fail-exit').value = s.failExitMessage || '';
   if (_gi('tog-review')) { _gi('tog-review').checked = !!s.showAnswerReview; toggleSettingInput('review', !!s.showAnswerReview); }
   if (_gi('s-show-correct')) _gi('s-show-correct').checked = !!s.showCorrectAnswers;
@@ -4549,7 +4573,7 @@ function saveSettings() {
 function getNoteText(s) {
   if (!s.maxAttempts) return '';
   const attText = s.maxAttempts === 1 ? '1 attempt' : s.maxAttempts + ' attempts';
-  const n = s.quizType === 'course_final_exam' ? 'exam' : 'quiz';
+  const n = (s.quizType === 'course_final_exam' || s.quizType === 'gpu_genius_fast_track') ? 'exam' : 'quiz';
   if (s.cooldownDays > 0) return 'Note that you will have ' + attText + ' to pass the ' + n + '. If you do not pass, you will be able to retake the ' + n + ' after ' + s.cooldownDays + ' day' + (s.cooldownDays !== 1 ? 's' : '') + '.';
   return 'Note that you will have ' + attText + ' to pass the ' + n + '.';
 }
@@ -4572,11 +4596,12 @@ function buildQuizHTML(settings, questions, isTest) {
     }
   }
 
-  const isExam = settings.quizType === 'course_final_exam';
+  const isExam = settings.quizType === 'course_final_exam' || settings.quizType === 'gpu_genius_fast_track';
   const N = isExam ? 'Exam' : 'Quiz';
   const n = isExam ? 'exam' : 'quiz';
   const subtitle = settings.quizType === 'course_completion' ? 'Course Completion Quiz'
                  : settings.quizType === 'course_final_exam' ? 'Course Final Exam'
+                 : settings.quizType === 'gpu_genius_fast_track' ? 'GPU Genius Fast Track Exam'
                  : 'Knowledge Check';
   const attDisp = settings.maxAttempts === 0 ? 'Unlimited' : String(settings.maxAttempts);
   const durDisp = !settings.timeLimitMinutes ? 'No limit' : settings.timeLimitMinutes + ' min';
@@ -5601,6 +5626,7 @@ function renderBatch() {
       + '<option value="course_completion"' + (qt === 'course_completion' ? ' selected' : '') + '>Course Completion</option>'
       + '<option value="topic_quiz"' + (qt === 'topic_quiz' ? ' selected' : '') + '>Knowledge Check</option>'
       + '<option value="course_final_exam"' + (qt === 'course_final_exam' ? ' selected' : '') + '>Course Final Exam</option>'
+      + '<option value="gpu_genius_fast_track"' + (qt === 'gpu_genius_fast_track' ? ' selected' : '') + '>GPU Genius Fast Track Exam</option>'
       + '</select></div>'
       + '<div class="batch-field"><div class="batch-label">Max Attempts <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#aaa">(0=∞)</span></div><input type="number" id="bt-attempts-' + item.id + '" value="' + (s.maxAttempts ?? 2) + '" min="0" max="99"></div>'
       + '<div class="batch-field"><div class="batch-label">Cooldown Days</div><input type="number" id="bt-cooldown-' + item.id + '" value="' + (s.cooldownDays ?? 7) + '" min="0" max="365"></div>'
@@ -5891,6 +5917,7 @@ function _quizFileBase() {
   const title = (APP.settings.title || 'question-bank').replace(/[^a-z0-9]+/gi, '-').toLowerCase().replace(/^-+|-+$/g, '');
   const type  = APP.settings.quizType === 'course_completion' ? 'completion-quiz'
               : APP.settings.quizType === 'course_final_exam' ? 'final-exam'
+              : APP.settings.quizType === 'gpu_genius_fast_track' ? 'fast-track-exam'
               : 'knowledge-check';
   return title + '-' + type;
 }
@@ -6012,6 +6039,7 @@ function downloadWordDoc() {
   const s = APP.settings;
   const typeName = s.quizType === 'course_completion' ? 'Course Completion Quiz'
                  : s.quizType === 'course_final_exam' ? 'Course Final Exam'
+                 : s.quizType === 'gpu_genius_fast_track' ? 'GPU Genius Fast Track Exam'
                  : 'Knowledge Check';
   const timeStr  = s.timeLimitMinutes ? s.timeLimitMinutes + ' minutes' : 'No limit';
   const attStr   = s.maxAttempts ? s.maxAttempts + (s.cooldownDays ? ' (cooldown: ' + s.cooldownDays + ' day' + (s.cooldownDays !== 1 ? 's' : '') + ')' : '') : 'Unlimited';
