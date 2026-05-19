@@ -341,7 +341,7 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
   <div class="btn-group" style="margin-left:auto;flex-shrink:0">
     <button class="btn btn-sm btn-outline-dark" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
     <div class="split-btn">
-      <button class="btn btn-sm btn-primary split-main" onclick="generateAndDownload()"><img class="btn-icon" src="assets/svg/download.svg" alt=""> Download SCORM</button>
+      <button class="btn btn-sm btn-primary split-main" id="btn-dl" onclick="generateAndDownload()"><img class="btn-icon" src="assets/svg/download.svg" alt=""> Download SCORM</button>
       <button class="btn btn-sm btn-primary split-arrow" onclick="toggleDlDropdown(event)" aria-label="More download options">&#9660;</button>
       <div class="split-dropdown" id="hdr-dl-dropdown">
         <button onclick="downloadWordDoc();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/ms word.svg" alt=""> Download as Word Doc</button>
@@ -4481,7 +4481,7 @@ function syncQuizInfo(field, value) {
     if (questionsRadio) questionsRadio.checked = true;
     document.querySelectorAll('.quiz-type-opt').forEach(l => l.classList.remove('quiz-type-sel'));
     document.querySelectorAll('input[name="s-type"]:checked, input[name="q-type"]:checked').forEach(r => r.closest('.quiz-type-opt').classList.add('quiz-type-sel'));
-    _updateCertificateToggleForQuizType(value);
+    _updateCertificateToggleForQuizType(value, true);
     _refreshPassExitPlaceholder();
   } else if (field === 'customQuizTypeName') {
     APP.settings.customQuizTypeName = value;
@@ -4507,7 +4507,7 @@ function _refreshPassExitPlaceholder() {
     : 'Congratulations, you have passed the course completion quiz.';
 }
 
-function _updateCertificateToggleForQuizType(quizType) {
+function _updateCertificateToggleForQuizType(quizType, applyDefaults = false) {
   const qCustom = document.getElementById('q-custom-config');
   const sCustom = document.getElementById('s-custom-config');
   const isCustom = quizType === 'custom';
@@ -4522,40 +4522,46 @@ function _updateCertificateToggleForQuizType(quizType) {
   if (isKnowledgeCheck) {
     togCert.checked = false;
     toggleSettingInput('certificate', false);
-    const togAttempts = document.getElementById('tog-attempts');
-    if (togAttempts) { togAttempts.checked = false; toggleSettingInput('attempts', false); }
-    const togTimelimit = document.getElementById('tog-timelimit');
-    if (togTimelimit) { togTimelimit.checked = false; toggleSettingInput('timelimit', false); }
+    if (applyDefaults) {
+      const togAttempts = document.getElementById('tog-attempts');
+      if (togAttempts) { togAttempts.checked = false; toggleSettingInput('attempts', false); }
+      const togTimelimit = document.getElementById('tog-timelimit');
+      if (togTimelimit) { togTimelimit.checked = false; toggleSettingInput('timelimit', false); }
+    }
   } else if (isExamType) {
-    togCert.checked = false;
-    toggleSettingInput('certificate', false);
-    const togAttempts = document.getElementById('tog-attempts');
-    if (togAttempts) { togAttempts.checked = true; toggleSettingInput('attempts', true); }
-    const sAttempts = document.getElementById('s-attempts');
-    if (sAttempts) sAttempts.value = 2;
-    const togCooldown = document.getElementById('tog-cooldown');
-    if (togCooldown) { togCooldown.checked = true; toggleSettingInput('cooldown', true); }
-    const sCooldown = document.getElementById('s-cooldown');
-    if (sCooldown) sCooldown.value = 7;
-    const togTimelimit = document.getElementById('tog-timelimit');
-    if (togTimelimit) { togTimelimit.checked = true; toggleSettingInput('timelimit', true); }
-    const sTimelimit = document.getElementById('s-timelimit');
-    if (sTimelimit) sTimelimit.value = 60;
+    if (applyDefaults) {
+      togCert.checked = false;
+      toggleSettingInput('certificate', false);
+      const togAttempts = document.getElementById('tog-attempts');
+      if (togAttempts) { togAttempts.checked = true; toggleSettingInput('attempts', true); }
+      const sAttempts = document.getElementById('s-attempts');
+      if (sAttempts) sAttempts.value = 2;
+      const togCooldown = document.getElementById('tog-cooldown');
+      if (togCooldown) { togCooldown.checked = true; toggleSettingInput('cooldown', true); }
+      const sCooldown = document.getElementById('s-cooldown');
+      if (sCooldown) sCooldown.value = 7;
+      const togTimelimit = document.getElementById('tog-timelimit');
+      if (togTimelimit) { togTimelimit.checked = true; toggleSettingInput('timelimit', true); }
+      const sTimelimit = document.getElementById('s-timelimit');
+      if (sTimelimit) sTimelimit.value = 60;
+    }
   } else {
-    togCert.checked = true;
-    toggleSettingInput('certificate', true);
-    const togAttempts = document.getElementById('tog-attempts');
-    if (togAttempts) { togAttempts.checked = true; toggleSettingInput('attempts', true); }
-    const sAttempts = document.getElementById('s-attempts');
-    if (sAttempts) sAttempts.value = 2;
-    const togCooldown = document.getElementById('tog-cooldown');
-    if (togCooldown) { togCooldown.checked = true; toggleSettingInput('cooldown', true); }
-    const sCooldown = document.getElementById('s-cooldown');
-    if (sCooldown) sCooldown.value = 7;
-    const togTimelimit = document.getElementById('tog-timelimit');
-    if (togTimelimit) { togTimelimit.checked = true; toggleSettingInput('timelimit', true); }
-    const sTimelimit = document.getElementById('s-timelimit');
-    if (sTimelimit) sTimelimit.value = 60;
+    if (applyDefaults) {
+      togCert.checked = true;
+      toggleSettingInput('certificate', true);
+      const togAttempts = document.getElementById('tog-attempts');
+      if (togAttempts) { togAttempts.checked = true; toggleSettingInput('attempts', true); }
+      const sAttempts = document.getElementById('s-attempts');
+      if (sAttempts) sAttempts.value = 2;
+      const togCooldown = document.getElementById('tog-cooldown');
+      if (togCooldown) { togCooldown.checked = true; toggleSettingInput('cooldown', true); }
+      const sCooldown = document.getElementById('s-cooldown');
+      if (sCooldown) sCooldown.value = 7;
+      const togTimelimit = document.getElementById('tog-timelimit');
+      if (togTimelimit) { togTimelimit.checked = true; toggleSettingInput('timelimit', true); }
+      const sTimelimit = document.getElementById('s-timelimit');
+      if (sTimelimit) sTimelimit.value = 60;
+    }
   }
   if (certRow) certRow.style.opacity = isKnowledgeCheck ? '0.45' : '';
 }
