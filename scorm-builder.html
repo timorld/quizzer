@@ -34,6 +34,9 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .btn-outline-green{background:var(--white);color:var(--green-dk);border-color:var(--green)}
 .btn-outline-green:hover{background:var(--green-lt);box-shadow:0 2px 8px rgba(118,185,0,.2)}
 .btn-outline-green .btn-icon{filter:brightness(0) saturate(100%) invert(40%) sepia(80%) saturate(500%) hue-rotate(60deg) brightness(90%)}
+.btn-outline-dark{background:var(--white);color:#1f2937;border-color:#1f2937}
+.btn-outline-dark:hover{background:#f3f4f6;box-shadow:0 2px 8px rgba(31,41,55,.18)}
+.btn-outline-dark .btn-icon{filter:brightness(0) saturate(100%) invert(13%) sepia(7%) saturate(1500%) hue-rotate(180deg) brightness(95%)}
 .btn-outline{background:var(--white);color:#666;border-color:#ccc}
 .btn-outline:hover{background:#f5f5f5;border-color:#aaa}
 .btn-danger{color:var(--danger);border-color:#e8c5d8}
@@ -138,6 +141,7 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .quiz-type-opt.qt-cc.quiz-type-sel{background:#76b90021;border-color:#b3d97a !important}
 .quiz-type-opt.qt-kc.quiz-type-sel{background:#3b82f61f;border-color:#93c5fd !important}
 .quiz-type-opt.qt-fe.quiz-type-sel{background:#a855f71f;border-color:#d8b4fe !important}
+.quiz-type-opt.qt-custom.quiz-type-sel{background:#ec48991f;border-color:#f9a8d4 !important}
 .quiz-type-opt.qt-gg.quiz-type-sel{background:#f59e0b1f;border-color:#fcd34d !important}
 .img-dz{border:2px dashed var(--border);padding:14px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;border-radius:var(--radius-sm);min-height:80px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;position:relative}
 .img-dz:hover{border-color:var(--green);background:var(--green-lt)}
@@ -329,14 +333,13 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 <header class="app-hdr">
   <div class="app-logo"><img src="assets/favicon_io/android-chrome-192x192.png" alt=""><span>Quizzer</span></div>
   <nav class="tabs">
-    <button class="tab-btn active" data-tab="import">Import</button>
-    <button class="tab-btn" data-tab="questions">Questions <span id="qc-badge" style="color:var(--green)"></span></button>
+    <button class="tab-btn active" data-tab="questions">Questions <span id="qc-badge" style="color:var(--green)"></span></button>
     <button class="tab-btn" data-tab="settings">Settings</button>
     <button class="tab-btn" data-tab="history">History</button>
     <button class="tab-btn" data-tab="batch">Batch <span id="bc-badge" style="color:var(--green)"></span></button>
   </nav>
   <div class="btn-group" style="margin-left:auto;flex-shrink:0">
-    <button class="btn btn-sm btn-outline-green" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
+    <button class="btn btn-sm btn-outline-dark" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
     <div class="split-btn">
       <button class="btn btn-sm btn-primary split-main" onclick="generateAndDownload()"><img class="btn-icon" src="assets/svg/download.svg" alt=""> Download SCORM</button>
       <button class="btn btn-sm btn-primary split-arrow" onclick="toggleDlDropdown(event)" aria-label="More download options">&#9660;</button>
@@ -350,27 +353,8 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 
 <div class="main">
 
-<!-- IMPORT TAB -->
-<div id="tab-import" class="tab-panel active">
-  <div class="pg-hdr">
-    <div><div class="pg-title">Import Questions</div><div class="pg-sub">Supports AIKEN .txt, Moodle XML .xml, SCORM .zip, and Word .docx — format is auto-detected</div></div>
-    <button class="btn btn-sm" onclick="showModal('modal-aiken')">View AIKEN Example</button>
-  </div>
-  <div class="drop-zone" id="dz-auto" style="padding:40px 24px">
-    <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:40px;height:40px"></div>
-    <div style="font-size:15px;font-weight:600;margin:8px 0 4px">Drop your file here, or click to browse</div>
-    <div class="dz-label">Accepts .txt (AIKEN) &nbsp;·&nbsp; .xml (Moodle XML) &nbsp;·&nbsp; .zip (SCORM or question bank) &nbsp;·&nbsp; .docx (Word doc exported from this app) &nbsp;·&nbsp; .txt + images together</div>
-    <input type="file" id="file-auto" accept=".txt,.xml,.zip,.docx">
-  </div>
-  <div style="text-align:center;margin-top:28px;padding-top:24px;border-top:1px solid var(--border)">
-    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Don't have a file? Start from scratch.</div>
-    <button class="btn btn-primary" onclick="document.querySelector('.tab-btn[data-tab=\'questions\']').click()">+ Create New Quiz</button>
-  </div>
-  <div id="import-log" style="margin-top:16px"></div>
-</div>
-
 <!-- QUESTIONS TAB -->
-<div id="tab-questions" class="tab-panel">
+<div id="tab-questions" class="tab-panel active">
 <div class="q-tab-wrap">
 <div class="q-tab-main">
   <div class="s-section" id="q-info-section" style="margin-bottom:16px">
@@ -394,6 +378,17 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
           <label class="quiz-type-opt qt-gg" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:500;border-radius:3px;transition:border-color .15s,background .15s" id="q-type-label-gg">
             <input type="radio" name="q-type" id="q-type-gg" value="gpu_genius_fast_track" style="accent-color:#f59e0b" onchange="syncQuizInfo('quizType',this.value)"> GPU Genius Fast Track Exam
           </label>
+          <label class="quiz-type-opt qt-custom" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:500;border-radius:3px;transition:border-color .15s,background .15s" id="q-type-label-custom">
+            <input type="radio" name="q-type" id="q-type-custom" value="custom" style="accent-color:#ec4899" onchange="syncQuizInfo('quizType',this.value)"> Custom
+          </label>
+        </div>
+        <div id="q-custom-config" class="custom-quiz-row" style="display:none;margin-top:10px;padding:12px 14px;background:#fff;border:1px solid var(--border);border-radius:6px;align-items:center;gap:14px;flex-wrap:wrap">
+          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Custom Name</label>
+          <input class="form-input" id="q-custom-name" type="text" placeholder="e.g. Mid-term Assessment" oninput="syncQuizInfo('customQuizTypeName',this.value)" style="flex:1;min-width:200px;max-width:340px">
+          <span style="display:inline-flex;align-items:center;gap:14px;padding-left:6px;border-left:1px solid var(--border)">
+            <label style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;cursor:pointer"><input type="radio" name="q-custom-mode" value="quiz" checked style="accent-color:#76B900" onchange="syncQuizInfo('customQuizMode',this.value)"> &ldquo;Quiz&rdquo;</label>
+            <label style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;cursor:pointer"><input type="radio" name="q-custom-mode" value="exam" style="accent-color:#76B900" onchange="syncQuizInfo('customQuizMode',this.value)"> &ldquo;Exam&rdquo;</label>
+          </span>
         </div>
       </div>
     </div>
@@ -406,22 +401,27 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
         <span class="tog-label" style="font-size:13px">Expand all</span>
       </div>
       <button class="btn btn-sm btn-danger" onclick="clearAll()">Clear All</button>
-      <button class="btn btn-primary" onclick="openEditor(null)">+ Add Question</button>
+      <button class="btn btn-outline-green" onclick="openEditor(null)">+ Add Question</button>
     </div>
+  </div>
+  <div id="q-empty-state" style="display:none;margin-top:8px">
+    <div class="drop-zone" id="dz-auto" style="padding:40px 24px;position:relative">
+      <button class="btn btn-sm" onclick="event.stopPropagation();showModal('modal-aiken')" style="position:absolute;top:12px;right:12px;z-index:2">View AIKEN Example</button>
+      <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:40px;height:40px"></div>
+      <div style="font-size:15px;font-weight:600;margin:8px 0 4px">Drop your file here, or click to browse</div>
+      <div class="dz-label">Accepts .txt (AIKEN) &nbsp;·&nbsp; .xml (Moodle XML) &nbsp;·&nbsp; .zip (SCORM or question bank) &nbsp;·&nbsp; .docx (Word doc exported from this app) &nbsp;·&nbsp; .txt + images together</div>
+      <input type="file" id="file-auto" accept=".txt,.xml,.zip,.docx">
+    </div>
+    <div style="text-align:center;margin-top:14px"><button class="btn btn-primary" onclick="openEditor(null)">+ Add Question</button></div>
+    <div id="import-log" style="margin-top:16px"></div>
   </div>
   <div id="q-list"></div>
   <div class="gen-bar">
     <div class="gen-info"><strong id="gen-count">0 questions</strong> ready &nbsp;·&nbsp; Title: <strong id="gen-title-display">—</strong></div>
     <div class="btn-group">
-      <button class="btn btn-outline-green" id="btn-test" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
-      <div class="split-btn" id="dl-split">
-        <button class="btn btn-primary split-main" id="btn-dl" onclick="generateAndDownload()"><img class="btn-icon" src="assets/svg/download.svg" alt=""> Download SCORM</button>
-        <button class="btn btn-primary split-arrow" onclick="toggleDlDropdown(event)" aria-label="More download options">&#9660;</button>
-        <div class="split-dropdown" id="dl-dropdown">
-          <button onclick="downloadWordDoc();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/ms word.svg" alt=""> Download as Word Doc</button>
-          <button onclick="downloadQuestionBank();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/txt.svg" alt=""> Download as AIKEN</button>
-        </div>
-      </div>
+      <button class="btn" onclick="openImportMore()"><img class="btn-icon" src="assets/svg/upload.svg" alt=""> Import more questions</button>
+      <button class="btn btn-outline-dark" id="btn-test" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
+      <button class="btn btn-outline-green" onclick="openEditor(null)">+ Add Question</button>
     </div>
   </div>
 </div><!-- end q-tab-main -->
@@ -444,7 +444,7 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
   <div class="pg-hdr">
     <div><div class="pg-title">Quiz Settings</div><div class="pg-sub">Embedded in the generated SCORM package</div></div>
     <div class="btn-group">
-      <button class="btn btn-outline-green" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
+      <button class="btn btn-outline-dark" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
     </div>
   </div>
   <div class="s-section">
@@ -469,6 +469,17 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
           <label class="quiz-type-opt qt-gg" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:500;border-radius:3px;transition:border-color .15s,background .15s" id="s-type-label-gg">
             <input type="radio" name="s-type" id="s-type-gg" value="gpu_genius_fast_track" style="accent-color:#f59e0b"> GPU Genius Fast Track Exam
           </label>
+          <label class="quiz-type-opt qt-custom" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:500;border-radius:3px;transition:border-color .15s,background .15s" id="s-type-label-custom">
+            <input type="radio" name="s-type" id="s-type-custom" value="custom" style="accent-color:#ec4899"> Custom
+          </label>
+        </div>
+        <div id="s-custom-config" class="custom-quiz-row" style="display:none;margin-top:10px;padding:12px 14px;background:#fff;border:1px solid var(--border);border-radius:6px;align-items:center;gap:14px;flex-wrap:wrap">
+          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Custom Name</label>
+          <input class="form-input" id="s-custom-name" type="text" placeholder="e.g. Mid-term Assessment" oninput="syncQuizInfo('customQuizTypeName',this.value)" style="flex:1;min-width:200px;max-width:340px">
+          <span style="display:inline-flex;align-items:center;gap:14px;padding-left:6px;border-left:1px solid var(--border)">
+            <label style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;cursor:pointer"><input type="radio" name="s-custom-mode" value="quiz" checked style="accent-color:#76B900" onchange="syncQuizInfo('customQuizMode',this.value)"> &ldquo;Quiz&rdquo;</label>
+            <label style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;cursor:pointer"><input type="radio" name="s-custom-mode" value="exam" style="accent-color:#76B900" onchange="syncQuizInfo('customQuizMode',this.value)"> &ldquo;Exam&rdquo;</label>
+          </span>
         </div>
       </div>
     </div>
@@ -995,6 +1006,22 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
   </div>
 </div>
 
+<!-- IMPORT MORE QUESTIONS MODAL -->
+<div class="m-overlay" id="modal-import-more">
+  <div class="modal" style="max-width:600px">
+    <div class="m-hdr"><span class="m-title">Import more questions</span><button class="m-close" onclick="closeModal('modal-import-more')">&#x2715;</button></div>
+    <div class="m-body">
+      <p style="font-size:14px;color:#333;line-height:1.65;margin-bottom:16px">The questions from your file will be <strong>added to the current quiz</strong>. Your existing questions and settings will not be changed.</p>
+      <div class="drop-zone" id="dz-import-more" style="padding:32px 20px">
+        <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:36px;height:36px"></div>
+        <div style="font-size:15px;font-weight:600;margin:8px 0 4px">Drop your file here, or click to browse</div>
+        <div class="dz-label">Accepts .txt (AIKEN) &nbsp;·&nbsp; .xml (Moodle XML) &nbsp;·&nbsp; .zip (SCORM or question bank) &nbsp;·&nbsp; .docx (Word doc) &nbsp;·&nbsp; .txt + images together</div>
+        <input type="file" id="file-import-more" accept=".txt,.xml,.zip,.docx">
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- AIKEN EXAMPLE MODAL -->
 <div class="m-overlay" id="modal-aiken">
   <div class="modal" style="max-width:580px">
@@ -1224,7 +1251,7 @@ function showSection(sectionId) {
   let lastAttemptQuestionIds = null;
   let lastAttemptAnswers = null;
   let reviewSource = 'result';
-  const _isExam = (typeof CONFIG !== 'undefined' && CONFIG && (CONFIG.quizType === 'course_final_exam' || CONFIG.quizType === 'gpu_genius_fast_track'));
+  const _isExam = (typeof CONFIG !== 'undefined' && CONFIG && (CONFIG.quizType === 'course_final_exam' || CONFIG.quizType === 'gpu_genius_fast_track' || (CONFIG.quizType === 'custom' && CONFIG.customQuizMode === 'exam')));
   const _qN = _isExam ? 'Exam' : 'Quiz';
   const _qn = _isExam ? 'exam' : 'quiz';
   const LABEL_START_QUIZ = 'Start ' + _qN;
@@ -1992,9 +2019,11 @@ function showSection(sectionId) {
     }
     var exitEl = document.querySelector('.exit-message');
     if (exitEl) {
+      var _customExitLabel = (CONFIG.customQuizTypeName && CONFIG.customQuizTypeName.trim()) || (CONFIG.customQuizMode === 'exam' ? 'custom exam' : 'custom quiz');
       var defaultPassExit = (CONFIG.quizType === 'course_completion') ? 'Congratulations, you have passed the course completion quiz.'
                           : (CONFIG.quizType === 'course_final_exam') ? 'Congratulations, you have passed the final exam.'
                           : (CONFIG.quizType === 'gpu_genius_fast_track') ? 'Congratulations, you have passed the GPU Genius Fast Track Exam.'
+                          : (CONFIG.quizType === 'custom') ? ('Congratulations, you have passed the ' + _customExitLabel + '.')
                           : 'Congratulations, you have passed the knowledge check.';
       var defaultFailExit = canRetry().allowed ? 'Please try again.' : '';
       var exitMsg = passed ? ((CONFIG.passExitMessage && CONFIG.passExitMessage.trim()) ? CONFIG.passExitMessage.trim() : defaultPassExit) : ((CONFIG.failExitMessage && CONFIG.failExitMessage.trim()) ? CONFIG.failExitMessage.trim() : defaultFailExit);
@@ -2630,6 +2659,8 @@ const APP = {
     certificateUrl: 'https://www.nvidia.com/en-us/training/academy/certificates/',
     certificateLinkText: '',
     bestScoreTracking: false,
+    customQuizTypeName: '',
+    customQuizMode: 'quiz',
     manifestIdentifier: '',
     preserveIdentifier: false
   },
@@ -2988,12 +3019,12 @@ async function handleAikenFile(file) {
     const imported = parseAiken(text);
     if (!imported.length) { showImportResult('&#9888; No valid questions found. Check the AIKEN format — see the example.', true); return; }
     let replace = false;
-    if (APP.questions.length > 0) {
+    if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
     }
     pushQHistory();
     APP.questions = replace ? imported : [...APP.questions, ...imported];
-    if (aikenTitle && (replace || !APP.settings.title)) { APP.settings.title = aikenTitle; document.getElementById('q-title') && (document.getElementById('q-title').value = aikenTitle); document.getElementById('s-title') && (document.getElementById('s-title').value = aikenTitle); document.getElementById('gen-title-display') && (document.getElementById('gen-title-display').textContent = aikenTitle || '—'); }
+    if (aikenTitle && (replace || !APP.settings.title) && !IMPORT_FORCE_APPEND) { APP.settings.title = aikenTitle; document.getElementById('q-title') && (document.getElementById('q-title').value = aikenTitle); document.getElementById('s-title') && (document.getElementById('s-title').value = aikenTitle); document.getElementById('gen-title-display') && (document.getElementById('gen-title-display').textContent = aikenTitle || '—'); }
     updateBadges();
     showImportResult('&#10003; Imported <strong>' + imported.length + ' questions</strong> from &ldquo;' + escH(file.name) + '&rdquo;. ' + (replace ? 'Replaced existing questions.' : 'Appended to existing questions.'));
     toast(imported.length + ' questions imported', 'ok');
@@ -3007,7 +3038,7 @@ async function handleXmlFile(file) {
     const imported = parseMoodleXML(text);
     if (!imported.length) { showImportResult('&#9888; No multichoice questions found in this Moodle XML file.', true); return; }
     let replace = false;
-    if (APP.questions.length > 0) {
+    if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
     }
     pushQHistory();
@@ -3023,13 +3054,18 @@ async function handleScormFile(file) {
   try {
     const { questions, settings } = await loadScormPackage(file);
     pushQHistory();
-    APP.questions = questions;
-    Object.assign(APP.settings, settings);
-    _activeBatchId = null;
-    document.querySelectorAll('.batch-item').forEach(el => el.classList.remove('batch-item-active'));
-    readSettingsToForm();
+    if (IMPORT_FORCE_APPEND) {
+      APP.questions = [...APP.questions, ...questions];
+      showImportResult('&#10003; Appended <strong>' + questions.length + ' questions</strong> from &ldquo;' + escH(file.name) + '&rdquo;. Settings were kept unchanged.');
+    } else {
+      APP.questions = questions;
+      Object.assign(APP.settings, settings);
+      _activeBatchId = null;
+      document.querySelectorAll('.batch-item').forEach(el => el.classList.remove('batch-item-active'));
+      readSettingsToForm();
+      showImportResult('&#10003; Loaded <strong>' + questions.length + ' questions</strong> and settings from &ldquo;' + escH(file.name) + '&rdquo;. Edit and re-generate below.');
+    }
     updateBadges();
-    showImportResult('&#10003; Loaded <strong>' + questions.length + ' questions</strong> and settings from &ldquo;' + escH(file.name) + '&rdquo;. Edit and re-generate below.');
     toast('SCORM package loaded', 'ok');
     document.querySelector('.tab-btn[data-tab="questions"]').click();
   } catch(e) { showImportResult('&#10007; ' + escH(e.message), true); toast('Failed to load package','err'); }
@@ -3049,12 +3085,12 @@ async function handleAikenWithImages(txtFile, imgFiles) {
     const imported = parseAiken(text, imageMap);
     if (!imported.length) { showImportResult('&#9888; No valid questions found. Check the AIKEN format — see the example.', true); return; }
     let replace = false;
-    if (APP.questions.length > 0) {
+    if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
     }
     pushQHistory();
     APP.questions = replace ? imported : [...APP.questions, ...imported];
-    if (aikenTitle && (replace || !APP.settings.title)) { APP.settings.title = aikenTitle; document.getElementById('q-title') && (document.getElementById('q-title').value = aikenTitle); document.getElementById('s-title') && (document.getElementById('s-title').value = aikenTitle); document.getElementById('gen-title-display') && (document.getElementById('gen-title-display').textContent = aikenTitle || '—'); }
+    if (aikenTitle && (replace || !APP.settings.title) && !IMPORT_FORCE_APPEND) { APP.settings.title = aikenTitle; document.getElementById('q-title') && (document.getElementById('q-title').value = aikenTitle); document.getElementById('s-title') && (document.getElementById('s-title').value = aikenTitle); document.getElementById('gen-title-display') && (document.getElementById('gen-title-display').textContent = aikenTitle || '—'); }
     updateBadges();
     showImportResult('&#10003; Imported <strong>' + imported.length + ' questions</strong> with ' + imgFiles.length + ' image file' + (imgFiles.length !== 1 ? 's' : '') + '.');
     toast(imported.length + ' questions imported', 'ok');
@@ -3082,11 +3118,11 @@ async function handleQBankZipFile(file) {
     }
     const imported = parseAiken(text, imageMap);
     if (!imported.length) { showImportResult('&#9888; No valid questions found in the AIKEN file inside the ZIP.', true); return; }
-    if (APP.questions.length > 0) {
+    if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       if (!confirm('Replace the current ' + APP.questions.length + ' question(s) with ' + imported.length + ' from "' + file.name + '"?')) return;
     }
-    APP.questions = imported;
-    if (aikenTitle) { APP.settings.title = aikenTitle; document.getElementById('q-title') && (document.getElementById('q-title').value = aikenTitle); document.getElementById('s-title') && (document.getElementById('s-title').value = aikenTitle); document.getElementById('gen-title-display') && (document.getElementById('gen-title-display').textContent = aikenTitle || '—'); }
+    APP.questions = IMPORT_FORCE_APPEND ? [...APP.questions, ...imported] : imported;
+    if (aikenTitle && !IMPORT_FORCE_APPEND) { APP.settings.title = aikenTitle; document.getElementById('q-title') && (document.getElementById('q-title').value = aikenTitle); document.getElementById('s-title') && (document.getElementById('s-title').value = aikenTitle); document.getElementById('gen-title-display') && (document.getElementById('gen-title-display').textContent = aikenTitle || '—'); }
     renderQuestions();
     updateBadges();
     showImportResult('&#10003; Imported <strong>' + imported.length + ' questions</strong> from &ldquo;' + escH(file.name) + '&rdquo;.');
@@ -3173,7 +3209,7 @@ async function handleDocxFile(file) {
     }
 
     let replace = false;
-    if (APP.questions.length > 0) {
+    if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + valid.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
     }
     pushQHistory();
@@ -3209,10 +3245,24 @@ async function handleAutoFile(file) {
   }
 }
 
-// Single unified drop zone
-(function() {
-  const dz = document.getElementById('dz-auto');
-  const fi = document.getElementById('file-auto');
+// Flag used by import-more flow: forces handlers to append (not replace) and skip the replace prompt and settings overwrite
+let IMPORT_FORCE_APPEND = false;
+
+function openImportMore() { showModal('modal-import-more'); }
+
+async function _routeFilesToHandler(files) {
+  if (files.length === 1) { await handleAutoFile(files[0]); return; }
+  const txtFile = files.find(f => f.name.toLowerCase().endsWith('.txt'));
+  const imgFiles = files.filter(f => /\.(png|jpe?g|gif|webp|svg)$/i.test(f.name));
+  if (txtFile && imgFiles.length) { await handleAikenWithImages(txtFile, imgFiles); return; }
+  if (txtFile) { await handleAutoFile(txtFile); return; }
+  await handleAutoFile(files[0]);
+}
+
+function _wireDropZone(dzId, fiId, opts) {
+  const dz = document.getElementById(dzId);
+  const fi = document.getElementById(fiId);
+  if (!dz || !fi) return;
   dz.addEventListener('click', () => fi.click());
   dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
@@ -3220,15 +3270,21 @@ async function handleAutoFile(file) {
     e.preventDefault(); dz.classList.remove('drag-over');
     const files = Array.from(e.dataTransfer.files);
     if (!files.length) return;
-    if (files.length === 1) { await handleAutoFile(files[0]); return; }
-    const txtFile = files.find(f => f.name.toLowerCase().endsWith('.txt'));
-    const imgFiles = files.filter(f => /\.(png|jpe?g|gif|webp|svg)$/i.test(f.name));
-    if (txtFile && imgFiles.length) { await handleAikenWithImages(txtFile, imgFiles); return; }
-    if (txtFile) { await handleAutoFile(txtFile); return; }
-    await handleAutoFile(files[0]);
+    if (opts && opts.forceAppend) IMPORT_FORCE_APPEND = true;
+    try { await _routeFilesToHandler(files); } finally { IMPORT_FORCE_APPEND = false; }
+    if (opts && opts.closeModal) closeModal(opts.closeModal);
   });
-  fi.addEventListener('change', async e => { if (e.target.files[0]) { await handleAutoFile(e.target.files[0]); e.target.value = ''; } });
-})();
+  fi.addEventListener('change', async e => {
+    if (!e.target.files[0]) return;
+    if (opts && opts.forceAppend) IMPORT_FORCE_APPEND = true;
+    try { await handleAutoFile(e.target.files[0]); } finally { IMPORT_FORCE_APPEND = false; }
+    e.target.value = '';
+    if (opts && opts.closeModal) closeModal(opts.closeModal);
+  });
+}
+
+_wireDropZone('dz-auto', 'file-auto');
+_wireDropZone('dz-import-more', 'file-import-more', { forceAppend: true, closeModal: 'modal-import-more' });
 
 // ── QUESTION EDITOR ───────────────────────────────────────
 function openEditor(id) {
@@ -4151,10 +4207,9 @@ function renderQuestions() {
   document.getElementById('gen-count').textContent = n + ' question' + (n !== 1 ? 's' : '');
   document.getElementById('gen-title-display').textContent = APP.settings.title || '—';
   document.querySelector('.gen-bar').style.display = n ? '' : 'none';
-  if (!n) {
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon"><img src="assets/svg/question mark in circle.svg" alt=""></div><h3 style="font-size:16px;font-weight:700;margin-bottom:6px">No questions yet</h3><p style="margin-bottom:18px">Import from a file on the Import tab, or add a question manually.</p><button class="btn btn-primary" onclick="openEditor(null)">+ Add Question</button></div>';
-    return;
-  }
+  const emptyEl = document.getElementById('q-empty-state');
+  if (emptyEl) emptyEl.style.display = n ? 'none' : '';
+  if (!n) { list.innerHTML = ''; return; }
   list.innerHTML = APP.questions.map((q, i) => {
     const preview = stripHtml(q.question).replace(/\s+/g,' ').trim().slice(0,90);
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -4226,7 +4281,7 @@ function renderQuestions() {
       + ((q.codeBlock && q.codeBlock.trim()) ? '<span style="font-size:12px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:12px;height:12px;fill:none;stroke:#76B900;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> CLI</span>' : '')
       + '</div></div>'
       + '<div class="q-actions" style="margin-left:auto;flex-shrink:0;align-self:flex-start">'
-      + '<button class="btn btn-sm" onclick="previewQuestion(\'' + q.id + '\')" title="Preview">' + ICON.preview + '</button>'
+      + (Q_EXPANDED ? '' : '<button class="btn btn-sm" onclick="previewQuestion(\'' + q.id + '\')" title="Preview">' + ICON.preview + '</button>')
       + '<button class="btn btn-sm" onclick="openEditor(\'' + q.id + '\')">Edit</button>'
       + '<button class="btn btn-sm" onclick="duplicateQuestion(\'' + q.id + '\')" title="Duplicate">' + ICON.duplicate + '</button>'
       + '<button class="btn btn-sm btn-danger" onclick="deleteQuestion(\'' + q.id + '\')" title="Delete">' + ICON.trash + '</button>'
@@ -4426,13 +4481,38 @@ function syncQuizInfo(field, value) {
     if (questionsRadio) questionsRadio.checked = true;
     document.querySelectorAll('.quiz-type-opt').forEach(l => l.classList.remove('quiz-type-sel'));
     document.querySelectorAll('input[name="s-type"]:checked, input[name="q-type"]:checked').forEach(r => r.closest('.quiz-type-opt').classList.add('quiz-type-sel'));
-    const passExitEl = document.getElementById('s-pass-exit');
-    if (passExitEl) passExitEl.placeholder = value === 'topic_quiz' ? 'Congratulations, you have passed the knowledge check.' : value === 'course_final_exam' ? 'Congratulations, you have passed the final exam.' : value === 'gpu_genius_fast_track' ? 'Congratulations, you have passed the GPU Genius Fast Track Exam.' : 'Congratulations, you have passed the course completion quiz.';
     _updateCertificateToggleForQuizType(value);
+    _refreshPassExitPlaceholder();
+  } else if (field === 'customQuizTypeName') {
+    APP.settings.customQuizTypeName = value;
+    const qInp = document.getElementById('q-custom-name'); if (qInp && qInp.value !== value) qInp.value = value;
+    const sInp = document.getElementById('s-custom-name'); if (sInp && sInp.value !== value) sInp.value = value;
+    _refreshPassExitPlaceholder();
+  } else if (field === 'customQuizMode') {
+    APP.settings.customQuizMode = value;
+    const sel = 'input[name="q-custom-mode"][value="' + value + '"], input[name="s-custom-mode"][value="' + value + '"]';
+    document.querySelectorAll(sel).forEach(r => r.checked = true);
+    _refreshPassExitPlaceholder();
   }
 }
 
+function _refreshPassExitPlaceholder() {
+  const passExitEl = document.getElementById('s-pass-exit'); if (!passExitEl) return;
+  const s = APP.settings;
+  const customLabel = (s.customQuizTypeName || '').trim() || (s.customQuizMode === 'exam' ? 'custom exam' : 'custom quiz');
+  passExitEl.placeholder = s.quizType === 'topic_quiz' ? 'Congratulations, you have passed the knowledge check.'
+    : s.quizType === 'course_final_exam' ? 'Congratulations, you have passed the final exam.'
+    : s.quizType === 'gpu_genius_fast_track' ? 'Congratulations, you have passed the GPU Genius Fast Track Exam.'
+    : s.quizType === 'custom' ? 'Congratulations, you have passed the ' + customLabel + '.'
+    : 'Congratulations, you have passed the course completion quiz.';
+}
+
 function _updateCertificateToggleForQuizType(quizType) {
+  const qCustom = document.getElementById('q-custom-config');
+  const sCustom = document.getElementById('s-custom-config');
+  const isCustom = quizType === 'custom';
+  if (qCustom) qCustom.style.display = isCustom ? 'flex' : 'none';
+  if (sCustom) sCustom.style.display = isCustom ? 'flex' : 'none';
   const togCert = document.getElementById('tog-certificate');
   const certRow = togCert && togCert.closest('.toggle-row');
   if (!togCert) return;
@@ -4523,7 +4603,12 @@ function readSettingsToForm() {
   if (_gi('tog-min-attempts-review')) { _gi('tog-min-attempts-review').checked = !!minAttReview; toggleSettingInput('min-attempts-review', !!minAttReview); }
   if (_gi('s-min-attempts-review')) _gi('s-min-attempts-review').value = minAttReview || 2;
   if (_gi('tog-certificate')) { _gi('tog-certificate').checked = !!s.showCertificateLink; toggleSettingInput('certificate', !!s.showCertificateLink); }
+  if (_gi('q-custom-name')) _gi('q-custom-name').value = s.customQuizTypeName || '';
+  if (_gi('s-custom-name')) _gi('s-custom-name').value = s.customQuizTypeName || '';
+  const customMode = s.customQuizMode === 'exam' ? 'exam' : 'quiz';
+  document.querySelectorAll('input[name="q-custom-mode"][value="' + customMode + '"], input[name="s-custom-mode"][value="' + customMode + '"]').forEach(r => r.checked = true);
   _updateCertificateToggleForQuizType(s.quizType || 'course_completion');
+  _refreshPassExitPlaceholder();
   if (_gi('tog-best-score')) _gi('tog-best-score').checked = s.bestScoreTracking !== false;
   if (_gi('s-cert-url')) _gi('s-cert-url').value = s.certificateUrl || 'https://www.nvidia.com/en-us/training/academy/certificates/';
   if (_gi('s-cert-text')) _gi('s-cert-text').value = s.certificateLinkText || '';
@@ -4563,6 +4648,8 @@ function saveSettings() {
     certificateUrl: (document.getElementById('s-cert-url').value || '').trim() || 'https://www.nvidia.com/en-us/training/academy/certificates/',
     certificateLinkText: (document.getElementById('s-cert-text').value || '').trim(),
     bestScoreTracking: document.getElementById('tog-best-score').checked,
+    customQuizTypeName: (document.getElementById('s-custom-name') && document.getElementById('s-custom-name').value || '').trim(),
+    customQuizMode: (document.querySelector('input[name="s-custom-mode"]:checked') || {}).value || 'quiz',
     manifestIdentifier: APP.settings.manifestIdentifier || '',
     preserveIdentifier: (document.getElementById('tog-preserve-id') && document.getElementById('tog-preserve-id').checked) || false
   };
@@ -4573,7 +4660,7 @@ function saveSettings() {
 function getNoteText(s) {
   if (!s.maxAttempts) return '';
   const attText = s.maxAttempts === 1 ? '1 attempt' : s.maxAttempts + ' attempts';
-  const n = (s.quizType === 'course_final_exam' || s.quizType === 'gpu_genius_fast_track') ? 'exam' : 'quiz';
+  const n = (s.quizType === 'course_final_exam' || s.quizType === 'gpu_genius_fast_track' || (s.quizType === 'custom' && s.customQuizMode === 'exam')) ? 'exam' : 'quiz';
   if (s.cooldownDays > 0) return 'Note that you will have ' + attText + ' to pass the ' + n + '. If you do not pass, you will be able to retake the ' + n + ' after ' + s.cooldownDays + ' day' + (s.cooldownDays !== 1 ? 's' : '') + '.';
   return 'Note that you will have ' + attText + ' to pass the ' + n + '.';
 }
@@ -4596,12 +4683,16 @@ function buildQuizHTML(settings, questions, isTest) {
     }
   }
 
-  const isExam = settings.quizType === 'course_final_exam' || settings.quizType === 'gpu_genius_fast_track';
+  const isCustom = settings.quizType === 'custom';
+  const customIsExam = isCustom && settings.customQuizMode === 'exam';
+  const isExam = settings.quizType === 'course_final_exam' || settings.quizType === 'gpu_genius_fast_track' || customIsExam;
   const N = isExam ? 'Exam' : 'Quiz';
   const n = isExam ? 'exam' : 'quiz';
+  const customLabel = (settings.customQuizTypeName || '').trim() || (customIsExam ? 'Custom Exam' : 'Custom Quiz');
   const subtitle = settings.quizType === 'course_completion' ? 'Course Completion Quiz'
                  : settings.quizType === 'course_final_exam' ? 'Course Final Exam'
                  : settings.quizType === 'gpu_genius_fast_track' ? 'GPU Genius Fast Track Exam'
+                 : settings.quizType === 'custom' ? customLabel
                  : 'Knowledge Check';
   const attDisp = settings.maxAttempts === 0 ? 'Unlimited' : String(settings.maxAttempts);
   const durDisp = !settings.timeLimitMinutes ? 'No limit' : settings.timeLimitMinutes + ' min';
@@ -4624,6 +4715,8 @@ function buildQuizHTML(settings, questions, isTest) {
     certificateUrl: settings.certificateUrl || '',
     certificateLinkText: settings.certificateLinkText || '',
     bestScoreTracking: settings.bestScoreTracking !== false,
+    customQuizTypeName: settings.customQuizTypeName || '',
+    customQuizMode: settings.customQuizMode === 'exam' ? 'exam' : 'quiz',
     previewScreen: settings._previewScreen || null
   };
 
@@ -5341,7 +5434,7 @@ function renderHistory() {
       + '<div class="hist-meta">' + d + ' &nbsp;&middot;&nbsp; ' + h.questionCount + ' questions &nbsp;&middot;&nbsp; Pass: ' + h.passingPct + '%</div>'
       + '</div>'
       + '<div class="hist-actions">'
-      + '<button class="btn btn-sm btn-outline-green" onclick="testInBrowser(loadHistEntry(\'' + h.id + '\'))">' + ICON.play + ' Test</button>'
+      + '<button class="btn btn-sm btn-outline-dark" onclick="testInBrowser(loadHistEntry(\'' + h.id + '\'))">' + ICON.play + ' Test</button>'
       + '<button class="btn btn-sm btn-primary" onclick="dlHistEntry(\'' + h.id + '\')"' + (canDl ? '' : ' disabled title="Zip data unavailable"') + '>' + ICON.download + ' Download</button>'
       + '<button class="btn btn-sm" onclick="loadHistEntryToEditor(\'' + h.id + '\')">Load to Editor</button>'
       + '<button class="btn btn-sm btn-danger" onclick="deleteHistEntry(\'' + h.id + '\')" title="Delete">' + ICON.trash + '</button>'
@@ -5546,7 +5639,9 @@ function batchSettings(item) {
     showCorrectAnswers:  item.settings.showCorrectAnswers || false,
     showCertificateLink: item.settings.showCertificateLink || false,
     certificateUrl:      item.settings.certificateUrl || 'https://www.nvidia.com/en-us/training/academy/certificates/',
-    certificateLinkText: item.settings.certificateLinkText || ''
+    certificateLinkText: item.settings.certificateLinkText || '',
+    customQuizTypeName:  item.settings.customQuizTypeName || '',
+    customQuizMode:      item.settings.customQuizMode === 'exam' ? 'exam' : 'quiz'
   };
 }
 
@@ -5612,7 +5707,7 @@ function renderBatch() {
       + '<button class="batch-info-btn" tabindex="0">i<span class="batch-tooltip">' + item.questions.length + ' questions<br>' + escH(item.filename) + '</span></button>'
       + '<div class="btn-group" style="flex-shrink:0">'
       + '<button class="btn btn-sm" onclick="toggleBatchSettings(\'' + item.id + '\')" id="bt-stg-btn-' + item.id + '">&#9881; Settings</button>'
-      + '<button class="btn btn-sm btn-outline-green" onclick="batchTestItem(\'' + item.id + '\')">' + ICON.play + ' Test</button>'
+      + '<button class="btn btn-sm btn-outline-dark" onclick="batchTestItem(\'' + item.id + '\')">' + ICON.play + ' Test</button>'
       + '<button class="btn btn-sm btn-primary" onclick="batchDownloadOne(\'' + item.id + '\')">' + ICON.download + ' Download</button>'
       + '<button class="btn btn-sm btn-outline" onclick="loadBatchToEditor(\'' + item.id + '\')" title="Load questions into the Questions tab">Load to Editor</button>'
       + '<button class="btn btn-sm btn-danger" onclick="removeBatchItem(\'' + item.id + '\')" title="Remove">' + ICON.trash + '</button>'
@@ -5627,6 +5722,7 @@ function renderBatch() {
       + '<option value="topic_quiz"' + (qt === 'topic_quiz' ? ' selected' : '') + '>Knowledge Check</option>'
       + '<option value="course_final_exam"' + (qt === 'course_final_exam' ? ' selected' : '') + '>Course Final Exam</option>'
       + '<option value="gpu_genius_fast_track"' + (qt === 'gpu_genius_fast_track' ? ' selected' : '') + '>GPU Genius Fast Track Exam</option>'
+      + '<option value="custom"' + (qt === 'custom' ? ' selected' : '') + '>Custom</option>'
       + '</select></div>'
       + '<div class="batch-field"><div class="batch-label">Max Attempts <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#aaa">(0=∞)</span></div><input type="number" id="bt-attempts-' + item.id + '" value="' + (s.maxAttempts ?? 2) + '" min="0" max="99"></div>'
       + '<div class="batch-field"><div class="batch-label">Cooldown Days</div><input type="number" id="bt-cooldown-' + item.id + '" value="' + (s.cooldownDays ?? 7) + '" min="0" max="365"></div>'
@@ -5764,7 +5860,7 @@ async function processBatchFiles(files) {
       let questions, settings;
       if (name.endsWith('.zip')) {
         const batchZip = await JSZip.loadAsync(file);
-        if (!batchZip.file('imsmanifest.xml')) throw new Error('Not a SCORM package — question bank ZIPs can only be imported from the Import tab');
+        if (!batchZip.file('imsmanifest.xml')) throw new Error('Not a SCORM package — question bank ZIPs can only be imported from the Questions tab');
         ({ questions, settings } = await loadScormPackage(file));
       } else if (name.endsWith('.xml')) {
         const text = await file.text();
@@ -5918,6 +6014,7 @@ function _quizFileBase() {
   const type  = APP.settings.quizType === 'course_completion' ? 'completion-quiz'
               : APP.settings.quizType === 'course_final_exam' ? 'final-exam'
               : APP.settings.quizType === 'gpu_genius_fast_track' ? 'fast-track-exam'
+              : APP.settings.quizType === 'custom' ? ((APP.settings.customQuizTypeName || 'custom').replace(/[^a-z0-9]+/gi, '-').toLowerCase().replace(/^-+|-+$/g, '') || 'custom')
               : 'knowledge-check';
   return title + '-' + type;
 }
@@ -6040,6 +6137,7 @@ function downloadWordDoc() {
   const typeName = s.quizType === 'course_completion' ? 'Course Completion Quiz'
                  : s.quizType === 'course_final_exam' ? 'Course Final Exam'
                  : s.quizType === 'gpu_genius_fast_track' ? 'GPU Genius Fast Track Exam'
+                 : s.quizType === 'custom' ? ((s.customQuizTypeName || '').trim() || (s.customQuizMode === 'exam' ? 'Custom Exam' : 'Custom Quiz'))
                  : 'Knowledge Check';
   const timeStr  = s.timeLimitMinutes ? s.timeLimitMinutes + ' minutes' : 'No limit';
   const attStr   = s.maxAttempts ? s.maxAttempts + (s.cooldownDays ? ' (cooldown: ' + s.cooldownDays + ' day' + (s.cooldownDays !== 1 ? 's' : '') + ')' : '') : 'Unlimited';
