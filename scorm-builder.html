@@ -1006,6 +1006,41 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
   </div>
 </div>
 
+<!-- ZIP IMPORT ERROR MODAL -->
+<div class="m-overlay" id="modal-zip-error">
+  <div class="modal" style="max-width:560px">
+    <div class="m-hdr"><span class="m-title">Couldn't read this ZIP</span><button class="m-close" onclick="closeModal('modal-zip-error')">&#x2715;</button></div>
+    <div class="m-body">
+      <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;padding:14px 16px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:28px;height:28px;flex-shrink:0;stroke:#dc2626;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="17"/></svg>
+        <p style="font-size:14px;line-height:1.6;color:#1a1a1a">This ZIP file doesn't seem right. Was it downloaded from ALM? In that case, try re-zipping it.</p>
+      </div>
+      <p style="font-size:14px;font-weight:600;margin-bottom:14px;color:#1a1a1a">Try re-zipping the contents:</p>
+      <ol style="margin:0;padding:0;list-style:none">
+        <li style="display:flex;gap:14px;margin-bottom:14px;align-items:flex-start">
+          <div style="background:var(--green);color:white;min-width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;margin-top:1px">1</div>
+          <div style="flex:1;font-size:14px;line-height:1.55">Right-click the ZIP file and choose <strong>"Extract All&hellip;"</strong> to unzip it into a folder.</div>
+        </li>
+        <li style="display:flex;gap:14px;margin-bottom:14px;align-items:flex-start">
+          <div style="background:var(--green);color:white;min-width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;margin-top:1px">2</div>
+          <div style="flex:1;font-size:14px;line-height:1.55">Open the extracted folder and select all its contents (<kbd style="background:#f3f4f6;padding:1px 7px;border-radius:4px;border:1px solid #d1d5db;font-size:12px;font-family:inherit">Ctrl + A</kbd>).</div>
+        </li>
+        <li style="display:flex;gap:14px;margin-bottom:14px;align-items:flex-start">
+          <div style="background:var(--green);color:white;min-width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;margin-top:1px">3</div>
+          <div style="flex:1;font-size:14px;line-height:1.55">Right-click the selection and choose <strong>"Send to" &rarr; "Compressed (zipped) folder"</strong>.</div>
+        </li>
+        <li style="display:flex;gap:14px;margin-bottom:0;align-items:flex-start">
+          <div style="background:var(--green);color:white;min-width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;margin-top:1px">4</div>
+          <div style="flex:1;font-size:14px;line-height:1.55">Drop the new ZIP into Quizzer.</div>
+        </li>
+      </ol>
+    </div>
+    <div class="m-footer">
+      <button class="btn btn-primary" onclick="closeModal('modal-zip-error')">Got it</button>
+    </div>
+  </div>
+</div>
+
 <!-- IMPORT MORE QUESTIONS MODAL -->
 <div class="m-overlay" id="modal-import-more">
   <div class="modal" style="max-width:600px">
@@ -3229,7 +3264,9 @@ async function handleAutoFile(file) {
   const name = file.name.toLowerCase();
   if (name.endsWith('.docx')) return handleDocxFile(file);
   if (name.endsWith('.zip')) {
-    const zip = await JSZip.loadAsync(file);
+    let zip;
+    try { zip = await JSZip.loadAsync(file); }
+    catch (e) { showModal('modal-zip-error'); return; }
     if (zip.file('imsmanifest.xml')) return handleScormFile(file);
     return handleQBankZipFile(file);
   }
