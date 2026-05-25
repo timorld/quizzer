@@ -1340,7 +1340,7 @@ function showSection(sectionId) {
         bestScore = state.bestScore != null ? state.bestScore : null;
         if (state.lastAttemptQuestionIds) lastAttemptQuestionIds = state.lastAttemptQuestionIds;
         if (state.lastAttemptAnswers) lastAttemptAnswers = state.lastAttemptAnswers;
-        if (state.quizStartTime && state.attemptQuestionIds && Array.isArray(state.attemptQuestionIds)) {
+        if ((state.elapsedMs != null || state.quizStartTime) && state.attemptQuestionIds && Array.isArray(state.attemptQuestionIds)) {
           currentQuestionIndex = Math.min(state.currentQuestionIndex || 0, state.attemptQuestionIds.length - 1);
           userAnswers = typeof state.userAnswers === 'object' && state.userAnswers !== null ? state.userAnswers : {};
         }
@@ -4564,6 +4564,9 @@ function _updateCertificateToggleForQuizType(quizType, applyDefaults = false) {
       if (togAttempts) { togAttempts.checked = false; toggleSettingInput('attempts', false); }
       const togTimelimit = document.getElementById('tog-timelimit');
       if (togTimelimit) { togTimelimit.checked = false; toggleSettingInput('timelimit', false); }
+      APP.settings.showCertificateLink = false;
+      APP.settings.maxAttempts = 0;
+      APP.settings.timeLimitMinutes = 0;
     }
   } else if (isExamType) {
     if (applyDefaults) {
@@ -4581,6 +4584,10 @@ function _updateCertificateToggleForQuizType(quizType, applyDefaults = false) {
       if (togTimelimit) { togTimelimit.checked = true; toggleSettingInput('timelimit', true); }
       const sTimelimit = document.getElementById('s-timelimit');
       if (sTimelimit) sTimelimit.value = 60;
+      APP.settings.showCertificateLink = false;
+      APP.settings.maxAttempts = 2;
+      APP.settings.cooldownDays = 7;
+      APP.settings.timeLimitMinutes = 60;
     }
   } else {
     if (applyDefaults) {
@@ -4598,6 +4605,10 @@ function _updateCertificateToggleForQuizType(quizType, applyDefaults = false) {
       if (togTimelimit) { togTimelimit.checked = true; toggleSettingInput('timelimit', true); }
       const sTimelimit = document.getElementById('s-timelimit');
       if (sTimelimit) sTimelimit.value = 60;
+      APP.settings.showCertificateLink = true;
+      APP.settings.maxAttempts = 2;
+      APP.settings.cooldownDays = 7;
+      APP.settings.timeLimitMinutes = 60;
     }
   }
   if (certRow) certRow.style.opacity = isKnowledgeCheck ? '0.45' : '';
