@@ -621,6 +621,13 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
             <div class="tog-desc">Show a warning before blank submission</div>
           </div>
         </div>
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" id="s-confirm-submit" checked><span class="tog-slider"></span></label>
+          <div>
+            <div class="tog-label">Confirm before submitting</div>
+            <div class="tog-desc">Show a prompt asking the learner to confirm submission</div>
+          </div>
+        </div>
       </div>
 
       <!-- Review -->
@@ -1041,6 +1048,32 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
   </div>
 </div>
 
+<!-- SUSPEND_DATA SIZE WARNING MODAL -->
+<div class="m-overlay" id="modal-suspend-size">
+  <div class="modal" style="max-width:560px">
+    <div class="m-hdr"><span class="m-title">Quiz may exceed LMS state limit</span><button class="m-close" onclick="closeModal('modal-suspend-size')">&#x2715;</button></div>
+    <div class="m-body">
+      <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;padding:14px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:28px;height:28px;flex-shrink:0;stroke:#c2410c;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:1px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div style="flex:1">
+          <p style="font-size:14px;line-height:1.6;color:#1a1a1a;margin-bottom:8px">This quiz's per-learner saved state could reach <strong id="suspend-size-actual">—</strong> characters, above the <strong>4,096</strong> limit set by the SCORM 1.2 spec.</p>
+          <p style="font-size:13px;line-height:1.6;color:#555">Some LMSes (including some Adobe Learning Manager tenants) enforce this strictly and silently reject oversized writes — which breaks attempt resume and attempt-count tracking.</p>
+        </div>
+      </div>
+      <p style="font-size:14px;font-weight:600;margin-bottom:10px;color:#1a1a1a">Ways to reduce the size:</p>
+      <ul style="font-size:14px;line-height:1.7;padding-left:22px;margin:0;color:#333">
+        <li>Set a lower <strong>questions per attempt</strong> in Settings</li>
+        <li>Use fewer matching, sequencing, or hotspot questions per attempt</li>
+        <li>Keep matching pairs and sequencing steps short</li>
+      </ul>
+    </div>
+    <div class="m-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-suspend-size')">Cancel</button>
+      <button class="btn btn-primary" id="btn-suspend-size-continue">Download Anyway</button>
+    </div>
+  </div>
+</div>
+
 <!-- IMPORT MORE QUESTIONS MODAL -->
 <div class="m-overlay" id="modal-import-more">
   <div class="modal" style="max-width:600px">
@@ -1350,7 +1383,20 @@ function showSection(sectionId) {
     return null;
   }
 
-  function saveState(state) { scorm.set('cmi.suspend_data', JSON.stringify(state)); scorm.commit(); }
+  function saveState(state) {
+    var payload = JSON.stringify(state);
+    // SCORM 1.2 spec mandates LMSes support >= 4096 chars of suspend_data.
+    // Some LMSes (incl. some ALM configs) enforce this strictly and silently
+    // reject oversized writes — which breaks resume + attempt-count tracking.
+    // Warn at 3500 to leave headroom; warn again at hard 4096 limit.
+    if (payload.length >= 4096) {
+      console.warn('[Quizzer] suspend_data is ' + payload.length + ' chars — exceeds the SCORM 1.2 4096-char ceiling. The LMS may silently reject this write, which will break attempt resume and attempt-count enforcement. Consider shorter question IDs, fewer interactive (matching/hotspot) questions per attempt, or a smaller questionsPerAttempt.');
+    } else if (payload.length >= 3500) {
+      console.warn('[Quizzer] suspend_data is ' + payload.length + ' chars — approaching the SCORM 1.2 4096-char ceiling.');
+    }
+    scorm.set('cmi.suspend_data', payload);
+    scorm.commit();
+  }
 
   function getStateForSave() {
     const base = { attemptCount, lastAttemptTimestamp };
@@ -1972,17 +2018,35 @@ function showSection(sectionId) {
     return { correct, incorrect: currentQuestions.length - correct, total: currentQuestions.length, percentage: Math.round((correct / currentQuestions.length) * 100) };
   }
 
-  function showWarningModal() {
-    const modal = document.getElementById('warning-modal'); const message = document.getElementById('warning-message');
-    const unansweredCount = currentQuestions.filter(q => !isQuestionAnswered(q)).length;
-    message.textContent = `You have ${unansweredCount} unanswered question(s). Blank answers will be marked as incorrect. Are you sure you want to submit?`;
+  function showSubmitModal(scenario) {
+    const modal = document.getElementById('warning-modal');
+    const titleEl = document.getElementById('warning-title');
+    const message = document.getElementById('warning-message');
+    const cancelBtn = document.getElementById('cancel-submit');
+    const confirmBtn = document.getElementById('confirm-submit');
+    if (scenario === 'unanswered') {
+      const unansweredCount = currentQuestions.filter(q => !isQuestionAnswered(q)).length;
+      if (titleEl) titleEl.textContent = 'Unanswered Questions';
+      message.textContent = 'You have ' + unansweredCount + ' unanswered question(s). Blank answers will be marked as incorrect. Are you sure you want to submit?';
+      if (cancelBtn) cancelBtn.textContent = 'Review Answers';
+      if (confirmBtn) confirmBtn.textContent = 'Submit Anyway';
+    } else {
+      if (titleEl) titleEl.textContent = 'Submit ' + _qN + '?';
+      message.textContent = 'Once you submit, you won’t be able to change your answers. Are you ready to submit?';
+      if (cancelBtn) cancelBtn.textContent = 'Keep Reviewing';
+      if (confirmBtn) confirmBtn.textContent = 'Submit ' + _qN;
+    }
     modal.classList.add('active');
   }
 
   function hideWarningModal() { document.getElementById('warning-modal').classList.remove('active'); }
 
   function submitQuiz() {
-    if (CONFIG.warnOnBlankAnswers) { const unansweredCount = currentQuestions.filter(q => !isQuestionAnswered(q)).length; if (unansweredCount > 0) { showWarningModal(); return; } }
+    if (CONFIG.warnOnBlankAnswers) {
+      const unansweredCount = currentQuestions.filter(q => !isQuestionAnswered(q)).length;
+      if (unansweredCount > 0) { showSubmitModal('unanswered'); return; }
+    }
+    if (CONFIG.confirmBeforeSubmit) { showSubmitModal('confirm'); return; }
     performSubmit();
   }
 
@@ -2683,6 +2747,7 @@ const APP = {
     questionsPerAttempt: 0,
     allowBlankAnswers: true,
     warnOnBlankAnswers: true,
+    confirmBeforeSubmit: true,
     passMessage: '',
     failMessage: '',
     passExitMessage: '',
@@ -4564,9 +4629,12 @@ function _updateCertificateToggleForQuizType(quizType, applyDefaults = false) {
       if (togAttempts) { togAttempts.checked = false; toggleSettingInput('attempts', false); }
       const togTimelimit = document.getElementById('tog-timelimit');
       if (togTimelimit) { togTimelimit.checked = false; toggleSettingInput('timelimit', false); }
+      const sConfirmSubmit = document.getElementById('s-confirm-submit');
+      if (sConfirmSubmit) sConfirmSubmit.checked = false;
       APP.settings.showCertificateLink = false;
       APP.settings.maxAttempts = 0;
       APP.settings.timeLimitMinutes = 0;
+      APP.settings.confirmBeforeSubmit = false;
     }
   } else if (isExamType) {
     if (applyDefaults) {
@@ -4584,10 +4652,13 @@ function _updateCertificateToggleForQuizType(quizType, applyDefaults = false) {
       if (togTimelimit) { togTimelimit.checked = true; toggleSettingInput('timelimit', true); }
       const sTimelimit = document.getElementById('s-timelimit');
       if (sTimelimit) sTimelimit.value = 60;
+      const sConfirmSubmit = document.getElementById('s-confirm-submit');
+      if (sConfirmSubmit) sConfirmSubmit.checked = true;
       APP.settings.showCertificateLink = false;
       APP.settings.maxAttempts = 2;
       APP.settings.cooldownDays = 7;
       APP.settings.timeLimitMinutes = 60;
+      APP.settings.confirmBeforeSubmit = true;
     }
   } else {
     if (applyDefaults) {
@@ -4605,10 +4676,13 @@ function _updateCertificateToggleForQuizType(quizType, applyDefaults = false) {
       if (togTimelimit) { togTimelimit.checked = true; toggleSettingInput('timelimit', true); }
       const sTimelimit = document.getElementById('s-timelimit');
       if (sTimelimit) sTimelimit.value = 60;
+      const sConfirmSubmit = document.getElementById('s-confirm-submit');
+      if (sConfirmSubmit) sConfirmSubmit.checked = true;
       APP.settings.showCertificateLink = true;
       APP.settings.maxAttempts = 2;
       APP.settings.cooldownDays = 7;
       APP.settings.timeLimitMinutes = 60;
+      APP.settings.confirmBeforeSubmit = true;
     }
   }
   if (certRow) certRow.style.opacity = isKnowledgeCheck ? '0.45' : '';
@@ -4647,6 +4721,7 @@ function readSettingsToForm() {
   if (_gi('s-randomize')) _gi('s-randomize').checked = s.randomizeQuestions !== false;
   if (_gi('s-allow-blank')) _gi('s-allow-blank').checked = s.allowBlankAnswers !== false;
   if (_gi('s-warn-blank')) _gi('s-warn-blank').checked = s.warnOnBlankAnswers !== false;
+  if (_gi('s-confirm-submit')) _gi('s-confirm-submit').checked = s.confirmBeforeSubmit !== false;
   if (_gi('s-pass-title')) _gi('s-pass-title').value = s.passMessage || '';
   if (_gi('s-fail-title')) _gi('s-fail-title').value = s.failMessage || '';
   if (_gi('s-pass-exit')) { _gi('s-pass-exit').value = s.passExitMessage || ''; _gi('s-pass-exit').placeholder = (s.quizType === 'topic_quiz') ? 'Congratulations, you have passed the knowledge check.' : (s.quizType === 'course_final_exam') ? 'Congratulations, you have passed the final exam.' : (s.quizType === 'gpu_genius_fast_track') ? 'Congratulations, you have passed the GPU Genius Fast Track Exam.' : 'Congratulations, you have passed the course completion quiz.'; }
@@ -4691,6 +4766,7 @@ function saveSettings() {
     randomizeQuestions: document.getElementById('s-randomize').checked,
     allowBlankAnswers: document.getElementById('s-allow-blank').checked,
     warnOnBlankAnswers: document.getElementById('s-warn-blank').checked,
+    confirmBeforeSubmit: document.getElementById('s-confirm-submit').checked,
     passMessage: document.getElementById('s-pass-title').value.trim(),
     failMessage: document.getElementById('s-fail-title').value.trim(),
     passExitMessage: document.getElementById('s-pass-exit').value.trim(),
@@ -4760,6 +4836,7 @@ function buildQuizHTML(settings, questions, isTest) {
     timeLimitMinutes: settings.timeLimitMinutes,
     totalQuestions: settings.questionsPerAttempt || 0,
     allowBlankAnswers: settings.allowBlankAnswers, warnOnBlankAnswers: settings.warnOnBlankAnswers,
+    confirmBeforeSubmit: settings.confirmBeforeSubmit !== false,
     passMessage: settings.passMessage || '', failMessage: settings.failMessage || '',
     passExitMessage: settings.passExitMessage || '', failExitMessage: settings.failExitMessage || '',
     showAnswerReview: !!settings.showAnswerReview,
@@ -4909,7 +4986,7 @@ function buildQuizHTML(settings, questions, isTest) {
     + '        <button type="button" class="start-btn" id="time-limit-start-btn">Start</button>\n'
     + '      </div>\n    </div>\n  </div>\n\n'
     + '  <div id="warning-modal" class="modal">\n    <div class="modal-content">\n'
-    + '      <h3 class="modal-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 152.94 132.81" style="width:28px;height:28px;flex-shrink:0"><path d="M76.47,1L.86,132.31h151.21L76.47,1ZM76.47,8.63l69.02,119.88H7.45L76.47,8.63Z" stroke="#000" stroke-miterlimit="10"/><path d="M76.47,8.63L7.45,128.51h138.04L76.47,8.63ZM91.78,51.92l-6.63,46.39h-17.37l-6.63-46.39h30.63ZM85.39,119.73h-17.85v-17.85h17.85v17.85Z" stroke="#000" stroke-miterlimit="10"/><path d="M61.15,51.92l6.63,46.39h17.37l6.63-46.39h-30.63ZM82.06,94.74h-11.18l-5.61-39.26h22.4l-5.61,39.26Z" stroke="#000" stroke-miterlimit="10"/><path d="M67.54,101.88v17.85h17.85v-17.85h-17.85ZM81.82,116.15h-10.7v-10.7h10.7v10.7Z" stroke="#000" stroke-miterlimit="10"/></svg> Unanswered Questions</h3>\n'
+    + '      <h3 class="modal-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:28px;height:28px;flex-shrink:0;fill:none;stroke:#1f2937;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> <span id="warning-title">Unanswered Questions</span></h3>\n'
     + '      <p class="modal-message" id="warning-message"></p>\n'
     + '      <div class="modal-actions">\n'
     + '        <button class="secondary nav-btn btn-previous" id="cancel-submit">Review Answers</button>\n'
@@ -4938,7 +5015,7 @@ function generateManifest(settings) {
     + '      <title>' + escH(settings.title) + '</title>\n'
     + '      <item identifier="ITEM-' + id + '" identifierref="RES-' + id + '">\n'
     + '        <title>' + escH(settings.title) + '</title>\n'
-    + '        <adlcp:masteryscore>' + (settings.passingPercentage || 70) + '</adlcp:masteryscore>\n'
+    + (settings.passingPercentage ? '        <adlcp:masteryscore>' + settings.passingPercentage + '</adlcp:masteryscore>\n' : '')
     + '      </item>\n    </organization>\n  </organizations>\n'
     + '  <resources>\n'
     + '    <resource identifier="RES-' + id + '" type="webcontent" adlcp:scormtype="sco" href="index.html">\n'
@@ -4963,10 +5040,76 @@ async function buildScormZip(settings, questions) {
   return await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE', compressionOptions: { level: 6 } });
 }
 
+// Worst-case answer per question type — mirrors the actual userAnswers[id] shape
+function _worstCaseAnswer(q) {
+  const t = q.questionType;
+  if (t === 'multiple') return (q.options || []).map(o => o.letter || 'A');
+  if (t === 'matching') {
+    const obj = {};
+    (q.pairs || []).forEach((_, i) => { obj[i] = i; });
+    return obj;
+  }
+  if (t === 'sequencing') return (q.steps || []).slice();
+  if (t === 'hotspot') {
+    const max = Math.max(1, q.maxPins || 1);
+    const pins = [];
+    for (let i = 0; i < max; i++) pins.push({ xPct: 99.99, yPct: 99.99 });
+    return pins;
+  }
+  // single
+  return (q.options && q.options[0] && q.options[0].letter) || 'A';
+}
+
+// Estimate the worst-case JSON size of cmi.suspend_data after a full attempt.
+// We model the mid-attempt state, when both the active-attempt block and the
+// previous-attempt block are present (the largest the payload ever gets).
+function _estimateSuspendDataSize(settings, questions) {
+  const all = questions || [];
+  const perAttempt = settings.questionsPerAttempt > 0
+    ? Math.min(settings.questionsPerAttempt, all.length)
+    : all.length;
+  // Pick the N largest by answer footprint — worst-case selection
+  const ranked = all.map(q => ({ q, size: JSON.stringify(_worstCaseAnswer(q)).length }))
+                    .sort((a, b) => b.size - a.size)
+                    .slice(0, perAttempt)
+                    .map(r => r.q);
+  const ids = ranked.map(q => q.id);
+  const answers = {};
+  ranked.forEach(q => { answers[q.id] = _worstCaseAnswer(q); });
+  const state = {
+    attemptCount: 99,
+    lastAttemptTimestamp: '2030-12-31T23:59:59.999Z',
+    hasPassed: true,
+    lastScore: 100,
+    bestScore: 100,
+    timeExpiredAt: 1735689599999,
+    elapsedMs: 999999999,
+    currentQuestionIndex: Math.max(0, perAttempt - 1),
+    attemptQuestionIds: ids,
+    lastAttemptQuestionIds: ids,
+    userAnswers: answers,
+    lastAttemptAnswers: answers
+  };
+  return JSON.stringify(state).length;
+}
+
 async function generateAndDownload() {
   saveSettings();
   if (!APP.settings.title) { focusQuizTitleInput(); return; }
   if (!APP.questions.length) { toast('Add some questions first','err'); return; }
+  // Check estimated suspend_data size against SCORM 1.2's 4096-char ceiling
+  const size = _estimateSuspendDataSize(APP.settings, APP.questions);
+  if (size > 4096) {
+    document.getElementById('suspend-size-actual').textContent = size.toLocaleString();
+    const continueBtn = document.getElementById('btn-suspend-size-continue');
+    continueBtn.onclick = function() { closeModal('modal-suspend-size'); _doDownload(); };
+    showModal('modal-suspend-size');
+    return;
+  }
+  await _doDownload();
+}
+
+async function _doDownload() {
   const btn = document.getElementById('btn-dl');
   btn.disabled = true; btn.textContent = '⏳ Building…';
   try {
@@ -5685,6 +5828,7 @@ function batchSettings(item) {
     randomizeQuestions:  randomizeEl ? randomizeEl.checked : item.settings.randomizeQuestions !== false,
     allowBlankAnswers:   item.settings.allowBlankAnswers !== false,
     warnOnBlankAnswers:  item.settings.warnOnBlankAnswers !== false,
+    confirmBeforeSubmit: item.settings.confirmBeforeSubmit !== false,
     passMessage:         item.settings.passMessage || '',
     failMessage:         item.settings.failMessage || '',
     passExitMessage:     item.settings.passExitMessage || '',
