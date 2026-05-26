@@ -52,6 +52,9 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .drop-zone input[type=file]{display:none}
 .dz-icon{font-size:24px;margin-bottom:6px}
 .dz-label{font-size:12px;color:var(--muted)}
+.ft-chip{display:flex;flex-direction:column;align-items:center;gap:4px}
+.ft-tag{display:inline-block;padding:4px 10px;background:#fff;border:1.5px solid #d1d5db;border-radius:5px;font-size:11px;font-weight:700;font-family:Consolas,'Courier New',monospace;letter-spacing:.04em}
+.ft-sub{font-size:10px;color:var(--muted);font-weight:500;letter-spacing:.02em}
 .import-result{background:var(--white);border:1px solid var(--border);border-left:4px solid var(--green);padding:14px 18px;margin-top:16px;font-size:13px;line-height:1.6;border-radius:var(--radius-sm)}
 .import-result.error{border-left-color:var(--danger)}
 .q-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
@@ -238,6 +241,10 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .opt-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;padding:4px 3px;line-height:1;transition:color .15s}
 .opt-del:hover{color:var(--danger)}
 .test-modal .modal{max-width:1440px;width:calc(100vw - 48px)}
+.test-modal.test-single-mode .modal{max-width:820px;width:calc(100vw - 48px)}
+.test-modal.test-single-mode .m-hdr [data-test-tool]{display:none !important}
+.test-modal.test-single-mode .test-ifr{min-width:0;height:200px;transition:height .15s}
+.test-modal.test-single-mode .test-body-wrap{overflow:visible}
 .test-body-wrap{display:flex;flex-direction:row;align-items:stretch;overflow:hidden}
 .test-ifr{flex:1 1 0;min-width:680px;height:72vh;border:none;display:block}
 #scorm-log-panel{flex-shrink:0;width:320px;border-left:2px solid var(--border);border-top:none;display:flex;flex-direction:column}
@@ -405,12 +412,22 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
     </div>
   </div>
   <div id="q-empty-state" style="display:none;margin-top:8px">
-    <div class="drop-zone" id="dz-auto" style="padding:40px 24px;position:relative">
+    <div class="drop-zone" id="dz-auto" style="padding:34px 24px 28px;position:relative">
       <button class="btn btn-sm" onclick="event.stopPropagation();showModal('modal-aiken')" style="position:absolute;top:12px;right:12px;z-index:2">View AIKEN Example</button>
-      <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:40px;height:40px"></div>
-      <div style="font-size:15px;font-weight:600;margin:8px 0 4px">Drop your file here, or click to browse</div>
-      <div class="dz-label">Accepts .txt (AIKEN) &nbsp;·&nbsp; .xml (Moodle XML) &nbsp;·&nbsp; .zip (SCORM or question bank) &nbsp;·&nbsp; .docx (Word doc exported from this app) &nbsp;·&nbsp; .txt + images together</div>
-      <input type="file" id="file-auto" accept=".txt,.xml,.zip,.docx">
+      <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:38px;height:38px"></div>
+      <div style="font-size:16px;font-weight:600;margin:8px 0 2px">Drop your file here, or click to browse</div>
+      <div style="display:flex;justify-content:center;align-items:flex-start;gap:14px;flex-wrap:wrap;margin:16px 0 8px">
+        <div class="ft-chip"><span class="ft-tag" style="border-color:#9ca3af;color:#4b5563">TXT</span><span class="ft-sub">AIKEN</span></div>
+        <div class="ft-chip"><span class="ft-tag" style="border-color:#f59e0b;color:#b45309">XML</span><span class="ft-sub">Moodle</span></div>
+        <div class="ft-chip"><span class="ft-tag" style="border-color:#eab308;color:#854d0e">ZIP</span><span class="ft-sub">SCORM</span></div>
+        <div class="ft-chip"><span class="ft-tag" style="border-color:#2563eb;color:#1e40af">DOCX</span><span class="ft-sub">Word</span></div>
+        <div class="ft-chip"><span class="ft-tag" style="border-color:#dc2626;color:#991b1b">PPTX</span><span class="ft-sub">PowerPoint</span></div>
+      </div>
+      <button type="button" onclick="event.stopPropagation();openAIConvertModal()" style="margin-top:10px;display:inline-flex;align-items:center;gap:7px;padding:7px 14px;background:linear-gradient(135deg,rgba(118,185,0,.12),rgba(168,85,247,.10));border:1px solid rgba(118,185,0,.30);border-radius:22px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit;transition:background .15s,box-shadow .15s,transform .1s" onmouseover="this.style.background='linear-gradient(135deg,rgba(118,185,0,.20),rgba(168,85,247,.18))';this.style.boxShadow='0 2px 10px rgba(118,185,0,.18)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(118,185,0,.12),rgba(168,85,247,.10))';this.style.boxShadow='none'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 3 L13.8 9.2 L20 11 L13.8 12.8 L12 19 L10.2 12.8 L4 11 L10.2 9.2 Z"/></svg>
+        Drop your file here &mdash; if needed, it will be converted using AI
+      </button>
+      <input type="file" id="file-auto" accept=".txt,.xml,.zip,.docx,.pptx,.md">
     </div>
     <div style="text-align:center;margin-top:14px"><button class="btn btn-primary" onclick="openEditor(null)">+ Add Question</button></div>
     <div id="import-log" style="margin-top:16px"></div>
@@ -443,9 +460,6 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 <div id="tab-settings" class="tab-panel">
   <div class="pg-hdr">
     <div><div class="pg-title">Quiz Settings</div><div class="pg-sub">Embedded in the generated SCORM package</div></div>
-    <div class="btn-group">
-      <button class="btn btn-outline-dark" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
-    </div>
   </div>
   <div class="s-section">
     <h3>Quiz Information</h3>
@@ -716,20 +730,33 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
       </div>
     </div>
   </div>
-  <div class="s-section" id="s-section-identity" style="display:none;border-left:4px solid #f59e0b;background:#fffdf0">
-    <h3 style="color:#92400e">Re-upload Mode <small style="font-weight:400;color:#b45309;font-size:12px">Experimental</small></h3>
-    <div class="toggle-row">
-      <label class="toggle"><input type="checkbox" id="tog-preserve-id" onchange="this.parentElement.querySelector('.tog-slider').style.background=this.checked?'var(--green)':'';saveSettings()"><span class="tog-slider" style="background:#d1d5db"></span></label>
-      <div style="flex:1">
-        <div class="tog-label">Keep original package ID on export</div>
-        <div class="tog-desc">When ON, the exported SCORM will use the same manifest identifier as the imported package. This does <strong>not</strong> guarantee ALM preserves learner data — ALM resets tracking records when content is replaced regardless of the ID. May be useful for other platform-level purposes.</div>
+  <div class="s-section" id="s-section-advanced" style="background:#fafbfc">
+    <h3 onclick="toggleAdvancedSettings()" style="cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none;margin:0">
+      <span id="advanced-toggle-icon" style="display:inline-block;transition:transform .15s;font-size:11px;color:var(--muted)">▶</span>
+      Advanced Settings
+      <small style="font-weight:400;color:#bbb;font-size:12px;margin-left:auto">For builders only — not part of the SCORM export</small>
+    </h3>
+    <div id="advanced-content" style="display:none;margin-top:18px">
+      <div id="s-section-identity" style="display:none;border-left:4px solid #f59e0b;background:#fffdf0;padding:16px 18px;margin-bottom:18px;border-radius:var(--radius-sm)">
+        <h4 style="color:#92400e;margin:0 0 12px 0;font-size:15px">Re-upload Mode <small style="font-weight:400;color:#b45309;font-size:12px">Experimental</small></h4>
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" id="tog-preserve-id" onchange="this.parentElement.querySelector('.tog-slider').style.background=this.checked?'var(--green)':'';saveSettings()"><span class="tog-slider" style="background:#d1d5db"></span></label>
+          <div style="flex:1">
+            <div class="tog-label">Keep original package ID on export</div>
+            <div class="tog-desc">When ON, the exported SCORM will use the same manifest identifier as the imported package. This does <strong>not</strong> guarantee ALM preserves learner data — ALM resets tracking records when content is replaced regardless of the ID. May be useful for other platform-level purposes.</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:10px 14px;background:#fef3c7;border:1px solid #fcd34d;border-radius:var(--radius-sm);font-size:12px;color:#78350f;word-break:break-all">
+          <span style="font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:10px">Package ID:&nbsp;</span><span id="s-manifest-id-display" style="font-family:Consolas,'Courier New',monospace"></span>
+        </div>
+      </div>
+      <div>
+        <h4 style="margin:0 0 6px 0;font-size:15px">AI Assistant <small style="font-weight:400;color:#bbb;font-size:12px">Configured on the server — not part of SCORM exports</small></h4>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px">The AI conversion endpoint is configured server-side via env vars (<code style="font-family:Consolas,'Courier New',monospace;font-size:12px">NVIDIA_API_KEY</code>, <code style="font-family:Consolas,'Courier New',monospace;font-size:12px">NVIDIA_API_ENDPOINT</code>, <code style="font-family:Consolas,'Courier New',monospace;font-size:12px">NVIDIA_API_MODEL</code>). No per-user API key is required. Use the button below to verify the service is reachable.</p>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="btn btn-sm btn-outline-dark" onclick="testAIConnection()">Test Connection</button> <span id="ai-test-result" style="font-size:13px"></span></div>
       </div>
     </div>
-    <div style="margin-top:12px;padding:10px 14px;background:#fef3c7;border:1px solid #fcd34d;border-radius:var(--radius-sm);font-size:12px;color:#78350f;word-break:break-all">
-      <span style="font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:10px">Package ID:&nbsp;</span><span id="s-manifest-id-display" style="font-family:Consolas,'Courier New',monospace"></span>
-    </div>
   </div>
-  <div style="text-align:right"><button class="btn btn-primary" onclick="generateAndDownload()"><img class="btn-icon" src="assets/svg/download.svg" alt=""> Download SCORM</button></div>
 </div>
 
 <!-- HISTORY TAB -->
@@ -909,7 +936,13 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
              ondragleave="event.stopPropagation();this.classList.remove('drag-over')"
              ondrop="event.preventDefault();event.stopPropagation();this.classList.remove('drag-over');if(event.dataTransfer.files[0])edHsLoadImage({files:event.dataTransfer.files})">
           <input type="file" id="ed-hs-file" accept="image/*" onchange="edHsLoadImage(this)" style="display:none">
-          <div style="font-size:22px;color:var(--green);margin-bottom:5px">🖼</div>
+          <div style="margin-bottom:6px;line-height:0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#76B900" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
           <div style="font-size:13px;font-weight:600;color:var(--green-dk)">Click or drag an image here</div>
           <div style="font-size:12px;color:var(--muted);margin-top:3px">PNG, JPG, SVG</div>
         </div>
@@ -980,10 +1013,10 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
   <div class="modal" style="max-width:1100px">
     <div class="m-hdr">
       <span class="m-title" id="test-modal-title">Preview Quiz</span>
-      <button class="btn btn-sm btn-outline" onclick="simulateReload()" title="Simulate the user reloading the page — state is preserved just like in a real LMS">&#8635; Simulate Reload</button>
-      <button class="btn btn-sm btn-outline" onclick="resetTestState()" title="Clear saved attempt data so you can test from the beginning">&#9866; Reset Test State</button>
-      <label class="btn btn-sm btn-outline" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;user-select:none" title="Highlight correct answers as you go — tester only, not in the real SCORM"><input type="checkbox" id="toggle-show-answers" onchange="toggleAnswerHints(this.checked)" style="accent-color:var(--green);cursor:pointer"> Show Answers</label>
-      <button class="btn btn-sm btn-outline" id="btn-scorm-log" onclick="toggleScormLog()" title="Show SCORM API call log">&#128203; SCORM Log</button>
+      <button class="btn btn-sm btn-outline" data-test-tool onclick="simulateReload()" title="Simulate the user reloading the page — state is preserved just like in a real LMS">&#8635; Simulate Reload</button>
+      <button class="btn btn-sm btn-outline" data-test-tool onclick="resetTestState()" title="Clear saved attempt data so you can test from the beginning">&#9866; Reset Test State</button>
+      <label class="btn btn-sm btn-outline" data-test-tool style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;user-select:none" title="Highlight correct answers as you go — tester only, not in the real SCORM"><input type="checkbox" id="toggle-show-answers" onchange="toggleAnswerHints(this.checked)" style="accent-color:var(--green);cursor:pointer"> Show Answers</label>
+      <button class="btn btn-sm btn-outline" data-test-tool id="btn-scorm-log" onclick="toggleScormLog()" title="Show SCORM API call log">&#128203; SCORM Log</button>
       <button class="m-close" onclick="closeTestModal()">&#x2715;</button>
     </div>
     <div class="m-body" style="padding:0">
@@ -1049,6 +1082,42 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 </div>
 
 <!-- SUSPEND_DATA SIZE WARNING MODAL -->
+<!-- AI CONVERT MODAL -->
+<div class="m-overlay" id="modal-ai-convert">
+  <div class="modal" style="max-width:760px">
+    <div class="m-hdr"><span class="m-title">✨ Convert with AI</span><button class="m-close" onclick="closeModal('modal-ai-convert')">&#x2715;</button></div>
+    <div class="m-body">
+      <p style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:14px">Paste raw text or drop a file (.txt / .docx). The AI will convert it to AIKEN format. Review the output and import when you're happy with it.</p>
+      <div style="display:grid;grid-template-columns:1fr;gap:12px">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Input</label>
+            <div style="display:flex;gap:8px">
+              <label class="btn btn-sm btn-outline-dark" style="cursor:pointer">
+                <input type="file" id="ai-file-input" accept=".txt,.docx,.pptx,.xml" style="display:none">📎 Drop file
+              </label>
+              <button class="btn btn-sm btn-outline-dark" onclick="document.getElementById('ai-input-text').value=''">Clear</button>
+            </div>
+          </div>
+          <textarea id="ai-input-text" class="form-textarea" placeholder="Paste quiz text here, or drop a .txt / .docx file above…" style="width:100%;min-height:140px;max-height:240px;font-family:Consolas,'Courier New',monospace;font-size:13px;resize:vertical"></textarea>
+        </div>
+        <div style="text-align:center"><button class="btn btn-primary" id="ai-convert-btn" onclick="runAIConversion()">Convert to AIKEN ↓</button></div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">AIKEN Output</label>
+            <span id="ai-status" style="font-size:12px;color:var(--muted)"></span>
+          </div>
+          <textarea id="ai-output-text" class="form-textarea" placeholder="The AI-converted AIKEN will appear here. You can edit it before importing." style="width:100%;min-height:180px;max-height:340px;font-family:Consolas,'Courier New',monospace;font-size:13px;resize:vertical"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="m-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-ai-convert')">Cancel</button>
+      <button class="btn btn-primary" id="ai-import-btn" onclick="importAIConverted()" disabled>Import Questions</button>
+    </div>
+  </div>
+</div>
+
 <div class="m-overlay" id="modal-suspend-size">
   <div class="modal" style="max-width:560px">
     <div class="m-hdr"><span class="m-title">Quiz may exceed LMS state limit</span><button class="m-close" onclick="closeModal('modal-suspend-size')">&#x2715;</button></div>
@@ -2474,6 +2543,19 @@ function showSection(sectionId) {
         document.getElementById('start-screen').classList.add('hidden');
         showResults({ percentage: pct, correct: correct, incorrect: total - correct }, passed, passed ? 1800000 : 900000);
       }
+      // Single-question test mode — skip start screen, hide all chrome, render the one question
+      if (CONFIG.previewScreen === 'singleQuestion') {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        ['prev-btn','next-btn','submit-btn'].forEach(function(id){
+          var el = document.getElementById(id); if (el) el.style.display = 'none';
+        });
+        document.querySelectorAll('.info-bar, .progress-bar, .quiz-zoom-toggle, .quiz-zoom-panel, .question-header').forEach(function(el){ el.style.display = 'none'; });
+        // Also collapse the empty space at the top by removing the quiz-shell minimum height
+        var shell = document.querySelector('.quiz-shell'); if (shell) { shell.style.minHeight = 'auto'; shell.style.padding = '14px'; }
+        currentQuestionIndex = 0; userAnswers = {}; startTime = Date.now();
+        renderQuestion();
+      }
     } catch (error) {
       console.error('Initialization failed:', error);
       alert(`Failed to load quiz: ${error.message}\n\nPlease contact your administrator.`);
@@ -3117,7 +3199,10 @@ async function handleAikenFile(file) {
     const raw = await file.text();
     const { title: aikenTitle, text } = extractAikenTitle(raw);
     const imported = parseAiken(text);
-    if (!imported.length) { showImportResult('&#9888; No valid questions found. Check the AIKEN format — see the example.', true); return; }
+    if (!imported.length) {
+      if (await _offerAIConversion(raw, file.name)) return;
+      showImportResult('&#9888; No valid questions found. Check the AIKEN format — see the example.', true); return;
+    }
     let replace = false;
     if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
@@ -3136,7 +3221,10 @@ async function handleXmlFile(file) {
   try {
     const text = await file.text();
     const imported = parseMoodleXML(text);
-    if (!imported.length) { showImportResult('&#9888; No multichoice questions found in this Moodle XML file.', true); return; }
+    if (!imported.length) {
+      if (await _offerAIConversion(text, file.name)) return;
+      showImportResult('&#9888; No multichoice questions found in this Moodle XML file.', true); return;
+    }
     let replace = false;
     if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
@@ -3304,6 +3392,11 @@ async function handleDocxFile(file) {
     });
 
     if (!valid.length) {
+      // Re-extract with image markers and the imageMap so AI can preserve question/image associations
+      try {
+        const { text: aiText, images: aiImages } = await _extractDocxWithImages(file);
+        if (await _offerAIConversion(aiText, file.name, aiImages)) return;
+      } catch (_) { /* fall through to error if re-extraction fails */ }
       showImportResult('&#9888; No valid questions found in the Word document. Make sure it was exported from this app and saved as .docx.', true);
       return;
     }
@@ -3324,10 +3417,578 @@ async function handleDocxFile(file) {
   }
 }
 
+// ── AI ASSISTED CONVERSION ────────────────────────────────
+// All AI calls are routed through a server-side proxy at /api/ai-convert,
+// which holds the API key in env vars (NVIDIA_API_KEY etc.). No credentials
+// live in the browser.
+const ADMIN_EMAIL = 'tpraag@nvidia.com';
+function _adminContactHtml(subject) {
+  const s = encodeURIComponent(subject || 'Quizzer AI assistant issue');
+  return ' — <a href="mailto:' + ADMIN_EMAIL + '?subject=' + s + '" style="color:#1d4ed8;text-decoration:underline">contact ' + ADMIN_EMAIL + '</a>';
+}
+
+async function testAIConnection() {
+  const resultEl = document.getElementById('ai-test-result');
+  resultEl.textContent = '⏳ Testing…';
+  resultEl.style.color = 'var(--muted)';
+  try {
+    const r = await fetch('/api/ai-status');
+    const data = await r.json();
+    if (data.ok) {
+      resultEl.textContent = '✓ Connected — model: ' + (data.model || 'unknown');
+      resultEl.style.color = 'var(--green-dk)';
+    } else if (!data.configured) {
+      resultEl.innerHTML = '✗ Not configured on the server' + _adminContactHtml('Quizzer AI assistant not configured');
+      resultEl.style.color = '#dc2626';
+    } else {
+      resultEl.innerHTML = '✗ ' + escH(data.error || 'Connection failed') + _adminContactHtml('Quizzer AI assistant connection failed');
+      resultEl.style.color = '#dc2626';
+    }
+  } catch (e) {
+    resultEl.innerHTML = '✗ ' + escH(e.message) + _adminContactHtml('Quizzer AI assistant unreachable');
+    resultEl.style.color = '#dc2626';
+  }
+}
+
+const _AIKEN_CONVERSION_PROMPT =
+  'You convert quiz questions into a custom AIKEN dialect used by the SCORM Quizzer app.\n' +
+  'This dialect natively supports FIVE question types: single-choice, multiple-choice, MATCHING, SEQUENCING, and HOTSPOT.\n\n' +
+  '========= GLOBAL RULES =========\n' +
+  '- Output ONLY the AIKEN content. No commentary, no markdown, no code fences, no explanations.\n' +
+  '- Optional first line: "TITLE: Quiz Title"\n' +
+  '- Questions are separated by a blank line.\n' +
+  '- Number every question sequentially starting at 1, using "1." or "1)" format.\n' +
+  '- Preserve question text faithfully — do not paraphrase.\n' +
+  '- Skip introductory text, page numbers, section titles, instructions, and non-question content.\n' +
+  '- The input may contain "[IMAGE: filename.ext]" markers (brackets included). These are REAL embedded images from the source file. You MUST preserve every such marker by emitting "IMAGE: filename.ext" (without the brackets) IN THE CORRECT POSITION WITHIN THE QUESTION BLOCK (see "IMAGE PLACEMENT RULES" below). NEVER drop image markers. NEVER invent image filenames that were not in the input. NEVER place image markers at the bottom of the output or in a separate section.\n' +
+  '- If you cannot determine the correct answer for a question, prepend "(verify answer) " to the question text and pick a plausible default.\n\n' +
+  '========= IMAGE PLACEMENT RULES (READ CAREFULLY) =========\n' +
+  'When a question has an image, the "IMAGE: filename" line MUST go INSIDE that question\'s block, on its own line, BETWEEN the question text and the first option line ("A.").\n' +
+  '- NEVER put IMAGE: lines at the end of the question (after ANSWER:).\n' +
+  '- NEVER collect IMAGE: lines at the bottom of the output.\n' +
+  '- NEVER place IMAGE: lines outside any question block.\n' +
+  '- Each IMAGE: line is on its own line. No prefixes, no "IMAGE: 1." or numbering.\n' +
+  '- The marker filename must match the input exactly (case + extension).\n\n' +
+  'CORRECT placement (single/multiple choice):\n\n' +
+  '7. Which continent is shown in the image?\n' +
+  'IMAGE: continent.png\n' +
+  'A. Asia\n' +
+  'B. Africa\n' +
+  'C. South America\n' +
+  'D. Australia\n' +
+  'ANSWER: C\n\n' +
+  'CORRECT placement (matching with image):\n\n' +
+  '8. Match each labeled region of the diagram to its name.\n' +
+  'TYPE: MATCHING\n' +
+  'IMAGE: diagram.png\n' +
+  'PAIR: A | Nucleus\n' +
+  'PAIR: B | Cytoplasm\n\n' +
+  'WRONG placements to avoid:\n' +
+  '- Image marker AFTER the answer line (will be silently dropped by the parser):\n' +
+  '    1. Q text?\n' +
+  '    A. ...\n' +
+  '    ANSWER: A\n' +
+  '    IMAGE: foo.png   <-- WRONG, do not do this\n' +
+  '- All images bundled together at the bottom of the output (will not attach to any question):\n' +
+  '    ...all questions first...\n' +
+  '    IMAGE: img1.png   <-- WRONG\n' +
+  '    IMAGE: img2.png   <-- WRONG\n\n' +
+  '========= TYPE 1 — SINGLE-CHOICE =========\n' +
+  'Default when one option is correct. Format:\n\n' +
+  '1. Question text here?\n' +
+  'A. Option A\n' +
+  'B. Option B\n' +
+  'C. Option C\n' +
+  'D. Option D\n' +
+  'ANSWER: B\n\n' +
+  '========= TYPE 2 — MULTIPLE-CHOICE (multiple correct) =========\n' +
+  'Use when two or more options are correct. Format identical to single-choice but ANSWER is comma-separated:\n\n' +
+  '2. Which of the following are programming languages?\n' +
+  'A. Python\n' +
+  'B. HTML\n' +
+  'C. JavaScript\n' +
+  'D. CSS\n' +
+  'ANSWER: A,C\n\n' +
+  '========= TYPE 3 — MATCHING =========\n' +
+  'Use when the source asks to "match X to Y", "pair the items", with left/right columns, or numbered-to-lettered associations.\n' +
+  'Add "TYPE: MATCHING" right after the question text. Each pair is "PAIR: left | right" with a SPACE-PIPE-SPACE separator.\n' +
+  'DO NOT split into multiple single-choice questions — emit ONE matching question with all the pairs.\n\n' +
+  'Example for "Match each country to its capital: 1) France 2) Japan 3) Canada / A) Ottawa B) Tokyo C) Paris":\n\n' +
+  '3. Match each country to its capital.\n' +
+  'TYPE: MATCHING\n' +
+  'PAIR: France | Paris\n' +
+  'PAIR: Japan | Tokyo\n' +
+  'PAIR: Canada | Ottawa\n\n' +
+  '========= TYPE 4 — SEQUENCING =========\n' +
+  'Use when the source asks to "arrange in order", "put in correct sequence", "order from first to last", etc.\n' +
+  'Add "TYPE: SEQUENCING" right after the question text. Then list each item with "STEP: " IN THE CORRECT ORDER.\n' +
+  'DO NOT emit as multiple-choice — emit ONE sequencing question with the steps in the right order.\n\n' +
+  'Example for "Arrange these planets from closest to farthest from the Sun: Venus, Mars, Mercury, Earth":\n\n' +
+  '4. Arrange these planets from closest to farthest from the Sun.\n' +
+  'TYPE: SEQUENCING\n' +
+  'STEP: Mercury\n' +
+  'STEP: Venus\n' +
+  'STEP: Earth\n' +
+  'STEP: Mars\n\n' +
+  '========= TYPE 5 — HOTSPOT =========\n' +
+  'Use when the source asks the learner to CLICK on a part of an image (e.g. "Click the kidney in the diagram").\n' +
+  'Requires an image. Format:\n\n' +
+  '5. Click the [target region] in the diagram.\n' +
+  'TYPE: HOTSPOT\n' +
+  'IMAGE: filename.png\n' +
+  'HOTSPOT: 25%,30%,15%,20% | Region label\n' +
+  'MAXPINS: 1\n\n' +
+  'HOTSPOT coordinates: "x%,y%,w%,h%" defines a rectangle (top-left x/y, width, height as percentages of the image).\n' +
+  'Only emit hotspot questions if the source explicitly shows hotspot regions with coordinates. If you cannot determine coordinates from the source, treat it as a single-choice question instead. Do NOT guess hotspot coordinates.\n\n' +
+  '========= ADDITIONAL FEATURES (any type) =========\n' +
+  '- IMAGES: add "IMAGE: filename.png" as its own line. Place it before the options to render above the question, or after the options to render below.\n' +
+  '- CODE BLOCKS: wrap code in ##CODE## ... ##/CODE## on their own lines, before the options. Only for single/multiple choice.\n\n' +
+  '  Example with code:\n\n' +
+  '  6. What does this code output?\n' +
+  '  ##CODE##\n' +
+  '  x = 5\n' +
+  '  y = 3\n' +
+  '  print(x * y + 1)\n' +
+  '  ##/CODE##\n' +
+  '  A. 15\n' +
+  '  B. 8\n' +
+  '  C. 16\n' +
+  '  D. 9\n' +
+  '  ANSWER: C\n\n' +
+  '========= NON-NATIVE TYPES (map to native ones) =========\n' +
+  '- TRUE / FALSE → single-choice with options "A. True" and "B. False".\n' +
+  '- FILL IN THE BLANK → single-choice with 3-4 plausible candidate answers as options.\n\n' +
+  '========= REMEMBER =========\n' +
+  '- Match how the source structures each question to the right TYPE. A matching question becomes ONE matching block, not several single-choice questions.\n' +
+  '- Use TYPE: MATCHING / SEQUENCING / HOTSPOT directives — they are required for the parser to recognize those types.\n' +
+  '- Output AIKEN text only. No JSON, no explanations.\n';
+
+async function callAIConvert(rawText) {
+  // Routes through the server-side proxy at /api/ai-convert. The key lives in
+  // an env var on the server, not in the browser.
+  const r = await fetch('/api/ai-convert', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [
+        { role: 'system', content: _AIKEN_CONVERSION_PROMPT },
+        { role: 'user',   content: 'Convert the following text to AIKEN format:\n\n' + rawText }
+      ],
+      max_tokens: 8000
+    })
+  });
+  if (!r.ok) {
+    let errMsg = 'AI service error (HTTP ' + r.status + ')';
+    try { const j = await r.json(); if (j && j.error) errMsg = j.error; } catch(_) {}
+    throw new Error(errMsg);
+  }
+  const data = await r.json();
+  const content = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '';
+  if (!content.trim()) throw new Error('Empty response from model. Try again, or notify your administrator if this persists.');
+  return content.trim();
+}
+
+// Holds images extracted from a .docx so they can be passed to parseAiken on import.
+// Reset whenever a new file is dropped into the AI modal or the modal is opened.
+let _aiImageMap = {};
+
+// Extract plain text from a dropped file. For .docx and .pptx, also extract embedded images
+// and inject `[IMAGE: filename]` markers at the positions where they appear, so the AI can
+// preserve question/image associations in the AIKEN output.
+async function _extractTextFromFile(file) {
+  const name = file.name.toLowerCase();
+  if (name.endsWith('.docx')) {
+    const { text, images } = await _extractDocxWithImages(file);
+    _aiImageMap = images;
+    return text;
+  }
+  if (name.endsWith('.pptx')) {
+    const { text, images } = await _extractPptxWithImages(file);
+    _aiImageMap = images;
+    return text;
+  }
+  _aiImageMap = {};
+  return await file.text();
+}
+
+async function _extractDocxWithImages(file) {
+  const zip = await JSZip.loadAsync(file);
+  const xmlEntry = zip.file('word/document.xml');
+  if (!xmlEntry) throw new Error('Not a valid .docx file');
+
+  // 1. Parse relationships file to map relationship IDs to media filenames
+  const relsEntry = zip.file('word/_rels/document.xml.rels');
+  const rIdToFilename = {};
+  if (relsEntry) {
+    const relsXml = await relsEntry.async('string');
+    const relsDoc = new DOMParser().parseFromString(relsXml, 'application/xml');
+    Array.from(relsDoc.getElementsByTagName('Relationship')).forEach(rel => {
+      const type = rel.getAttribute('Type') || '';
+      if (!type.endsWith('/image')) return;
+      const id = rel.getAttribute('Id');
+      const target = rel.getAttribute('Target'); // e.g. "media/image1.png"
+      if (id && target) rIdToFilename[id] = target.split('/').pop();
+    });
+  }
+
+  // 2. Extract media. Scan the WHOLE archive for image-extension files, not just
+  // word/media/* — Word can store images in word/embeddings/, customXml/, or other
+  // locations depending on the doc's history.
+  const imageMap = {};
+  const mimeMap = { png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', gif:'image/gif', webp:'image/webp', svg:'image/svg+xml', bmp:'image/bmp', tif:'image/tiff', tiff:'image/tiff' };
+  const imageExtPattern = /\.(png|jpe?g|gif|webp|svg|bmp|tiff?)$/i;
+  for (const path of Object.keys(zip.files)) {
+    if (zip.files[path].dir) continue;
+    if (!imageExtPattern.test(path)) continue;
+    const filename = path.split('/').pop();
+    if (imageMap[filename]) continue;
+    const ext = (filename.split('.').pop() || 'png').toLowerCase();
+    const mime = mimeMap[ext] || 'image/png';
+    const b64 = await zip.files[path].async('base64');
+    imageMap[filename] = 'data:' + mime + ';base64,' + b64;
+  }
+
+  // 3. Walk document body in order. For each paragraph, emit its text then any image markers.
+  const xmlText = await xmlEntry.async('string');
+  const xmlDoc = new DOMParser().parseFromString(xmlText, 'application/xml');
+  const NS  = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+  const ANS = 'http://schemas.openxmlformats.org/drawingml/2006/main';
+  const RNS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const VML = 'urn:schemas-microsoft-com:vml';
+
+  const lines = [];
+  const seenImages = new Set();
+  Array.from(xmlDoc.getElementsByTagNameNS(NS, 'p')).forEach(p => {
+    const text = Array.from(p.getElementsByTagNameNS(NS, 't')).map(t => t.textContent).join('').trim();
+    if (text) lines.push(text);
+    // Modern image references: <a:blip r:embed="...">
+    Array.from(p.getElementsByTagNameNS(ANS, 'blip')).forEach(blip => {
+      const rId = blip.getAttributeNS(RNS, 'embed') || blip.getAttribute('r:embed');
+      if (rId && rIdToFilename[rId]) { lines.push('[IMAGE: ' + rIdToFilename[rId] + ']'); seenImages.add(rIdToFilename[rId]); }
+    });
+    // Legacy VML image references: <v:imagedata r:id="...">
+    Array.from(p.getElementsByTagNameNS(VML, 'imagedata')).forEach(img => {
+      const rId = img.getAttributeNS(RNS, 'id') || img.getAttribute('r:id') || img.getAttributeNS(RNS, 'href') || img.getAttribute('r:href');
+      if (rId && rIdToFilename[rId]) { lines.push('[IMAGE: ' + rIdToFilename[rId] + ']'); seenImages.add(rIdToFilename[rId]); }
+    });
+  });
+
+  // Catch-all for images that live outside paragraphs (floating shapes, headers/footers, etc.)
+  for (const filename of Object.keys(imageMap)) {
+    if (!seenImages.has(filename)) lines.push('[IMAGE: ' + filename + ']');
+  }
+
+  return { text: lines.join('\n'), images: imageMap };
+}
+
+async function _extractPptxWithImages(file) {
+  const zip = await JSZip.loadAsync(file);
+  // 1. Slide files in numeric order: ppt/slides/slide1.xml, slide2.xml, ...
+  const slidePaths = Object.keys(zip.files)
+    .filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+    .sort((a, b) => parseInt(a.match(/slide(\d+)\.xml/)[1]) - parseInt(b.match(/slide(\d+)\.xml/)[1]));
+  if (!slidePaths.length) throw new Error('Not a valid .pptx file (no slides found)');
+
+  // 2. Extract media. Scan the WHOLE archive for image-extension files, not just
+  // ppt/media/* — PowerPoint sometimes stores images in ppt/embeddings/, inside
+  // charts/, or other locations depending on how the deck was authored. Skip
+  // well-known non-content images (e.g. docProps/thumbnail.* is the file thumbnail
+  // shown in Explorer previews, not a slide image).
+  const imageMap = {};
+  const mimeMap = { png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', gif:'image/gif', webp:'image/webp', svg:'image/svg+xml', bmp:'image/bmp', tif:'image/tiff', tiff:'image/tiff' };
+  const imageExtPattern = /\.(png|jpe?g|gif|webp|svg|bmp|tiff?)$/i;
+  const skipPathPattern = /(^|\/)(docProps|ppt)\/thumbnail\./i;
+  for (const path of Object.keys(zip.files)) {
+    if (zip.files[path].dir) continue;
+    if (!imageExtPattern.test(path)) continue;
+    if (skipPathPattern.test(path)) continue;
+    const filename = path.split('/').pop();
+    if (imageMap[filename]) continue; // already added under same basename
+    const ext = (filename.split('.').pop() || 'png').toLowerCase();
+    const mime = mimeMap[ext] || 'image/png';
+    const b64 = await zip.files[path].async('base64');
+    imageMap[filename] = 'data:' + mime + ';base64,' + b64;
+  }
+
+  // 3. Walk slides in order, emitting text + image markers per slide
+  const ANS = 'http://schemas.openxmlformats.org/drawingml/2006/main';
+  const RNS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const VML = 'urn:schemas-microsoft-com:vml';
+  const lines = [];
+  const seenImages = new Set();
+
+  // Helper: parse a rels file → { rId: { type, target } }
+  async function _parseRels(relsPath) {
+    const map = {};
+    const entry = zip.file(relsPath);
+    if (!entry) return map;
+    const xml = await entry.async('string');
+    const doc = new DOMParser().parseFromString(xml, 'application/xml');
+    Array.from(doc.getElementsByTagName('Relationship')).forEach(rel => {
+      const id = rel.getAttribute('Id');
+      const type = rel.getAttribute('Type') || '';
+      const target = rel.getAttribute('Target') || '';
+      if (id && target) map[id] = { type, target };
+    });
+    return map;
+  }
+
+  // Helper: resolve a relative target (e.g. "../slideLayouts/slideLayout1.xml") against a base dir
+  function _resolveRelTarget(baseDir, target) {
+    if (target.startsWith('/')) return target.slice(1);
+    // Simple resolve: split baseDir and walk
+    const baseParts = baseDir.split('/').filter(Boolean);
+    const relParts = target.split('/');
+    for (const p of relParts) {
+      if (p === '..') baseParts.pop();
+      else if (p && p !== '.') baseParts.push(p);
+    }
+    return baseParts.join('/');
+  }
+
+  const ASVG = 'http://schemas.microsoft.com/office/drawing/2016/SVG/main';
+  // Helper: pull blip/imagedata image filenames from any XML doc, given its rels map
+  function _collectBlipImages(doc, relsMap) {
+    const out = [];
+    Array.from(doc.getElementsByTagNameNS(ANS, 'blip')).forEach(blip => {
+      const rId = blip.getAttributeNS(RNS, 'embed') || blip.getAttribute('r:embed');
+      if (rId && relsMap[rId] && relsMap[rId].type.endsWith('/image')) out.push(relsMap[rId].target.split('/').pop());
+    });
+    // Modern PowerPoint stores SVGs as <asvg:svgBlip> nested inside <a:blip>. The
+    // raster fallback PNG is the outer <a:blip>; the actual SVG is the inner one.
+    Array.from(doc.getElementsByTagNameNS(ASVG, 'svgBlip')).forEach(blip => {
+      const rId = blip.getAttributeNS(RNS, 'embed') || blip.getAttribute('r:embed');
+      if (rId && relsMap[rId] && relsMap[rId].type.endsWith('/image')) out.push(relsMap[rId].target.split('/').pop());
+    });
+    Array.from(doc.getElementsByTagNameNS(VML, 'imagedata')).forEach(img => {
+      const rId = img.getAttributeNS(RNS, 'id') || img.getAttribute('r:id') || img.getAttributeNS(RNS, 'href') || img.getAttribute('r:href');
+      if (rId && relsMap[rId] && relsMap[rId].type.endsWith('/image')) out.push(relsMap[rId].target.split('/').pop());
+    });
+    return out;
+  }
+
+  for (const slidePath of slidePaths) {
+    const slideNum = slidePath.match(/slide(\d+)\.xml/)[1];
+
+    // Parse this slide's own rels
+    const slideRels = await _parseRels('ppt/slides/_rels/slide' + slideNum + '.xml.rels');
+
+    // Find this slide's layout, and the layout's master, by walking rels
+    let layoutPath = null, layoutRels = {};
+    for (const r of Object.values(slideRels)) {
+      if (r.type.endsWith('/slideLayout')) {
+        layoutPath = _resolveRelTarget('ppt/slides', r.target);
+        break;
+      }
+    }
+    let masterPath = null, masterRels = {};
+    if (layoutPath && zip.file(layoutPath)) {
+      const layoutBase = layoutPath.substring(0, layoutPath.lastIndexOf('/'));
+      const layoutName = layoutPath.split('/').pop();
+      layoutRels = await _parseRels(layoutBase + '/_rels/' + layoutName + '.rels');
+      for (const r of Object.values(layoutRels)) {
+        if (r.type.endsWith('/slideMaster')) {
+          masterPath = _resolveRelTarget(layoutBase, r.target);
+          break;
+        }
+      }
+      if (masterPath && zip.file(masterPath)) {
+        const masterBase = masterPath.substring(0, masterPath.lastIndexOf('/'));
+        const masterName = masterPath.split('/').pop();
+        masterRels = await _parseRels(masterBase + '/_rels/' + masterName + '.rels');
+      }
+    }
+
+    // Slide separator
+    lines.push('--- Slide ' + slideNum + ' ---');
+
+    // Parse slide XML and emit text
+    const slideXml = await zip.files[slidePath].async('string');
+    const slideDoc = new DOMParser().parseFromString(slideXml, 'application/xml');
+    Array.from(slideDoc.getElementsByTagNameNS(ANS, 'p')).forEach(p => {
+      const text = Array.from(p.getElementsByTagNameNS(ANS, 't')).map(t => t.textContent).join('').trim();
+      if (text) lines.push(text);
+    });
+
+    // Emit images from the slide itself
+    _collectBlipImages(slideDoc, slideRels).forEach(fn => {
+      if (imageMap[fn]) { lines.push('[IMAGE: ' + fn + ']'); seenImages.add(fn); }
+    });
+
+    // Then walk the slide's layout for inherited images
+    if (layoutPath && zip.file(layoutPath)) {
+      const layoutXml = await zip.files[layoutPath].async('string');
+      const layoutDoc = new DOMParser().parseFromString(layoutXml, 'application/xml');
+      _collectBlipImages(layoutDoc, layoutRels).forEach(fn => {
+        if (imageMap[fn] && !seenImages.has(fn)) { lines.push('[IMAGE: ' + fn + ']'); seenImages.add(fn); }
+      });
+    }
+
+    // Then walk the master for further-inherited images
+    if (masterPath && zip.file(masterPath)) {
+      const masterXml = await zip.files[masterPath].async('string');
+      const masterDoc = new DOMParser().parseFromString(masterXml, 'application/xml');
+      _collectBlipImages(masterDoc, masterRels).forEach(fn => {
+        if (imageMap[fn] && !seenImages.has(fn)) { lines.push('[IMAGE: ' + fn + ']'); seenImages.add(fn); }
+      });
+    }
+  }
+
+  // Catch-all: any image found in ppt/media/* that wasn't referenced from a slide's main content
+  // (e.g. background fills, layout-inherited images, SmartArt). Emit them at the end so the AI
+  // can still attach them to a question if the surrounding text gives a clue.
+  for (const filename of Object.keys(imageMap)) {
+    if (!seenImages.has(filename)) lines.push('[IMAGE: ' + filename + ']');
+  }
+
+  return { text: lines.join('\n'), images: imageMap };
+}
+
+// Offered when an import lands on 0 questions. Returns true if the AI modal opened (caller should suppress its own error).
+async function _offerAIConversion(rawText, sourceLabel, imageMap) {
+  const ok = await cdlg({
+    title: 'Couldn\'t auto-detect questions',
+    msg: 'No questions could be parsed from "' + sourceLabel + '". Would you like to convert it with AI?',
+    confirmText: 'Convert with AI',
+    cancelText: 'Cancel'
+  });
+  if (!ok) return false;
+  openAIConvertModal(rawText, imageMap);
+  return true;
+}
+
+function openAIConvertModal(prefillText, prefillImageMap) {
+  const inputEl  = document.getElementById('ai-input-text');
+  const outputEl = document.getElementById('ai-output-text');
+  const importBtn = document.getElementById('ai-import-btn');
+  if (typeof prefillText === 'string' && prefillText.length > 0) inputEl.value = prefillText;
+  else if (!inputEl.value) inputEl.value = '';
+  outputEl.value = '';
+  if (importBtn) importBtn.disabled = true;
+  // Reset/seed the image map for this session
+  _aiImageMap = prefillImageMap && typeof prefillImageMap === 'object' ? prefillImageMap : {};
+  const statusEl = document.getElementById('ai-status');
+  if (statusEl) {
+    const imgCount = Object.keys(_aiImageMap).length;
+    statusEl.textContent = imgCount ? ('Loaded with ' + imgCount + ' image' + (imgCount !== 1 ? 's' : '') + ' — ready to convert') : '';
+    statusEl.style.color = 'var(--muted)';
+  }
+  _setupAIModalDropZone();
+  showModal('modal-ai-convert');
+}
+
+async function runAIConversion() {
+  const inputEl  = document.getElementById('ai-input-text');
+  const outputEl = document.getElementById('ai-output-text');
+  const statusEl = document.getElementById('ai-status');
+  const convertBtn = document.getElementById('ai-convert-btn');
+  const importBtn  = document.getElementById('ai-import-btn');
+  const raw = (inputEl.value || '').trim();
+  if (!raw) { statusEl.textContent = 'Add some input text first.'; statusEl.style.color = '#dc2626'; return; }
+  convertBtn.disabled = true; convertBtn.textContent = '⏳ Converting…';
+  statusEl.textContent = 'Calling AI…'; statusEl.style.color = 'var(--muted)';
+  outputEl.value = '';
+  if (importBtn) importBtn.disabled = true;
+  try {
+    const aiken = await callAIConvert(raw);
+    outputEl.value = aiken;
+    statusEl.textContent = '✓ Done — review the AIKEN above and click Import when ready.';
+    statusEl.style.color = 'var(--green-dk)';
+    if (importBtn) importBtn.disabled = false;
+  } catch (e) {
+    statusEl.innerHTML = '✗ ' + escH(e.message) + _adminContactHtml('Quizzer AI conversion error: ' + e.message);
+    statusEl.style.color = '#dc2626';
+  } finally {
+    convertBtn.disabled = false; convertBtn.textContent = 'Convert to AIKEN ↓';
+  }
+}
+
+async function importAIConverted() {
+  const outputEl = document.getElementById('ai-output-text');
+  const text = (outputEl.value || '').trim();
+  if (!text) { toast('Nothing to import', 'err'); return; }
+  const { title: aikenTitle, text: cleanText } = extractAikenTitle(text);
+  // Pass the extracted image map so questions with IMAGE: lines get their image data attached
+  const imageMap = _aiImageMap && Object.keys(_aiImageMap).length ? _aiImageMap : undefined;
+  const imported = parseAiken(cleanText, imageMap);
+  if (!imported.length) { toast('Could not parse the AIKEN output — try regenerating or editing it', 'err'); return; }
+  let replace = false;
+  if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
+    replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' converted questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
+  }
+  pushQHistory();
+  APP.questions = replace ? imported : [...APP.questions, ...imported];
+  if (aikenTitle && (replace || !APP.settings.title)) {
+    APP.settings.title = aikenTitle;
+    const qT = document.getElementById('q-title'); if (qT) qT.value = aikenTitle;
+    const sT = document.getElementById('s-title'); if (sT) sT.value = aikenTitle;
+    const gT = document.getElementById('gen-title-display'); if (gT) gT.textContent = aikenTitle || '—';
+  }
+  updateBadges();
+  toast(imported.length + ' question' + (imported.length !== 1 ? 's' : '') + ' imported', 'ok');
+  closeModal('modal-ai-convert');
+  document.querySelector('.tab-btn[data-tab="questions"]').click();
+}
+
+async function _loadFileIntoAIModal(file) {
+  const statusEl = document.getElementById('ai-status');
+  const inputEl  = document.getElementById('ai-input-text');
+  try {
+    const text = await _extractTextFromFile(file);
+    inputEl.value = text;
+    const imgCount = Object.keys(_aiImageMap).length;
+    if (statusEl) {
+      statusEl.textContent = 'Loaded "' + file.name + '"' + (imgCount ? (' with ' + imgCount + ' image' + (imgCount !== 1 ? 's' : '')) : '') + ' — ready to convert';
+      statusEl.style.color = 'var(--muted)';
+    }
+  } catch (err) {
+    if (statusEl) { statusEl.textContent = 'Failed to read file: ' + err.message; statusEl.style.color = '#dc2626'; }
+  }
+}
+
+// Wire up the file input AND drag-and-drop on the modal input textarea
+function _setupAIModalDropZone() {
+  const ta = document.getElementById('ai-input-text');
+  if (ta && !ta.dataset.dropWired) {
+    ta.dataset.dropWired = '1';
+    const origBoxShadow = ta.style.boxShadow || '';
+    ta.addEventListener('dragover', e => { e.preventDefault(); ta.style.boxShadow = '0 0 0 2px var(--green)'; });
+    ta.addEventListener('dragleave', () => { ta.style.boxShadow = origBoxShadow; });
+    ta.addEventListener('drop', async e => {
+      e.preventDefault();
+      ta.style.boxShadow = origBoxShadow;
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) await _loadFileIntoAIModal(f);
+    });
+  }
+}
+
+(function() {
+  document.addEventListener('change', async function(e) {
+    if (!e.target || e.target.id !== 'ai-file-input') return;
+    const f = e.target.files[0]; if (!f) return;
+    await _loadFileIntoAIModal(f);
+    e.target.value = '';
+  });
+})();
+
 // Auto-detect file type and route to correct handler
 async function handleAutoFile(file) {
   const name = file.name.toLowerCase();
   if (name.endsWith('.docx')) return handleDocxFile(file);
+  if (name.endsWith('.pptx')) {
+    // No native PPTX parser — extract text+images and go straight to AI conversion flow
+    try {
+      const { text, images } = await _extractPptxWithImages(file);
+      if (await _offerAIConversion(text, file.name, images)) return;
+      showImportResult('&#9888; PPTX files can only be imported via AI conversion. Add an API key in Settings → AI Assistant.', true);
+    } catch (e) { showImportResult('&#10007; Could not read .pptx: ' + escH(e.message), true); }
+    return;
+  }
+  if (name.endsWith('.ppt')) {
+    showImportResult('&#9888; Old PowerPoint .ppt format is not supported. Please re-save your file as .pptx (PowerPoint Open XML) and try again.', true);
+    return;
+  }
   if (name.endsWith('.zip')) {
     let zip;
     try { zip = await JSZip.loadAsync(file); }
@@ -4383,7 +5044,7 @@ function renderQuestions() {
       + ((q.codeBlock && q.codeBlock.trim()) ? '<span style="font-size:12px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:12px;height:12px;fill:none;stroke:#76B900;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> CLI</span>' : '')
       + '</div></div>'
       + '<div class="q-actions" style="margin-left:auto;flex-shrink:0;align-self:flex-start">'
-      + (Q_EXPANDED ? '' : '<button class="btn btn-sm" onclick="previewQuestion(\'' + q.id + '\')" title="Preview">' + ICON.preview + '</button>')
+      + '<button class="btn btn-sm btn-outline-dark" onclick="testSingleQuestion(\'' + q.id + '\')" title="Test this question interactively"><img class="btn-icon" src="assets/svg/play.svg" alt=""></button>'
       + '<button class="btn btn-sm" onclick="openEditor(\'' + q.id + '\')">Edit</button>'
       + '<button class="btn btn-sm" onclick="duplicateQuestion(\'' + q.id + '\')" title="Duplicate">' + ICON.duplicate + '</button>'
       + '<button class="btn btn-sm btn-danger" onclick="deleteQuestion(\'' + q.id + '\')" title="Delete">' + ICON.trash + '</button>'
@@ -4531,6 +5192,15 @@ function applyMinsPerQuestion() {
   toggleSettingInput('timelimit', true);
   document.getElementById('s-timelimit').value = total;
   toast(qCount + ' questions × ' + minsPerQ + ' min = ' + total + ' min', 'ok');
+}
+
+function toggleAdvancedSettings() {
+  const content = document.getElementById('advanced-content');
+  const icon = document.getElementById('advanced-toggle-icon');
+  if (!content) return;
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? '' : 'none';
+  if (icon) icon.style.transform = isHidden ? 'rotate(90deg)' : 'rotate(0)';
 }
 
 function confirmShowAnswerReview(checkbox) {
@@ -4741,6 +5411,7 @@ function readSettingsToForm() {
   if (_gi('tog-best-score')) _gi('tog-best-score').checked = s.bestScoreTracking !== false;
   if (_gi('s-cert-url')) _gi('s-cert-url').value = s.certificateUrl || 'https://www.nvidia.com/en-us/training/academy/certificates/';
   if (_gi('s-cert-text')) _gi('s-cert-text').value = s.certificateLinkText || '';
+  // AI Assistant is configured server-side via env vars — no per-user form to populate.
   // Package identity section — only visible when a SCORM zip has been imported
   const identitySection = document.getElementById('s-section-identity');
   if (identitySection) {
@@ -5148,6 +5819,62 @@ function _previewFallbackData(entry) {
   return { settings, questions: q };
 }
 
+function testSingleQuestion(id) {
+  const q = APP.questions.find(qq => qq.id === id);
+  if (!q) return;
+  const idx = APP.questions.indexOf(q) + 1;
+  // Strip everything that would obscure the question: no timer, no attempt limit,
+  // no passing threshold, no blank-answer prompts, no certificate or review chrome.
+  const minimalSettings = Object.assign({}, APP.settings, {
+    title: 'Question ' + idx,
+    maxAttempts: 0,
+    cooldownDays: 0,
+    timeLimitMinutes: 0,
+    questionsPerAttempt: 1,
+    randomizeQuestions: false,
+    passingPercentage: 0,
+    allowBlankAnswers: true,
+    warnOnBlankAnswers: false,
+    confirmBeforeSubmit: false,
+    showCertificateLink: false,
+    bestScoreTracking: false,
+    _previewScreen: 'singleQuestion'
+  });
+  resetTestSim();
+  const html = buildQuizHTML(minimalSettings, [JSON.parse(JSON.stringify(q))], true);
+  const ifr = document.getElementById('test-ifr');
+  setTimeout(() => { ifr.srcdoc = html; }, 30);
+  document.getElementById('test-modal-title').textContent = 'Test: Question ' + idx;
+  document.getElementById('modal-test').classList.add('test-single-mode');
+  _autoSizeSingleQuestionIframe();
+  showModal('modal-test');
+}
+
+// Resize the test iframe to fit its content when in single-question mode.
+// Re-measures progressively as the content may render after layout settles
+// (images loading, fonts, interactive widgets).
+function _autoSizeSingleQuestionIframe() {
+  const ifr = document.getElementById('test-ifr');
+  if (!ifr) return;
+  const measure = () => {
+    if (!document.getElementById('modal-test').classList.contains('test-single-mode')) return;
+    try {
+      const doc = ifr.contentDocument;
+      if (!doc || !doc.body) return;
+      const card = doc.querySelector('.quiz-card') || doc.body;
+      const h = (card.scrollHeight || doc.body.scrollHeight) + 40;
+      const max = Math.max(280, Math.floor(window.innerHeight * 0.85));
+      ifr.style.height = Math.max(220, Math.min(h, max)) + 'px';
+    } catch (_) { /* document not ready yet */ }
+  };
+  ifr.addEventListener('load', function loaded() {
+    ifr.removeEventListener('load', loaded);
+    // Re-measure at staggered intervals — interactive widgets and images may
+    // continue laying out after the initial load event.
+    [50, 200, 500, 1000].forEach(d => setTimeout(measure, d));
+  });
+}
+
 function testInBrowser(entry) {
   if (!entry) saveSettings();
   _lastTestEntry = entry;
@@ -5155,8 +5882,10 @@ function testInBrowser(entry) {
   resetTestSim();
   const html = buildQuizHTML(settings, questions, true);
   const ifr = document.getElementById('test-ifr');
+  ifr.style.height = ''; // clear any leftover inline height from single-question mode
   setTimeout(() => { ifr.srcdoc = html; }, 30);
   document.getElementById('test-modal-title').textContent = 'Preview: ' + settings.title;
+  document.getElementById('modal-test').classList.remove('test-single-mode');
   showModal('modal-test');
 }
 
@@ -5191,7 +5920,9 @@ function previewScreen(screen) {
 
 function closeTestModal() {
   closeModal('modal-test');
+  document.getElementById('modal-test').classList.remove('test-single-mode');
   var ifr = document.getElementById('test-ifr');
+  ifr.style.height = '';
   ifr.srcdoc = '';
   ifr.removeAttribute('srcdoc');
   _simulateReloadStore = {};

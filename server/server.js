@@ -1,3 +1,7 @@
+// Load env vars from .env if dotenv is installed. Silently no-op otherwise — the
+// app still works as long as the env vars are set some other way (systemd, shell, etc.)
+try { require('dotenv').config({ path: require('path').join(__dirname, '.env') }); } catch (_) {}
+
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -92,6 +96,70 @@ app.post('/api/presets', (req, res) => {
 app.delete('/api/presets/:id', (req, res) => {
   writePresets(readPresets().filter(p => p.id !== req.params.id));
   res.json({ ok: true });
+});
+
+// ── AI PROXY ──────────────────────────────────────────────
+// Forwards browser requests to the configured AI inference endpoint, keeping
+// the API key server-side. Configured via env vars:
+//   NVIDIA_API_KEY      (required)
+//   NVIDIA_API_ENDPOINT (optional, default below)
+//   NVIDIA_API_MODEL    (optional, default below)
+// Requires Node 18+ for the built-in fetch().
+const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY || '';
+const NVIDIA_API_ENDPOINT = process.env.NVIDIA_API_ENDPOINT || 'https://inference-api.nvidia.com/v1/chat/completions';
+const NVIDIA_API_MODEL = process.env.NVIDIA_API_MODEL || 'openai/openai/gpt-5-mini';
+
+function _ts() { return '[' + new Date().toISOString() + ']'; }
+
+app.post('/api/ai-convert', async (req, res) => {
+  if (!NVIDIA_API_KEY) {
+    console.error(_ts() + ' AI proxy: NVIDIA_API_KEY env var is not set');
+    return res.status(503).json({ error: 'AI service not configured. Set NVIDIA_API_KEY on the server.' });
+  }
+  try {
+    const upstream = await fetch(NVIDIA_API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + NVIDIA_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ model: NVIDIA_API_MODEL }, req.body || {}))
+    });
+    const text = await upstream.text();
+    if (!upstream.ok) {
+      console.error(_ts() + ' AI proxy: upstream returned ' + upstream.status + ': ' + text.slice(0, 500));
+      return res.status(upstream.status).json({
+        error: 'AI service returned ' + upstream.status + (upstream.status === 401 || upstream.status === 403 ? ' — the API key may be expired or invalid. Please notify your administrator.' : ''),
+        upstream_status: upstream.status,
+        upstream_body: text.slice(0, 500)
+      });
+    }
+    res.type('application/json').send(text);
+  } catch (e) {
+    console.error(_ts() + ' AI proxy: network error: ' + e.message);
+    res.status(502).json({ error: 'Could not reach the AI service: ' + e.message });
+  }
+});
+
+app.get('/api/ai-status', async (req, res) => {
+  if (!NVIDIA_API_KEY) {
+    return res.json({ ok: false, configured: false, error: 'NVIDIA_API_KEY env var is not set on the server' });
+  }
+  try {
+    const upstream = await fetch(NVIDIA_API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + NVIDIA_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: NVIDIA_API_MODEL, messages: [{ role: 'user', content: 'reply with the single word: ok' }], max_tokens: 30 })
+    });
+    if (!upstream.ok) {
+      const txt = await upstream.text();
+      console.error(_ts() + ' AI status check failed: ' + upstream.status + ': ' + txt.slice(0, 300));
+      return res.json({ ok: false, configured: true, status: upstream.status, error: 'Upstream returned ' + upstream.status + (upstream.status === 401 || upstream.status === 403 ? ' — the API key may be expired or invalid.' : '') });
+    }
+    const data = await upstream.json();
+    const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '').trim();
+    res.json({ ok: true, configured: true, model: NVIDIA_API_MODEL, reply: reply.slice(0, 60) });
+  } catch (e) {
+    console.error(_ts() + ' AI status check error: ' + e.message);
+    res.json({ ok: false, configured: true, error: e.message });
+  }
 });
 
 // ── START ─────────────────────────────────────────────────
