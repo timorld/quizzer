@@ -1,6 +1,10 @@
 # Server runtime data — never overwrite on the server
 server/data/
 
+# Remote-player test — the player/ subfolder is its own git repo
+# (pushed to github.com/timorld/quizzer-player), don't double-track here
+test-remote-player/player/
+
 # Secrets — env files with API keys, never commit
 server/.env
 .env

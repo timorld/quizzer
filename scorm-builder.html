@@ -709,16 +709,24 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
     </div>
   </div>
   <div class="s-section">
-    <h3>Preview Screens &nbsp;<small style="font-weight:400;color:#bbb;font-size:12px">Open the quiz at a specific state — no questions need to be answered</small></h3>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+    <h3 onclick="toggleSettingsSection('preview-content','preview-toggle-icon','flex')" style="cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none;margin:0">
+      <span id="preview-toggle-icon" style="display:inline-block;transition:transform .15s;font-size:11px;color:var(--muted)">▶</span>
+      Preview Screens
+      <small style="font-weight:400;color:#bbb;font-size:12px;margin-left:auto">Open the quiz at a specific state — no questions need to be answered</small>
+    </h3>
+    <div id="preview-content" style="display:none;margin-top:18px;flex-wrap:wrap;gap:8px;align-items:center">
       <button class="btn btn-sm" onclick="testInBrowser(null)" title="Preview the quiz start screen"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Start screen</button>
       <button class="btn btn-sm" onclick="previewScreen('pass')" title="Preview the pass result screen"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Pass result</button>
       <button class="btn btn-sm" onclick="previewScreen('fail')" title="Preview the fail result screen"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Fail result</button>
     </div>
   </div>
   <div class="s-section">
-    <h3>Feedback Messages &nbsp;<small style="font-weight:400;color:#bbb;font-size:12px">Leave blank to use defaults</small></h3>
-    <div class="form-grid">
+    <h3 onclick="toggleSettingsSection('feedback-content','feedback-toggle-icon')" style="cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none;margin:0">
+      <span id="feedback-toggle-icon" style="display:inline-block;transition:transform .15s;font-size:11px;color:var(--muted)">▶</span>
+      Feedback Messages
+      <small style="font-weight:400;color:#bbb;font-size:12px;margin-left:auto">Leave blank to use defaults</small>
+    </h3>
+    <div id="feedback-content" class="form-grid" style="display:none;margin-top:18px">
       <div class="form-field">
         <label class="form-label">Pass Title <small>default: "You passed!"</small></label>
         <input class="form-input" id="s-pass-title" type="text" placeholder="You passed!">
@@ -761,6 +769,17 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
         <h4 style="margin:0 0 6px 0;font-size:15px">AI Assistant <small style="font-weight:400;color:#bbb;font-size:12px">Configured on the server — not part of SCORM exports</small></h4>
         <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px">The AI conversion endpoint is configured server-side via env vars (<code style="font-family:Consolas,'Courier New',monospace;font-size:12px">NVIDIA_API_KEY</code>, <code style="font-family:Consolas,'Courier New',monospace;font-size:12px">NVIDIA_API_ENDPOINT</code>, <code style="font-family:Consolas,'Courier New',monospace;font-size:12px">NVIDIA_API_MODEL</code>). No per-user API key is required. Use the button below to verify the service is reachable.</p>
         <div style="margin-top:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="btn btn-sm btn-outline-dark" onclick="testAIConnection()">Test Connection</button> <span id="ai-test-result" style="font-size:13px"></span></div>
+      </div>
+      <div style="border-top:1px solid #e5e7eb;margin-top:20px;padding-top:18px">
+        <h4 style="margin:0 0 6px 0;font-size:15px">Remote-Loaded Player <small style="font-weight:400;color:#b45309;font-size:12px">Experimental</small></h4>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px">When ON, exported SCORMs load the player JS and CSS from <code style="font-family:Consolas,'Courier New',monospace;font-size:12px">https://timorld.github.io/quizzer-player/</code> instead of bundling them inside the ZIP. This makes it possible to push player updates to already-deployed quizzes without re-uploading. Filename gets a <code style="font-family:Consolas,'Courier New',monospace;font-size:12px">_remote</code> suffix so these packages are easy to spot. Default OFF — leave OFF for normal production exports.</p>
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" id="tog-remote-player" onchange="onRemotePlayerToggle(this)"><span class="tog-slider" style="background:#d1d5db"></span></label>
+          <div style="flex:1">
+            <div class="tog-label">Use remote-loaded player on export</div>
+            <div class="tog-desc">While ON, every SCORM download (single, batch, history re-export) is built with remote script tags. The learner's browser must be able to reach GitHub Pages at quiz launch time.</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -5295,6 +5314,15 @@ function toggleAdvancedSettings() {
   if (icon) icon.style.transform = isHidden ? 'rotate(90deg)' : 'rotate(0)';
 }
 
+function toggleSettingsSection(contentId, iconId, openDisplay) {
+  const content = document.getElementById(contentId);
+  const icon = document.getElementById(iconId);
+  if (!content) return;
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? (openDisplay || '') : 'none';
+  if (icon) icon.style.transform = isHidden ? 'rotate(90deg)' : 'rotate(0)';
+}
+
 function confirmShowAnswerReview(checkbox) {
   if (checkbox.checked) {
     checkbox.checked = false;
@@ -5569,7 +5597,7 @@ function getNoteText(s) {
   return 'Note that you will have ' + attText + ' to pass the ' + n + '.';
 }
 
-function buildQuizHTML(settings, questions, isTest) {
+function buildQuizHTML(settings, questions, isTest, useRemote) {
   const css = document.getElementById('tpl-css').textContent;
   const api = document.getElementById('tpl-api').textContent;
   let player = document.getElementById('tpl-player').textContent;
@@ -5660,8 +5688,12 @@ function buildQuizHTML(settings, questions, isTest) {
     + '  };\n'
     + '})();\n' + sc);
 
-  const apiScriptBlock = isTest ? ('<script>\n' + api + '\n' + sc) : ('<script src="js/scorm-api.js">' + sc);
-  const playerScriptBlock = isTest ? ('<script>\n' + player + '\n' + sc) : ('<script src="js/quiz-player.js">' + sc);
+  const apiScriptBlock = isTest
+    ? ('<script>\n' + api + '\n' + sc)
+    : (useRemote ? ('<script src="' + REMOTE_PLAYER_BASE + 'scorm-api.js">' + sc) : ('<script src="js/scorm-api.js">' + sc));
+  const playerScriptBlock = isTest
+    ? ('<script>\n' + player + '\n' + sc)
+    : (useRemote ? ('<script src="' + REMOTE_PLAYER_BASE + 'quiz-player.js">' + sc) : ('<script src="js/quiz-player.js">' + sc));
 
   const p = settings.passingPercentage;
   return '<!DOCTYPE html>\n<html lang="en">\n<head>\n'
@@ -5774,10 +5806,11 @@ function buildQuizHTML(settings, questions, isTest) {
     + '</body>\n</html>';
 }
 
-function generateManifest(settings) {
+function generateManifest(settings, useRemote) {
   const id = (settings.preserveIdentifier && settings.manifestIdentifier)
     ? settings.manifestIdentifier
     : 'quiz_' + uuid();
+  const jsFiles = useRemote ? '' : '      <file href="js/scorm-api.js"/>\n      <file href="js/quiz-player.js"/>\n';
   return '<?xml version="1.0" encoding="UTF-8"?>\n'
     + '<manifest identifier="' + id + '" version="1.0"\n'
     + '          xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"\n'
@@ -5794,19 +5827,42 @@ function generateManifest(settings) {
     + '      </item>\n    </organization>\n  </organizations>\n'
     + '  <resources>\n'
     + '    <resource identifier="RES-' + id + '" type="webcontent" adlcp:scormtype="sco" href="index.html">\n'
-    + '      <file href="index.html"/>\n      <file href="js/scorm-api.js"/>\n      <file href="js/quiz-player.js"/>\n'
+    + '      <file href="index.html"/>\n' + jsFiles
     + '      <file href="data/questions.json"/>\n      <file href="data/quiz-settings.json"/>\n'
     + '    </resource>\n  </resources>\n</manifest>';
 }
 
 const XSD_STUB = '<?xml version="1.0" encoding="UTF-8"?>\n<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">\n  <!-- stub -->\n</xs:schema>';
 
+// ── REMOTE-LOADED PLAYER (experimental, session-only) ──
+// When ON, exported SCORMs reference the player JS/CSS from GitHub Pages
+// instead of bundling them. State lives in the checkbox only — refreshing
+// the page resets it to OFF on purpose, so production exports stay safe.
+const REMOTE_PLAYER_BASE = 'https://timorld.github.io/quizzer-player/';
+function _useRemotePlayer() {
+  const cb = document.getElementById('tog-remote-player');
+  return !!(cb && cb.checked);
+}
+function _updateDownloadBtnLabel() {
+  const btn = document.getElementById('btn-dl');
+  if (!btn || btn.disabled) return;
+  const label = _useRemotePlayer() ? 'Download Remote SCORM' : 'Download SCORM';
+  btn.innerHTML = '<img class="btn-icon" src="assets/svg/download.svg" alt=""> ' + label;
+}
+function onRemotePlayerToggle(cb) {
+  cb.parentElement.querySelector('.tog-slider').style.background = cb.checked ? 'var(--green)' : '';
+  _updateDownloadBtnLabel();
+}
+
 async function buildScormZip(settings, questions) {
+  const useRemote = _useRemotePlayer();
   const zip = new JSZip();
-  zip.file('imsmanifest.xml', generateManifest(settings));
-  zip.file('index.html', buildQuizHTML(settings, questions, false));
-  zip.file('js/scorm-api.js', document.getElementById('tpl-api').textContent.trim());
-  zip.file('js/quiz-player.js', document.getElementById('tpl-player').textContent.trim());
+  zip.file('imsmanifest.xml', generateManifest(settings, useRemote));
+  zip.file('index.html', buildQuizHTML(settings, questions, false, useRemote));
+  if (!useRemote) {
+    zip.file('js/scorm-api.js', document.getElementById('tpl-api').textContent.trim());
+    zip.file('js/quiz-player.js', document.getElementById('tpl-player').textContent.trim());
+  }
   zip.file('data/questions.json', JSON.stringify(questions, null, 2));
   zip.file('data/quiz-settings.json', JSON.stringify(settings, null, 2));
   zip.file('adlcp_rootv1p2.xsd', XSD_STUB);
@@ -5872,6 +5928,16 @@ async function generateAndDownload() {
   saveSettings();
   if (!APP.settings.title) { focusQuizTitleInput(); return; }
   if (!APP.questions.length) { toast('Add some questions first','err'); return; }
+  // Remote-player confirmation — heads-up that this isn't a normal SCORM
+  if (_useRemotePlayer()) {
+    const ok = await cdlg({
+      title: 'Remote Player toggle is ON',
+      msg: 'This SCORM will load the player from ' + REMOTE_PLAYER_BASE + ' at quiz launch time instead of bundling it. The filename will end in "_remote". Continue?',
+      confirmText: 'Download Remote SCORM',
+      cancelText: 'Cancel'
+    });
+    if (!ok) return;
+  }
   // Check estimated suspend_data size against SCORM 1.2's 4096-char ceiling
   const size = _estimateSuspendDataSize(APP.settings, APP.questions);
   if (size > 4096) {
@@ -5893,7 +5959,7 @@ async function _doDownload() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = (APP.settings.title || 'quiz').replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '_' + (function(){ var d=new Date(),mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return d.getFullYear()+'-'+mn[d.getMonth()]+'-'+String(d.getDate()).padStart(2,'0'); })() + '.zip';
+    a.download = (APP.settings.title || 'quiz').replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '_' + (function(){ var d=new Date(),mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return d.getFullYear()+'-'+mn[d.getMonth()]+'-'+String(d.getDate()).padStart(2,'0'); })() + (_useRemotePlayer() ? '_remote' : '') + '.zip';
     a.click();
     URL.revokeObjectURL(url);
     saveToHistory(APP.settings, APP.questions, zipBytes);
@@ -5903,7 +5969,8 @@ async function _doDownload() {
     toast('Generation failed: ' + e.message, 'err');
     console.error(e);
   } finally {
-    btn.disabled = false; btn.innerHTML = '<img class="btn-icon" src="assets/svg/download.svg" alt=""> Download SCORM';
+    btn.disabled = false;
+    _updateDownloadBtnLabel();
   }
 }
 
@@ -6830,7 +6897,7 @@ async function batchDownloadOne(id) {
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href     = url;
-    a.download = settings.title.replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '_' + (function(){ var d=new Date(),mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return d.getFullYear()+'-'+mn[d.getMonth()]+'-'+String(d.getDate()).padStart(2,'0'); })() + '.zip';
+    a.download = settings.title.replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '_' + (function(){ var d=new Date(),mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return d.getFullYear()+'-'+mn[d.getMonth()]+'-'+String(d.getDate()).padStart(2,'0'); })() + (_useRemotePlayer() ? '_remote' : '') + '.zip';
     a.click();
     URL.revokeObjectURL(url);
     toast(escH(settings.title) + ' downloaded', 'ok');
@@ -6855,7 +6922,7 @@ async function batchDownloadAll() {
     try {
       const settings = batchSettings(item);
       const zipBytes = await buildScormZip(settings, item.questions);
-      const entryName = settings.title.replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '_' + (function(){ var d=new Date(),mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return d.getFullYear()+'-'+mn[d.getMonth()]+'-'+String(d.getDate()).padStart(2,'0'); })() + '.zip';
+      const entryName = settings.title.replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '_' + (function(){ var d=new Date(),mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return d.getFullYear()+'-'+mn[d.getMonth()]+'-'+String(d.getDate()).padStart(2,'0'); })() + (_useRemotePlayer() ? '_remote' : '') + '.zip';
       bundle.file(entryName, zipBytes);
       done++;
       btn.textContent = '⏳ ' + done + '/' + BATCH.length + '…';

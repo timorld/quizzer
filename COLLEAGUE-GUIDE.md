@@ -69,12 +69,12 @@ Keep the message short and specific, e.g. `"Add GPU Genius Fast Track Exam quiz 
 
 ## Step 5 — Update the live server
 
-> **You'll need sudo access to the server.** If you don't have it, ask IT or the server admin to grant you access first.
+> **You'll need sudo access to the server.** If you don't have it, ask Timor to add you.
 
 SSH into the server using your NVIDIA username and password:
 
 ```bash
-ssh yourNVIDIAusername@quizzer.nvidia.com
+ssh user-name@quizzer.nvidia.com
 ```
 
 It will prompt for your NVIDIA password. Once you're in, pull the latest code:
