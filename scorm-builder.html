@@ -105,6 +105,8 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .preset-del-btn{padding:7px 10px;border:none;background:none;cursor:pointer;color:#ccc;display:flex;align-items:center;flex-shrink:0;transition:color .15s}
 .preset-del-btn:hover{color:var(--danger)}
 .preset-dd-empty{padding:10px 14px;font-size:13px;color:var(--muted);font-style:italic}
+.preset-builtin .preset-load-btn{font-weight:600}
+.preset-divider{padding:8px 12px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:#f9fafb;border-top:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6}
 .preset-save-popover{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);padding:14px 16px;min-width:240px;z-index:201}
 .gen-info{font-size:13px;color:var(--muted)}
 .gen-info strong{color:var(--text)}
@@ -511,7 +513,7 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
           </div>
         </div>
         <div style="position:relative" id="presets-dd-wrap">
-          <button class="btn btn-sm" onclick="togglePresetsDropdown()" id="btn-presets-dd">Custom Settings &#9660;</button>
+          <button class="btn btn-outline-green" onclick="togglePresetsDropdown()" id="btn-presets-dd">Change Settings &#9660;</button>
           <div class="preset-dropdown" id="presets-dropdown"></div>
         </div>
       </div>
@@ -5222,6 +5224,42 @@ async function fetchDefaultSettings() {
 }
 
 // ── PRESETS ───────────────────────────────────────────────
+// Built-in presets — always present at the top of the Change Settings dropdown.
+// They hold the behavior bundles that used to auto-apply per quiz type, minus
+// the certificate field (cert is still driven by the quiz-type radio).
+const BUILTIN_PRESETS = [
+  {
+    id: 'builtin-completion',
+    name: 'Completion quiz/exam',
+    settings: {
+      maxAttempts: 2,
+      cooldownDays: 7,
+      passingPercentage: 70,
+      timeLimitMinutes: 60,
+      confirmBeforeSubmit: true,
+      randomizeOptions: true,
+      randomizeQuestions: true,
+      allowBlankAnswers: true,
+      warnOnBlankAnswers: true
+    }
+  },
+  {
+    id: 'builtin-kc',
+    name: 'Knowledge check',
+    settings: {
+      maxAttempts: 0,
+      cooldownDays: 0,
+      passingPercentage: 70,
+      timeLimitMinutes: 0,
+      confirmBeforeSubmit: false,
+      randomizeOptions: true,
+      randomizeQuestions: true,
+      allowBlankAnswers: true,
+      warnOnBlankAnswers: true
+    }
+  }
+];
+
 async function fetchPresets() {
   APP.presets = await API.get('/api/presets') || [];
   renderPresetsDropdown();
@@ -5230,16 +5268,19 @@ async function fetchPresets() {
 function renderPresetsDropdown() {
   const dd = document.getElementById('presets-dropdown');
   if (!dd) return;
-  if (!APP.presets.length) {
-    dd.innerHTML = '<div class="preset-dd-empty">No saved presets</div>';
-    return;
-  }
-  dd.innerHTML = APP.presets.map(p =>
+  const builtinsHtml = BUILTIN_PRESETS.map(p =>
+    '<div class="preset-dropdown-item preset-builtin">'
+    + '<button class="preset-load-btn" onclick="loadPreset(\'' + p.id + '\')" title="' + escH(p.name) + '">' + escH(p.name) + '</button>'
+    + '</div>'
+  ).join('');
+  const userHtml = APP.presets.map(p =>
     '<div class="preset-dropdown-item">'
     + '<button class="preset-load-btn" onclick="loadPreset(\'' + p.id + '\')" title="' + escH(p.name) + '">' + escH(p.name) + '</button>'
     + '<button class="preset-del-btn" onclick="deletePreset(\'' + p.id + '\')" title="Delete preset"><img src="assets/svg/trash.svg" style="width:13px;height:13px;opacity:0.6"></button>'
     + '</div>'
   ).join('');
+  const divider = APP.presets.length ? '<div class="preset-divider">Your saved presets</div>' : '';
+  dd.innerHTML = builtinsHtml + divider + userHtml;
 }
 
 function toggleSavePresetPopover() {
@@ -5275,12 +5316,22 @@ async function saveCustomSettings() {
 }
 
 function loadPreset(id) {
-  const preset = APP.presets.find(p => p.id === id);
+  const preset = BUILTIN_PRESETS.find(p => p.id === id) || APP.presets.find(p => p.id === id);
   if (!preset) return;
   Object.assign(APP.settings, preset.settings);
   readSettingsToForm();
   document.getElementById('presets-dropdown').classList.remove('open');
   toast('Loaded "' + preset.name + '"', 'ok');
+}
+
+async function _promptKnowledgeCheckPreset() {
+  const ok = await cdlg({
+    title: 'Switch to Knowledge check settings?',
+    msg: 'Load the Knowledge check preset for this quiz?',
+    confirmText: 'Switch settings',
+    cancelText: 'Keep current'
+  });
+  if (ok) loadPreset('builtin-kc');
 }
 
 async function deletePreset(id) {
@@ -5366,6 +5417,7 @@ function syncQuizInfo(field, value) {
     if (other && other.value !== value) other.value = value;
     document.getElementById('gen-title-display').textContent = value || '—';
   } else if (field === 'quizType') {
+    const prevType = APP.settings.quizType;
     APP.settings.quizType = value;
     const settingsRadio = document.querySelector('input[name="s-type"][value="' + value + '"]');
     const questionsRadio = document.querySelector('input[name="q-type"][value="' + value + '"]');
@@ -5375,6 +5427,8 @@ function syncQuizInfo(field, value) {
     document.querySelectorAll('input[name="s-type"]:checked, input[name="q-type"]:checked').forEach(r => r.closest('.quiz-type-opt').classList.add('quiz-type-sel'));
     _updateCertificateToggleForQuizType(value, true);
     _refreshPassExitPlaceholder();
+    // If the user just switched to Knowledge Check, offer to apply the KC preset.
+    if (value === 'topic_quiz' && prevType !== 'topic_quiz') _promptKnowledgeCheckPreset();
   } else if (field === 'customQuizTypeName') {
     APP.settings.customQuizTypeName = value;
     const qInp = document.getElementById('q-custom-name'); if (qInp && qInp.value !== value) qInp.value = value;
@@ -5411,78 +5465,23 @@ function _updateCertificateToggleForQuizType(quizType, applyDefaults = false) {
   const isKnowledgeCheck = quizType === 'topic_quiz';
   const isExamType = quizType === 'course_final_exam' || quizType === 'gpu_genius_fast_track';
   togCert.disabled = isKnowledgeCheck;
-  if (isKnowledgeCheck) {
-    togCert.checked = false;
-    toggleSettingInput('certificate', false);
-    if (applyDefaults) {
-      const togAttempts = document.getElementById('tog-attempts');
-      if (togAttempts) { togAttempts.checked = false; toggleSettingInput('attempts', false); }
-      const togTimelimit = document.getElementById('tog-timelimit');
-      if (togTimelimit) { togTimelimit.checked = false; toggleSettingInput('timelimit', false); }
-      const sConfirmSubmit = document.getElementById('s-confirm-submit');
-      if (sConfirmSubmit) sConfirmSubmit.checked = false;
-      const sRandomOpts = document.getElementById('s-randomize-options');
-      if (sRandomOpts) sRandomOpts.checked = false;
-      APP.settings.showCertificateLink = false;
-      APP.settings.maxAttempts = 0;
-      APP.settings.timeLimitMinutes = 0;
-      APP.settings.confirmBeforeSubmit = false;
-      APP.settings.randomizeOptions = false;
-    }
-  } else if (isExamType) {
-    if (applyDefaults) {
+  // Cert is the only thing still tied to quiz type — KC and exam types force it off,
+  // completion + custom default it on. All other behavior settings are no longer
+  // auto-applied here; users pick a preset from the Change Settings dropdown instead.
+  if (applyDefaults) {
+    if (isKnowledgeCheck || isExamType) {
       togCert.checked = false;
       toggleSettingInput('certificate', false);
-      const togAttempts = document.getElementById('tog-attempts');
-      if (togAttempts) { togAttempts.checked = true; toggleSettingInput('attempts', true); }
-      const sAttempts = document.getElementById('s-attempts');
-      if (sAttempts) sAttempts.value = 2;
-      const togCooldown = document.getElementById('tog-cooldown');
-      if (togCooldown) { togCooldown.checked = true; toggleSettingInput('cooldown', true); }
-      const sCooldown = document.getElementById('s-cooldown');
-      if (sCooldown) sCooldown.value = 7;
-      const togTimelimit = document.getElementById('tog-timelimit');
-      if (togTimelimit) { togTimelimit.checked = true; toggleSettingInput('timelimit', true); }
-      const sTimelimit = document.getElementById('s-timelimit');
-      if (sTimelimit) sTimelimit.value = 60;
-      const sConfirmSubmit = document.getElementById('s-confirm-submit');
-      if (sConfirmSubmit) sConfirmSubmit.checked = true;
-      const sRandomOpts = document.getElementById('s-randomize-options');
-      if (sRandomOpts) sRandomOpts.checked = true;
       APP.settings.showCertificateLink = false;
-      APP.settings.maxAttempts = 2;
-      APP.settings.cooldownDays = 7;
-      APP.settings.timeLimitMinutes = 60;
-      APP.settings.confirmBeforeSubmit = true;
-      APP.settings.randomizeOptions = true;
-    }
-  } else {
-    if (applyDefaults) {
+    } else {
       togCert.checked = true;
       toggleSettingInput('certificate', true);
-      const togAttempts = document.getElementById('tog-attempts');
-      if (togAttempts) { togAttempts.checked = true; toggleSettingInput('attempts', true); }
-      const sAttempts = document.getElementById('s-attempts');
-      if (sAttempts) sAttempts.value = 2;
-      const togCooldown = document.getElementById('tog-cooldown');
-      if (togCooldown) { togCooldown.checked = true; toggleSettingInput('cooldown', true); }
-      const sCooldown = document.getElementById('s-cooldown');
-      if (sCooldown) sCooldown.value = 7;
-      const togTimelimit = document.getElementById('tog-timelimit');
-      if (togTimelimit) { togTimelimit.checked = true; toggleSettingInput('timelimit', true); }
-      const sTimelimit = document.getElementById('s-timelimit');
-      if (sTimelimit) sTimelimit.value = 60;
-      const sConfirmSubmit = document.getElementById('s-confirm-submit');
-      if (sConfirmSubmit) sConfirmSubmit.checked = true;
-      const sRandomOpts = document.getElementById('s-randomize-options');
-      if (sRandomOpts) sRandomOpts.checked = true;
       APP.settings.showCertificateLink = true;
-      APP.settings.maxAttempts = 2;
-      APP.settings.cooldownDays = 7;
-      APP.settings.timeLimitMinutes = 60;
-      APP.settings.confirmBeforeSubmit = true;
-      APP.settings.randomizeOptions = true;
     }
+  } else if (isKnowledgeCheck) {
+    // Restoring form for an existing quiz — still enforce KC has no cert
+    togCert.checked = false;
+    toggleSettingInput('certificate', false);
   }
   if (certRow) certRow.style.opacity = isKnowledgeCheck ? '0.45' : '';
 }
