@@ -1161,7 +1161,6 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
       <ul style="font-size:14px;line-height:1.7;padding-left:22px;margin:0;color:#333">
         <li>Set a lower <strong>questions per attempt</strong> in Settings</li>
         <li>Use fewer matching, sequencing, or hotspot questions per attempt</li>
-        <li>Keep matching pairs and sequencing steps short</li>
       </ul>
     </div>
     <div class="m-footer">
@@ -2981,6 +2980,16 @@ function uuid() {
     return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
   });
 }
+// Short ID for questions — kept compact because every question ID appears up
+// to 4 times in cmi.suspend_data (active + previous attempt × ids array + answers map),
+// and SCORM 1.2 caps suspend_data at 4096 chars. 7-char base36 = ~78B values, plenty
+// for any single quiz; collision risk is negligible. Used only for question IDs;
+// manifest/preset/history/batch IDs keep the full uuid().
+function qid() {
+  let s = '';
+  while (s.length < 7) s += Math.random().toString(36).slice(2);
+  return s.slice(0, 7);
+}
 function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function stripHtml(h) { const d = document.createElement('div'); d.innerHTML = h; return d.textContent || ''; }
 function focusQuizTitleInput() {
@@ -3112,7 +3121,7 @@ function parseAiken(text, imageMap) {
           return sep >= 0 ? { left: v.slice(0, sep).trim(), right: v.slice(sep + 3).trim() } : null;
         }).filter(Boolean);
         if (pairs.length < 2) continue;
-        const q = { id: uuid(), question: textLines.join(' ').trim(), questionType: 'matching', pairs };
+        const q = { id: qid(), question: textLines.join(' ').trim(), questionType: 'matching', pairs };
         const imgs = imgLines.map(l => { const n = l.replace(/^IMAGE:\s*/i,'').trim(); const data = imageMap[n] || imageMap[n.toLowerCase()] || null; return data ? { data, name: n } : null; }).filter(Boolean);
         if (imgs.length) { q.images = imgs; q.imagePosition = 'above'; }
         questions.push(q);
@@ -3122,7 +3131,7 @@ function parseAiken(text, imageMap) {
         if (!stepLines.length || !textLines.length) continue;
         const steps = stepLines.map(l => l.replace(/^STEP:\s*/i, '').trim()).filter(Boolean);
         if (steps.length < 2) continue;
-        questions.push({ id: uuid(), question: textLines.join(' ').trim(), questionType: 'sequencing', steps });
+        questions.push({ id: qid(), question: textLines.join(' ').trim(), questionType: 'sequencing', steps });
       } else if (typeVal === 'hotspot') {
         const hsLines    = rest.filter(l => /^HOTSPOT:\s*/i.test(l));
         const imgLines   = rest.filter(l => /^IMAGE:\s*/i.test(l));
@@ -3148,7 +3157,7 @@ function parseAiken(text, imageMap) {
           return {type:'rect',xPct:parseFloat(m[1]),yPct:parseFloat(m[2]),wPct:parseFloat(m[3]),hPct:parseFloat(m[4]),label,correct:true};
         }).filter(Boolean);
         if (!hotspots.length) continue;
-        const q = { id: uuid(), question: textLines.join(' ').trim(), questionType: 'hotspot', hotspots };
+        const q = { id: qid(), question: textLines.join(' ').trim(), questionType: 'hotspot', hotspots };
         if (maxPinsLn) q.maxPins = Math.max(1, parseInt(maxPinsLn.replace(/^MAXPINS:\s*/i,'')) || 1);
         if (pinColorLn) q.pinColor = pinColorLn.replace(/^PINCOLOR:\s*/i,'').trim();
         if (imgLines.length) {
@@ -3207,7 +3216,7 @@ function parseAiken(text, imageMap) {
     const validCorrect = correctLetters.filter(l => validLetters.includes(l));
     if (!validCorrect.length) continue;
     const q = {
-      id: uuid(), question: questionText,
+      id: qid(), question: questionText,
       questionType: validCorrect.length > 1 ? 'multiple' : 'single',
       options,
       correctAnswer: validCorrect.length === 1 ? validCorrect[0] : validCorrect
@@ -3249,7 +3258,7 @@ function parseMoodleXML(xmlText) {
     });
     if (options.length < 2 || !correctLetters.length) continue;
     questions.push({
-      id: uuid(), question: questionText,
+      id: qid(), question: questionText,
       questionType: correctLetters.length === 1 ? 'single' : 'multiple',
       options,
       correctAnswer: correctLetters.length === 1 ? correctLetters[0] : correctLetters
@@ -3496,7 +3505,7 @@ async function handleDocxFile(file) {
     const valid = raw.filter(q => q.options.some(o => o.isCorrect)).map(q => {
       const correct = q.options.filter(o => o.isCorrect).map(o => o.letter);
       return {
-        id: uuid(),
+        id: qid(),
         question: q.question,
         questionType: correct.length > 1 ? 'multiple' : 'single',
         options: q.options.map(o => ({ letter: o.letter, text: o.text })),
@@ -4822,7 +4831,7 @@ function saveQuestion() {
   const questionText = document.getElementById('ed-question').value.trim();
   if (!questionText) { toast('Please enter a question','err'); return; }
   const type = APP.editorType;
-  const question = { id: APP.editingId || uuid(), question: questionText, questionType: type };
+  const question = { id: APP.editingId || qid(), question: questionText, questionType: type };
 
   if (type === 'matching') {
     // Sync any in-flight pair inputs
@@ -4898,7 +4907,7 @@ function duplicateQuestion(id) {
   if (idx === -1) return;
   pushQHistory();
   const copy = JSON.parse(JSON.stringify(APP.questions[idx]));
-  copy.id = uuid();
+  copy.id = qid();
   APP.questions.splice(idx + 1, 0, copy);
   renderQuestions();
   updateBadges();
