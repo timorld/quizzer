@@ -12,6 +12,7 @@ const DATA_DIR = path.join(__dirname, 'data');
 const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
 const DEFAULTS_FILE = path.join(DATA_DIR, 'defaults.json');
 const PRESETS_FILE  = path.join(DATA_DIR, 'presets.json');
+const BANK_FILE     = path.join(DATA_DIR, 'question-bank.json');
 
 
 // ── DATA HELPERS ──────────────────────────────────────────
@@ -38,6 +39,19 @@ function readPresets() {
 }
 function writePresets(data) {
   fs.writeFileSync(PRESETS_FILE, JSON.stringify(data, null, 2));
+}
+
+function readBank() {
+  try {
+    const raw = JSON.parse(fs.readFileSync(BANK_FILE, 'utf8'));
+    return {
+      folders: Array.isArray(raw.folders) ? raw.folders : [],
+      questions: Array.isArray(raw.questions) ? raw.questions : []
+    };
+  } catch { return { folders: [], questions: [] }; }
+}
+function writeBank(data) {
+  fs.writeFileSync(BANK_FILE, JSON.stringify(data, null, 2));
 }
 
 // ── MIDDLEWARE ────────────────────────────────────────────
@@ -97,6 +111,125 @@ app.delete('/api/presets/:id', (req, res) => {
   writePresets(readPresets().filter(p => p.id !== req.params.id));
   res.json({ ok: true });
 });
+
+// ── QUESTION BANK ENDPOINTS ───────────────────────────────
+// Shared bank: folders form a tree (parentId === null for top level), questions
+// belong to exactly one folder. Data shape: { folders: [{id,name,parentId,sortOrder}],
+// questions: [{id,folderId,...questionFields}] }.
+app.get('/api/bank', (req, res) => res.json(readBank()));
+
+app.post('/api/bank/folders', (req, res) => {
+  const { id, name, parentId } = req.body || {};
+  if (!id || !name) return res.status(400).json({ error: 'Missing id or name' });
+  const bank = readBank();
+  if (bank.folders.some(f => f.id === id)) return res.status(409).json({ error: 'Folder id already exists' });
+  bank.folders.push({ id, name: String(name), parentId: parentId || null, sortOrder: bank.folders.length });
+  writeBank(bank);
+  res.json({ ok: true });
+});
+
+app.patch('/api/bank/folders/:id', (req, res) => {
+  const bank = readBank();
+  const f = bank.folders.find(f => f.id === req.params.id);
+  if (!f) return res.status(404).json({ error: 'Folder not found' });
+  const { name, parentId, sortOrder } = req.body || {};
+  if (typeof name === 'string' && name.trim()) f.name = name.trim();
+  if (parentId !== undefined) {
+    if (parentId === f.id) return res.status(400).json({ error: 'Folder cannot be its own parent' });
+    // Prevent moving a folder into its own descendant
+    const descendantIds = _collectDescendantFolderIds(bank.folders, f.id);
+    if (parentId && descendantIds.has(parentId)) return res.status(400).json({ error: 'Cannot move folder into its own descendant' });
+    f.parentId = parentId || null;
+  }
+  if (typeof sortOrder === 'number') f.sortOrder = sortOrder;
+  writeBank(bank);
+  res.json({ ok: true });
+});
+
+app.delete('/api/bank/folders/:id', (req, res) => {
+  const bank = readBank();
+  const id = req.params.id;
+  const childFolders = bank.folders.filter(f => f.parentId === id);
+  const childQuestions = bank.questions.filter(q => q.folderId === id);
+  if (childFolders.length || childQuestions.length) {
+    return res.status(409).json({ error: 'Folder is not empty', childFolders: childFolders.length, childQuestions: childQuestions.length });
+  }
+  bank.folders = bank.folders.filter(f => f.id !== id);
+  writeBank(bank);
+  res.json({ ok: true });
+});
+
+app.post('/api/bank/questions', (req, res) => {
+  const q = req.body;
+  if (!q || !q.id) return res.status(400).json({ error: 'Missing id' });
+  if (!q.folderId) return res.status(400).json({ error: 'Missing folderId' });
+  const bank = readBank();
+  if (!bank.folders.some(f => f.id === q.folderId)) return res.status(404).json({ error: 'folderId does not exist' });
+  bank.questions = bank.questions.filter(x => x.id !== q.id);
+  bank.questions.push(q);
+  writeBank(bank);
+  res.json({ ok: true });
+});
+
+app.patch('/api/bank/questions/:id', (req, res) => {
+  const bank = readBank();
+  const idx = bank.questions.findIndex(q => q.id === req.params.id);
+  if (idx < 0) return res.status(404).json({ error: 'Question not found' });
+  const patch = req.body || {};
+  if (patch.folderId && !bank.folders.some(f => f.id === patch.folderId)) {
+    return res.status(404).json({ error: 'folderId does not exist' });
+  }
+  bank.questions[idx] = Object.assign({}, bank.questions[idx], patch, { id: bank.questions[idx].id });
+  writeBank(bank);
+  res.json({ ok: true });
+});
+
+app.delete('/api/bank/questions/:id', (req, res) => {
+  const bank = readBank();
+  bank.questions = bank.questions.filter(q => q.id !== req.params.id);
+  writeBank(bank);
+  res.json({ ok: true });
+});
+
+// Reorder questions within a folder. Body: { folderId, orderedIds }. The given
+// ids replace, in-place, the array slots currently occupied by ids in that
+// folder. Questions in other folders keep their absolute positions, so the
+// global order outside the touched folder is preserved.
+app.post('/api/bank/questions/reorder', (req, res) => {
+  const { folderId, orderedIds } = req.body || {};
+  if (!folderId || !Array.isArray(orderedIds)) return res.status(400).json({ error: 'Missing folderId or orderedIds' });
+  const bank = readBank();
+  const idToQ = new Map(bank.questions.map(q => [q.id, q]));
+  for (const id of orderedIds) {
+    const q = idToQ.get(id);
+    if (!q) return res.status(400).json({ error: 'Unknown id: ' + id });
+    if (q.folderId !== folderId) return res.status(400).json({ error: 'id ' + id + ' is not in folder ' + folderId });
+  }
+  const idSet = new Set(orderedIds);
+  const orderQueue = orderedIds.slice();
+  const result = [];
+  for (const q of bank.questions) {
+    if (idSet.has(q.id)) {
+      const nextId = orderQueue.shift();
+      result.push(idToQ.get(nextId));
+    } else {
+      result.push(q);
+    }
+  }
+  bank.questions = result;
+  writeBank(bank);
+  res.json({ ok: true });
+});
+
+function _collectDescendantFolderIds(folders, rootId) {
+  const out = new Set();
+  const queue = [rootId];
+  while (queue.length) {
+    const cur = queue.shift();
+    folders.filter(f => f.parentId === cur).forEach(f => { out.add(f.id); queue.push(f.id); });
+  }
+  return out;
+}
 
 // ── AI PROXY ──────────────────────────────────────────────
 // Forwards browser requests to the configured AI inference endpoint, keeping

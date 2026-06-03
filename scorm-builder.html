@@ -59,7 +59,29 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .import-result.error{border-left-color:var(--danger)}
 .q-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
 .q-count{font-size:13px;color:var(--muted);font-weight:500}
+.q-section-group{margin-bottom:14px}
+.q-section-group.drag-section-over{outline:2px dashed var(--green);outline-offset:4px;border-radius:6px}
+.q-section-header{display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:6px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:var(--radius-sm);cursor:pointer;user-select:none;transition:background .12s}
+.q-section-header:hover{background:#e7e9ec}
+.q-section-chevron{display:inline-block;font-size:10px;color:var(--muted);transition:transform .15s;flex-shrink:0}
+.q-section-chevron.open{transform:rotate(90deg)}
+.q-section-name{font-size:14px;font-weight:700;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q-section-count{font-size:12px;color:var(--muted);flex-shrink:0}
+.q-section-actions{display:none;gap:4px;flex-shrink:0}
+.q-section-header:hover .q-section-actions{display:inline-flex}
+.q-section-actions button{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;color:#6b7280;transition:background .12s,border-color .12s,color .12s}
+.q-section-actions button:hover{background:var(--green-lt);border-color:var(--green);color:var(--green-dk)}
+.q-section-actions button.del:hover{background:#fee2e2;border-color:#ef4444;color:#dc2626}
+.q-section-actions .btn-icon{width:13px;height:13px}
+.q-section-empty{padding:14px 16px;font-size:13px;color:var(--muted);font-style:italic;text-align:center;background:#fafbfc;border:1px dashed var(--border);border-radius:var(--radius-sm)}
+.badge-section{display:inline-flex;align-items:center;padding:2px 8px;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em}
 .q-card{background:var(--white);border:1px solid var(--border);padding:16px 20px;margin-bottom:8px;display:flex;align-items:flex-start;gap:14px;border-radius:var(--radius);box-shadow:var(--shadow);transition:box-shadow .15s,border-color .1s}
+.q-card.q-selected{border-color:var(--green);background:#f7fbed}
+.q-sel-cb{margin-top:4px;flex-shrink:0;width:16px;height:16px;accent-color:var(--green);cursor:pointer}
+.q-sel-bar{display:flex;align-items:center;gap:14px;margin:8px 0;font-size:13px;color:var(--text);position:sticky;top:64px;z-index:5}
+.q-sel-bar > .q-sel-pill{display:flex;align-items:center;gap:14px;padding:8px 16px;background:var(--green-lt);border:1px solid #b3d97a;border-radius:var(--radius-sm);flex:1;min-width:0}
+.q-sel-bar #q-sel-actions{display:flex;gap:8px;flex-shrink:0}
+.q-sel-bar #q-sel-count{font-weight:700;color:var(--green-dk)}
 .q-card:hover{box-shadow:var(--shadow-md)}
 .q-card.dragging{opacity:.35;box-shadow:none}
 .q-card.drag-over-top{border-top:2px solid var(--green)}
@@ -321,6 +343,67 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .batch-field input[type=number]:focus{outline:none;border-color:var(--green)}
 .batch-actions{display:flex;gap:6px;justify-content:flex-end;padding-top:10px;border-top:1px solid #eee;margin-top:4px}
 .batch-bar{background:var(--white);border:1px solid var(--border);border-top:3px solid var(--green);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;bottom:0;margin-top:16px;z-index:10}
+/* ── QUESTION BANK ── */
+.bank-layout{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.bank-layout{grid-template-columns:1fr}}
+.bank-folders{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:10px;box-shadow:var(--shadow);min-height:200px;position:sticky;top:80px}
+.bank-search{font-size:13px;padding:6px 10px;margin-bottom:8px}
+#bank-q-search{margin-bottom:0;max-width:220px}
+.bank-questions{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);min-height:300px}
+.bank-empty{padding:18px 12px;font-size:13px;color:var(--muted);font-style:italic;text-align:center}
+.bank-folder{display:flex;align-items:center;gap:4px;padding:6px 8px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;color:var(--text);user-select:none;position:relative}
+.bank-folder:hover{background:#f3f4f6}
+.bank-folder.selected{background:var(--green-lt);color:var(--green-dk);font-weight:700}
+.bank-folder.drag-over{background:#fef3c7;outline:2px dashed #f59e0b;outline-offset:-2px}
+.bank-folder-toggle{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;font-size:9px;color:var(--muted);transition:transform .12s;flex-shrink:0}
+.bank-folder-toggle.open{transform:rotate(90deg)}
+.bank-folder-toggle.leaf{visibility:hidden}
+.bank-folder-icon{width:14px;height:14px;flex-shrink:0;color:#9ca3af}
+.bank-folder.selected .bank-folder-icon{color:var(--green-dk)}
+.bank-folder-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bank-folder-count{font-size:11px;color:var(--muted);font-weight:500;flex-shrink:0;padding-left:4px}
+.bank-folder-actions{display:none;gap:2px;flex-shrink:0}
+.bank-folder:hover .bank-folder-actions{display:inline-flex}
+.bank-folder-actions button{padding:2px 5px;border:none;background:transparent;cursor:pointer;color:#9ca3af;border-radius:3px;line-height:1;font-size:12px}
+.bank-folder-actions button:hover{background:#fff;color:var(--text)}
+.bank-folder-children{padding-left:14px;border-left:1px dashed #e5e7eb;margin-left:11px}
+.bank-q-row{position:relative;display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;background:#fafbfc;cursor:default;transition:background .12s,border-color .12s}
+.bank-q-row:hover{background:#fff;border-color:#cdd0d4}
+.bank-q-row.dragging{opacity:.5}
+.bank-q-row.q-selected{border-color:var(--green);background:#f7fbed}
+.bank-q-row .bank-q-sel-cb{margin-top:2px;flex-shrink:0;width:16px;height:16px;accent-color:var(--green);cursor:pointer}
+.bank-q-row .bank-q-grip{cursor:grab;user-select:none}
+.bank-q-row .bank-q-grip:active{cursor:grabbing}
+.bank-q-row::before,.bank-q-row::after{content:'';position:absolute;left:0;right:0;height:3px;background:var(--green);border-radius:2px;opacity:0;transition:opacity .1s;pointer-events:none}
+.bank-q-row::before{top:-5px}
+.bank-q-row::after{bottom:-5px}
+.bank-q-row.drag-over-top::before{opacity:1}
+.bank-q-row.drag-over-bottom::after{opacity:1}
+.bank-q-grip{color:#9ca3af;font-size:14px;line-height:18px;flex-shrink:0;cursor:grab}
+.bank-q-body{flex:1;min-width:0}
+.bank-q-text{font-size:13px;color:var(--text);line-height:1.45;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.bank-q-meta{font-size:11px;color:var(--muted);margin-top:4px;display:flex;gap:10px;flex-wrap:wrap}
+.bank-q-type{font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:10px;color:var(--green-dk)}
+.bank-q-actions{display:flex;gap:4px;flex-shrink:0}
+.bank-q-actions button{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;color:#6b7280;transition:background .12s,border-color .12s,color .12s}
+.bank-q-actions button:hover{background:var(--green-lt);border-color:var(--green);color:var(--green-dk)}
+.bank-q-actions button.del:hover{background:#fee2e2;border-color:#ef4444;color:#dc2626}
+.bank-q-actions .btn-icon{width:14px;height:14px}
+/* ── ADD FROM BANK PICKER ── */
+.afb-modal{max-width:960px;width:96vw}
+.afb-body{padding:0}
+.afb-layout{display:grid;grid-template-columns:280px 1fr;gap:0;align-items:stretch;height:60vh;min-height:380px}
+@media(max-width:780px){.afb-layout{grid-template-columns:1fr;height:auto}.afb-folders{max-height:240px}}
+.afb-folders{border-right:1px solid var(--border);padding:12px;overflow:auto;background:#fafbfc}
+.afb-questions{padding:14px 16px;overflow:auto}
+.afb-q-row{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;background:#fafbfc;transition:background .1s,border-color .1s;cursor:pointer}
+.afb-q-row:hover{background:#fff;border-color:#cdd0d4}
+.afb-q-row.afb-selected{background:var(--green-lt);border-color:var(--green)}
+.afb-q-cb{margin-top:2px;flex-shrink:0;width:16px;height:16px;accent-color:var(--green);cursor:pointer}
+.afb-q-body{flex:1;min-width:0}
+.afb-q-text{font-size:13px;color:var(--text);line-height:1.45;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.afb-q-meta{font-size:11px;color:var(--muted);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap}
+.afb-q-type{font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:10px;color:var(--green-dk)}
 .batch-empty{text-align:center;padding:48px 20px;color:var(--muted)}
 .btn-icon{width:14px;height:14px;vertical-align:middle;flex-shrink:0;display:inline-block}
 .btn-primary .btn-icon{filter:brightness(0) invert(1)}
@@ -346,6 +429,7 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
     <button class="tab-btn" data-tab="settings">Settings</button>
     <button class="tab-btn" data-tab="history">History</button>
     <button class="tab-btn" data-tab="batch">Batch <span id="bc-badge" style="color:var(--green)"></span></button>
+    <button class="tab-btn" data-tab="bank">Question Bank</button>
   </nav>
   <div class="btn-group" style="margin-left:auto;flex-shrink:0">
     <button class="btn btn-sm btn-outline-dark" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
@@ -410,6 +494,8 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
         <span class="tog-label" style="font-size:13px">Expand all</span>
       </div>
       <button class="btn btn-sm btn-danger" onclick="clearAll()">Clear All</button>
+      <button class="btn btn-outline-dark" onclick="addSection()">+ Section</button>
+      <button class="btn btn-outline-green" onclick="openAddFromBank()"><svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg> Add from Bank</button>
       <button class="btn btn-outline-green" onclick="openEditor(null)">+ Add Question</button>
     </div>
   </div>
@@ -431,8 +517,21 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
       </button>
       <input type="file" id="file-auto" accept=".txt,.xml,.zip,.docx,.pptx,.md">
     </div>
-    <div style="text-align:center;margin-top:14px"><button class="btn btn-primary" onclick="openEditor(null)">+ Add Question</button></div>
+    <div style="text-align:center;margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="openEditor(null)">+ Add Question</button>
+      <button class="btn btn-outline-green" onclick="openAddFromBank()"><svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg> Add from Bank</button>
+    </div>
     <div id="import-log" style="margin-top:16px"></div>
+  </div>
+  <div id="q-sel-bar" class="q-sel-bar" style="display:none">
+    <div class="q-sel-pill">
+      <label style="display:inline-flex;align-items:center;gap:6px;font-weight:500;cursor:pointer;font-size:13px;color:var(--text)"><input type="checkbox" id="q-sel-all" onchange="toggleSelectAllQuestions(this.checked)"> Select all</label>
+      <span><strong id="q-sel-count">0</strong> selected</span>
+    </div>
+    <div id="q-sel-actions">
+      <button class="btn btn-sm btn-outline-green" onclick="openSendToBank()"><img class="btn-icon" src="assets/svg/upload.svg" alt=""> Send to Bank</button>
+      <button class="btn btn-sm" onclick="clearQuestionSelection()">Clear selected</button>
+    </div>
   </div>
   <div id="q-list"></div>
   <div class="gen-bar">
@@ -564,7 +663,13 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
           <label class="toggle"><input type="checkbox" id="tog-best-score" onchange="confirmBestScoreTracking(this)"><span class="tog-slider"></span></label>
           <div style="flex:1">
             <div class="tog-label">Best score tracking</div>
-            <div class="tog-desc">Always report the learner's highest passing score to the LMS</div>
+            <div class="tog-desc">Lets a learner who already passed retake the quiz; the LMS keeps their highest score.</div>
+          </div>
+        </div>
+        <div class="toggle-row" title="Each correct pick earns a fraction; each wrong pick deducts a fraction (floor 0). Picking everything gives zero, so it can't be gamed.">
+          <label class="toggle"><input type="checkbox" id="tog-partial-credit" onchange="saveSettings()"><span class="tog-slider"></span></label>
+          <div style="flex:1">
+            <div class="tog-label">Partial credit on multi-select</div>
           </div>
         </div>
       </div>
@@ -830,6 +935,52 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
   </div>
 </div>
 
+<!-- QUESTION BANK TAB -->
+<div id="tab-bank" class="tab-panel">
+  <div class="pg-hdr">
+    <div>
+      <div class="pg-title">Question Bank</div>
+      <div class="pg-sub">A shared library of questions, organized into folders. Build quizzes faster by pulling from here.</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm btn-outline-green" onclick="bankNewFolder(null)">+ New Folder</button>
+    </div>
+  </div>
+  <div class="bank-layout">
+    <aside class="bank-folders" id="bank-folders">
+      <input class="form-input bank-search" id="bank-folder-search" type="text" placeholder="Search folders…" oninput="bankFilterFolders(this.value)">
+      <div id="bank-folder-tree"><div class="bank-empty">Loading…</div></div>
+    </aside>
+    <section class="bank-questions" id="bank-questions">
+      <div class="bank-empty" id="bank-q-placeholder">Select a folder to view its questions.</div>
+      <div id="bank-q-pane" style="display:none">
+        <div id="bank-q-header" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+          <div style="min-width:0;flex-shrink:0;max-width:42%">
+            <h3 id="bank-q-title" style="margin:0;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></h3>
+            <div id="bank-q-count" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+          </div>
+          <input class="form-input bank-search" id="bank-q-search" type="text" placeholder="Search questions…" oninput="bankFilterQuestions(this.value)" style="flex:1;min-width:120px">
+          <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+            <button class="btn btn-sm" id="bank-q-import-btn" onclick="bankOpenImportMore()" style="display:none"><img class="btn-icon" src="assets/svg/upload.svg" alt=""> Import more questions</button>
+            <button class="btn btn-sm btn-outline-green" onclick="bankAddQuestion()">+ Add Question</button>
+          </div>
+        </div>
+        <div id="bank-q-sel-bar" class="q-sel-bar" style="display:none">
+          <div class="q-sel-pill">
+            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:500;cursor:pointer;font-size:13px;color:var(--text)"><input type="checkbox" id="bank-q-sel-all" onchange="toggleBankSelectAllForQuiz(this.checked)"> Select all in this folder</label>
+            <span><strong id="bank-q-sel-count">0</strong> selected</span>
+          </div>
+          <div id="bank-q-sel-actions" style="display:flex;gap:8px">
+            <button class="btn btn-sm btn-primary" onclick="addBankSelectionToQuiz()"><svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg> Add to Quiz</button>
+            <button class="btn btn-sm" onclick="clearBankQuizSelection()">Clear selected</button>
+          </div>
+        </div>
+        <div id="bank-q-list"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
 </div><!-- .main -->
 <div id="toast-wrap"></div>
 
@@ -871,6 +1022,12 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
       <div class="form-field" style="margin-bottom:18px">
         <label class="form-label">Question Text <small>HTML supported: &lt;b&gt;, &lt;code&gt;, &lt;pre&gt;</small></label>
         <textarea class="form-textarea" id="ed-question" rows="5" placeholder="Enter your question here..."></textarea>
+      </div>
+      <div class="form-field" style="margin-bottom:18px">
+        <label class="form-label">Section <small>optional — pick a section. Manage the list (add / rename / delete) from the Questions tab.</small></label>
+        <select class="form-input" id="ed-section">
+          <option value="">(none)</option>
+        </select>
       </div>
       <!-- Attachments row -->
       <div style="margin-bottom:18px">
@@ -1181,6 +1338,90 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
         <div style="font-size:15px;font-weight:600;margin:8px 0 4px">Drop your file here, or click to browse</div>
         <div class="dz-label">Accepts .txt (AIKEN) &nbsp;·&nbsp; .xml (Moodle XML) &nbsp;·&nbsp; .zip (SCORM or question bank) &nbsp;·&nbsp; .docx (Word doc) &nbsp;·&nbsp; .txt + images together</div>
         <input type="file" id="file-import-more" accept=".txt,.xml,.zip,.docx">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SEND TO QUESTION BANK MODAL -->
+<div class="m-overlay" id="modal-q-to-bank">
+  <div class="modal" style="max-width:520px">
+    <div class="m-hdr"><span class="m-title">Send to Question Bank</span><button class="m-close" onclick="closeModal('modal-q-to-bank')">&#x2715;</button></div>
+    <div class="m-body">
+      <p style="font-size:14px;color:#333;line-height:1.6;margin:0 0 16px 0">Sending <strong id="qtb-count">0</strong> question(s). A fresh ID is minted for each copy so the originals in this quiz are not affected.</p>
+      <div class="form-field">
+        <label class="form-label">Pick an existing folder</label>
+        <select class="form-input" id="qtb-folder-select"></select>
+      </div>
+      <div style="text-align:center;margin:14px 0;color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em">— or —</div>
+      <div class="form-field">
+        <label class="form-label">Create a new folder</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input class="form-input" id="qtb-new-folder-name" type="text" placeholder="New folder name" style="flex:1;min-width:160px">
+          <select class="form-input" id="qtb-new-folder-parent" style="max-width:200px"></select>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">Optionally pick a parent folder so this becomes a subfolder.</div>
+      </div>
+    </div>
+    <div class="m-footer">
+      <button class="btn" onclick="closeModal('modal-q-to-bank')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmSendToBank()">Send to Bank</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD FROM QUESTION BANK PICKER -->
+<div class="m-overlay" id="modal-add-from-bank">
+  <div class="modal afb-modal">
+    <div class="m-hdr">
+      <span class="m-title">Add from Question Bank</span>
+      <button class="m-close" onclick="closeModal('modal-add-from-bank')">&#x2715;</button>
+    </div>
+    <div class="m-body afb-body">
+      <div class="afb-layout">
+        <aside class="afb-folders">
+          <input class="form-input bank-search" id="afb-folder-search" type="text" placeholder="Search folders…" oninput="afbFilterFolders(this.value)">
+          <div id="afb-folder-tree"><div class="bank-empty">Loading…</div></div>
+        </aside>
+        <section class="afb-questions">
+          <div class="bank-empty" id="afb-q-placeholder">Select a folder on the left to see its questions.</div>
+          <div id="afb-q-pane" style="display:none">
+            <div id="afb-q-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);flex-wrap:wrap">
+              <div style="min-width:0;flex:1">
+                <h3 id="afb-q-title" style="margin:0;font-size:15px"></h3>
+                <div id="afb-q-count" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+              </div>
+              <input class="form-input bank-search" id="afb-q-search" type="text" placeholder="Search questions…" oninput="afbFilterQuestions(this.value)" style="max-width:200px;margin-bottom:0">
+            </div>
+            <label style="display:inline-flex;align-items:center;gap:8px;padding:6px 10px;margin-bottom:8px;font-size:13px;color:var(--text);cursor:pointer">
+              <input type="checkbox" id="afb-select-all" onchange="afbToggleSelectAllInFolder(this.checked)"> Select all in this folder
+            </label>
+            <div id="afb-q-list"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="m-footer" style="justify-content:space-between">
+      <div style="font-size:13px;color:var(--text)"><strong id="afb-total-count">0</strong> selected</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="closeModal('modal-add-from-bank')">Cancel</button>
+        <button class="btn btn-primary" id="afb-confirm-btn" onclick="confirmAddFromBank()" disabled>Add to Quiz</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BANK: IMPORT MORE QUESTIONS MODAL -->
+<div class="m-overlay" id="modal-bank-import-more">
+  <div class="modal" style="max-width:600px">
+    <div class="m-hdr"><span class="m-title">Import questions to folder</span><button class="m-close" onclick="closeModal('modal-bank-import-more')">&#x2715;</button></div>
+    <div class="m-body">
+      <p style="font-size:14px;color:#333;line-height:1.65;margin-bottom:16px">Questions from your file will be added to <strong id="bank-import-folder-label">the selected folder</strong> in the Question Bank.</p>
+      <div class="drop-zone" id="dz-bank-import-more" style="padding:32px 20px">
+        <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:36px;height:36px"></div>
+        <div style="font-size:15px;font-weight:600;margin:8px 0 4px">Drop your file here, or click to browse</div>
+        <div class="dz-label">Accepts .txt (AIKEN) &nbsp;·&nbsp; .xml (Moodle XML) &nbsp;·&nbsp; .zip (SCORM or question bank) &nbsp;·&nbsp; .docx (Word doc)</div>
+        <input type="file" id="file-bank-import-more" accept=".txt,.xml,.zip,.docx,.pptx">
       </div>
     </div>
   </div>
@@ -2165,18 +2406,35 @@ function showSection(sectionId) {
   }
 
   function calculateScore() {
-    let correct = 0;
+    // `correct` counts fully-correct questions (whole-number display on the result screen).
+    // `marks` is the sum of question-level credit; partial credit on multi-select
+    // contributes fractional marks here while the count above stays integer.
+    let correct = 0, marks = 0;
     currentQuestions.forEach(question => {
       if (isInteractiveType(question.questionType)) {
-        if (isInteractiveCorrect(question)) correct++;
+        if (isInteractiveCorrect(question)) { correct++; marks += 1; }
       } else {
         const userAnswer = userAnswers[question.id];
         const correctAnswer = Array.isArray(question.correctAnswer) ? question.correctAnswer : [question.correctAnswer];
         const userAnswerArray = Array.isArray(userAnswer) ? userAnswer : [userAnswer];
-        if (correctAnswer.length === userAnswerArray.length && correctAnswer.every(ans => userAnswerArray.includes(ans))) correct++;
+        const fullyCorrect = correctAnswer.length === userAnswerArray.length && correctAnswer.every(ans => userAnswerArray.indexOf(ans) !== -1);
+        if (fullyCorrect) { correct++; marks += 1; }
+        else if (CONFIG.partialCreditMultiSelect && question.questionType === 'multiple' && userAnswerArray.length) {
+          // Moodle-style partial credit: +1/N per correct pick, -1/N per wrong pick, floor 0
+          const N = correctAnswer.length || 1;
+          let rightPicks = 0, wrongPicks = 0;
+          userAnswerArray.forEach(a => {
+            if (a == null) return;
+            if (correctAnswer.indexOf(a) !== -1) rightPicks++;
+            else wrongPicks++;
+          });
+          const q = Math.max(0, (rightPicks - wrongPicks) / N);
+          marks += q;
+        }
       }
     });
-    return { correct, incorrect: currentQuestions.length - correct, total: currentQuestions.length, percentage: Math.round((correct / currentQuestions.length) * 100) };
+    const total = currentQuestions.length;
+    return { correct, incorrect: total - correct, total, percentage: Math.round((marks / total) * 100) };
   }
 
   function showSubmitModal(scenario) {
@@ -2476,12 +2734,16 @@ function showSection(sectionId) {
           var letter = opt.letter || '', optText = opt.text || '';
           var isUserChoice = userAnsArr2.indexOf(letter) !== -1;
           var isCorrectChoice = correctAns2.indexOf(letter) !== -1;
+          // For multi-select: mark each option independently. A pick that happens to
+          // be in the correct set is ✓, even when the overall question is wrong (e.g.
+          // user got 2 of 3 correct picks). Unpicked correct options only get the
+          // blue "reveal" treatment when show-correct-answers is on.
           var revealCorrect = CONFIG.showCorrectAnswers && !isCorrect && isCorrectChoice && !isUserChoice;
           var cls = 'review-opt';
-          if (isUserChoice) cls += isCorrect ? ' review-opt-correct' : ' review-opt-wrong';
+          if (isUserChoice) cls += isCorrectChoice ? ' review-opt-correct' : ' review-opt-wrong';
           else if (revealCorrect) cls += ' review-opt-correct-reveal';
           html += '<div class="' + cls + '"><span class="review-opt-letter">' + safeText(letter) + '</span><span class="review-opt-text">' + allowOnlySafeHtml(optText) + '</span>';
-          if (isUserChoice) html += '<span class="review-opt-marker">' + (isCorrect ? '✓' : '✗') + '</span>';
+          if (isUserChoice) html += '<span class="review-opt-marker">' + (isCorrectChoice ? '✓' : '✗') + '</span>';
           else if (revealCorrect) html += '<span class="review-opt-marker review-opt-marker-reveal">✓</span>';
           html += '</div>';
         });
@@ -2957,7 +3219,9 @@ const APP = {
   editorHsPinColor: '#76B900',
   history: [],
   defaultSettings: null,
-  presets: []
+  presets: [],
+  selectedQids: new Set(), // ids of questions checked in the Questions tab, for bulk → bank
+  collapsedSections: new Set() // section names whose group is collapsed in the Questions list
 };
 
 // ── API ────────────────────────────────────────────────────
@@ -2967,6 +3231,9 @@ const API = {
   },
   async post(path, data) {
     try { const r = await fetch(path, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); return r.ok; } catch { return false; }
+  },
+  async patch(path, data) {
+    try { const r = await fetch(path, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); return r.ok; } catch { return false; }
   },
   async del(path) {
     try { const r = await fetch(path, { method:'DELETE' }); return r.ok; } catch { return false; }
@@ -3030,6 +3297,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       fetchHistory().then(renderHistory).then(updateBadges);
     }
     if (btn.dataset.tab === 'settings') readSettingsToForm();
+    if (btn.dataset.tab === 'bank') fetchBank().then(renderBank);
   });
 });
 
@@ -3325,6 +3593,7 @@ async function handleAikenFile(file) {
       if (await _offerAIConversion(raw, file.name)) return;
       showImportResult('&#9888; No valid questions found. Check the AIKEN format — see the example.', true); return;
     }
+    if (await _bankImportQuestions(imported, file.name)) return;
     let replace = false;
     if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
@@ -3347,6 +3616,7 @@ async function handleXmlFile(file) {
       if (await _offerAIConversion(text, file.name)) return;
       showImportResult('&#9888; No multichoice questions found in this Moodle XML file.', true); return;
     }
+    if (await _bankImportQuestions(imported, file.name)) return;
     let replace = false;
     if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
@@ -3363,6 +3633,7 @@ async function handleXmlFile(file) {
 async function handleScormFile(file) {
   try {
     const { questions, settings } = await loadScormPackage(file);
+    if (await _bankImportQuestions(questions, file.name)) return;
     pushQHistory();
     if (IMPORT_FORCE_APPEND) {
       APP.questions = [...APP.questions, ...questions];
@@ -3394,6 +3665,7 @@ async function handleAikenWithImages(txtFile, imgFiles) {
     const { title: aikenTitle, text } = extractAikenTitle(rawTxt);
     const imported = parseAiken(text, imageMap);
     if (!imported.length) { showImportResult('&#9888; No valid questions found. Check the AIKEN format — see the example.', true); return; }
+    if (await _bankImportQuestions(imported, txtFile.name)) return;
     let replace = false;
     if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
@@ -3428,6 +3700,7 @@ async function handleQBankZipFile(file) {
     }
     const imported = parseAiken(text, imageMap);
     if (!imported.length) { showImportResult('&#9888; No valid questions found in the AIKEN file inside the ZIP.', true); return; }
+    if (await _bankImportQuestions(imported, file.name)) return;
     if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       if (!confirm('Replace the current ' + APP.questions.length + ' question(s) with ' + imported.length + ' from "' + file.name + '"?')) return;
     }
@@ -3523,6 +3796,7 @@ async function handleDocxFile(file) {
       return;
     }
 
+    if (await _bankImportQuestions(valid, file.name)) return;
     let replace = false;
     if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + valid.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
@@ -4034,6 +4308,7 @@ async function importAIConverted() {
   const imageMap = _aiImageMap && Object.keys(_aiImageMap).length ? _aiImageMap : undefined;
   const imported = parseAiken(cleanText, imageMap);
   if (!imported.length) { toast('Could not parse the AIKEN output — try regenerating or editing it', 'err'); return; }
+  if (await _bankImportQuestions(imported, 'AI conversion')) { closeModal('modal-ai-convert'); return; }
   let replace = false;
   if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
     replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' converted questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
@@ -4148,6 +4423,13 @@ function _wireDropZone(dzId, fiId, opts) {
   const dz = document.getElementById(dzId);
   const fi = document.getElementById(fiId);
   if (!dz || !fi) return;
+  const setupBankTarget = () => {
+    if (opts && opts.bankFolderId) {
+      const id = typeof opts.bankFolderId === 'function' ? opts.bankFolderId() : opts.bankFolderId;
+      BANK.importTarget = id || null;
+    }
+  };
+  const clearTargets = () => { IMPORT_FORCE_APPEND = false; BANK.importTarget = null; };
   dz.addEventListener('click', () => fi.click());
   dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
@@ -4156,13 +4438,15 @@ function _wireDropZone(dzId, fiId, opts) {
     const files = Array.from(e.dataTransfer.files);
     if (!files.length) return;
     if (opts && opts.forceAppend) IMPORT_FORCE_APPEND = true;
-    try { await _routeFilesToHandler(files); } finally { IMPORT_FORCE_APPEND = false; }
+    setupBankTarget();
+    try { await _routeFilesToHandler(files); } finally { clearTargets(); }
     if (opts && opts.closeModal) closeModal(opts.closeModal);
   });
   fi.addEventListener('change', async e => {
     if (!e.target.files[0]) return;
     if (opts && opts.forceAppend) IMPORT_FORCE_APPEND = true;
-    try { await handleAutoFile(e.target.files[0]); } finally { IMPORT_FORCE_APPEND = false; }
+    setupBankTarget();
+    try { await handleAutoFile(e.target.files[0]); } finally { clearTargets(); }
     e.target.value = '';
     if (opts && opts.closeModal) closeModal(opts.closeModal);
   });
@@ -4170,9 +4454,48 @@ function _wireDropZone(dzId, fiId, opts) {
 
 _wireDropZone('dz-auto', 'file-auto');
 _wireDropZone('dz-import-more', 'file-import-more', { forceAppend: true, closeModal: 'modal-import-more' });
+_wireDropZone('dz-bank-import-more', 'file-bank-import-more', { bankFolderId: () => BANK.selectedFolderId, closeModal: 'modal-bank-import-more' });
+
+function bankOpenImportMore() {
+  if (!BANK.selectedFolderId) { toast('Select a folder first', 'err'); return; }
+  const folder = BANK.folders.find(f => f.id === BANK.selectedFolderId);
+  const lbl = document.getElementById('bank-import-folder-label');
+  if (lbl && folder) lbl.textContent = folder.name;
+  showModal('modal-bank-import-more');
+}
 
 // ── QUESTION EDITOR ───────────────────────────────────────
-function openEditor(id) {
+// Populates the editor's Section <select> from the quiz's settings.sections list.
+// The current question's section (if outside the list, e.g. legacy data) is added
+// inline so it stays selectable while the user edits.
+function _refreshSectionDatalist(currentValue) {
+  const sel = document.getElementById('ed-section');
+  if (!sel) return;
+  _ensureSectionsList();
+  const opts = APP.settings.sections.slice();
+  if (currentValue && !opts.includes(currentValue)) opts.push(currentValue);
+  sel.innerHTML = '<option value="">(none)</option>'
+    + opts.map(s => '<option value="' + escH(s) + '">' + escH(s) + '</option>').join('');
+  if (currentValue) sel.value = currentValue;
+}
+
+// Ensures APP.settings.sections exists and contains every section name currently
+// referenced by APP.questions (back-fills from old quizzes that stored only the
+// string on each question). Adds nothing to question objects.
+function _ensureSectionsList() {
+  if (!Array.isArray(APP.settings.sections)) APP.settings.sections = [];
+  const seen = new Set(APP.settings.sections);
+  APP.questions.forEach(q => {
+    if (q.section && !seen.has(q.section)) {
+      APP.settings.sections.push(q.section);
+      seen.add(q.section);
+    }
+  });
+}
+
+function openEditor(id, target) {
+  // target: 'quiz' (default) edits APP.questions; 'bank' edits a bank question
+  BANK.editingTarget = target === 'bank' ? 'bank' : 'quiz';
   APP.editingId = id;
   APP.editorType = 'single';
   APP.editorImages = [];
@@ -4181,13 +4504,17 @@ function openEditor(id) {
   document.getElementById('ed-title').textContent = id ? 'Edit Question' : 'Add Question';
   document.getElementById('ed-question').value = '';
   document.getElementById('ed-codeblock').value = '';
+  document.getElementById('ed-section').value = '';
   APP.editorOptions = [{text:'',isCorrect:false},{text:'',isCorrect:false},{text:'',isCorrect:false},{text:'',isCorrect:false}];
+  const _src = BANK.editingTarget === 'bank' ? BANK.questions : APP.questions;
+  let _editingSection = '';
   if (id) {
-    const q = APP.questions.find(q => q.id === id);
+    const q = _src.find(q => q.id === id);
     if (q) {
       APP.editorType = q.questionType;
       document.getElementById('ed-question').value = q.question;
       document.getElementById('ed-codeblock').value = q.codeBlock || '';
+      _editingSection = q.section || '';
       APP.editorOptions = (q.options || []).map(opt => ({
         text: opt.text,
         isCorrect: Array.isArray(q.correctAnswer) ? q.correctAnswer.includes(opt.letter) : q.correctAnswer === opt.letter
@@ -4218,7 +4545,7 @@ function openEditor(id) {
   document.getElementById('ed-hs-canvas-area').style.display = 'none';
   document.getElementById('ed-hs-img').src = '';
   if (id) {
-    const q = APP.questions.find(q => q.id === id);
+    const q = _src.find(q => q.id === id);
     if (q) {
       if (q.questionType === 'matching'   && q.pairs)    APP.editorPairs    = q.pairs.map(p => ({...p}));
       if (q.questionType === 'sequencing' && q.steps)    APP.editorSteps    = [...q.steps];
@@ -4248,6 +4575,7 @@ function openEditor(id) {
     const mpEl = document.getElementById('ed-hs-maxpins'); if (mpEl) mpEl.value = APP.editorHsMaxPins || 1;
     edHsRender();
   }
+  _refreshSectionDatalist(_editingSection);
   showModal('modal-editor');
   setTimeout(() => document.getElementById('ed-question').focus(), 100);
 }
@@ -4831,7 +5159,9 @@ function saveQuestion() {
   const questionText = document.getElementById('ed-question').value.trim();
   if (!questionText) { toast('Please enter a question','err'); return; }
   const type = APP.editorType;
+  const section = (document.getElementById('ed-section').value || '').trim();
   const question = { id: APP.editingId || qid(), question: questionText, questionType: type };
+  if (section) question.section = section;
 
   if (type === 'matching') {
     // Sync any in-flight pair inputs
@@ -4879,6 +5209,22 @@ function saveQuestion() {
     }
   }
 
+  if (BANK.editingTarget === 'bank') {
+    // Save into the question bank instead of the current quiz
+    if (!BANK.selectedFolderId && !APP.editingId) { toast('Select a folder first', 'err'); return; }
+    const existing = APP.editingId ? BANK.questions.find(q => q.id === APP.editingId) : null;
+    question.folderId = existing ? existing.folderId : BANK.selectedFolderId;
+    const wasEditing = !!APP.editingId;
+    closeModal('modal-editor');
+    API.post('/api/bank/questions', question).then(async ok => {
+      if (!ok) { toast('Could not save to bank', 'err'); return; }
+      await fetchBank();
+      renderBank();
+      toast(wasEditing ? 'Question updated' : 'Question added to bank', 'ok');
+    });
+    BANK.editingTarget = 'quiz';
+    return;
+  }
   pushQHistory();
   if (APP.editingId) {
     const idx = APP.questions.findIndex(q => q.id === APP.editingId);
@@ -5088,14 +5434,15 @@ function toggleExpandQuestions(on) {
 function renderQuestions() {
   const list = document.getElementById('q-list');
   const n = APP.questions.length;
+  _ensureSectionsList();
   document.getElementById('q-count-text').textContent = n + ' question' + (n !== 1 ? 's' : '');
   document.getElementById('gen-count').textContent = n + ' question' + (n !== 1 ? 's' : '');
   document.getElementById('gen-title-display').textContent = APP.settings.title || '—';
   document.querySelector('.gen-bar').style.display = n ? '' : 'none';
   const emptyEl = document.getElementById('q-empty-state');
-  if (emptyEl) emptyEl.style.display = n ? 'none' : '';
-  if (!n) { list.innerHTML = ''; return; }
-  list.innerHTML = APP.questions.map((q, i) => {
+  if (emptyEl) emptyEl.style.display = (n || APP.settings.sections.length) ? 'none' : '';
+  if (!n && !APP.settings.sections.length) { list.innerHTML = ''; return; }
+  const cards = APP.questions.map((q, i) => {
     const preview = stripHtml(q.question).replace(/\s+/g,' ').trim().slice(0,90);
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const bodyHtml = Q_EXPANDED
@@ -5150,7 +5497,9 @@ function renderQuestions() {
             + '</ul>';
         })()
       : '<div class="q-preview">' + escH(preview || '(no text)') + '</div>';
-    return '<div class="q-card" draggable="true" data-qidx="' + i + '">'
+    const isSel = APP.selectedQids.has(q.id);
+    return '<div class="q-card' + (isSel ? ' q-selected' : '') + '" draggable="true" data-qidx="' + i + '">'
+      + '<input type="checkbox" class="q-sel-cb"' + (isSel ? ' checked' : '') + ' onchange="toggleQuestionSelection(\'' + q.id + '\', this.checked)" onclick="event.stopPropagation()" title="Select for bulk actions">'
       + ICON.drag
       + '<span class="q-num">' + (i+1) + '</span>'
       + '<div class="q-body">'
@@ -5164,6 +5513,7 @@ function renderQuestions() {
         })(q.questionType)
       + (q.questionType !== 'hotspot' && q.images && q.images.length ? '<span style="font-size:12px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><img src="assets/svg/image.svg" style="width:12px;height:12px"> ' + q.images.length + ' image' + (q.images.length>1?'s':'') + '</span>' : (q.questionType !== 'hotspot' && q.imageData ? '<span style="font-size:12px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><img src="assets/svg/image.svg" style="width:12px;height:12px"> image</span>' : ''))
       + ((q.codeBlock && q.codeBlock.trim()) ? '<span style="font-size:12px;color:var(--green);display:inline-flex;align-items:center;gap:3px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:12px;height:12px;fill:none;stroke:#76B900;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> CLI</span>' : '')
+      + (q.section ? '<span class="badge badge-section" title="Section">' + escH(q.section) + '</span>' : '')
       + '</div></div>'
       + '<div class="q-actions" style="margin-left:auto;flex-shrink:0;align-self:flex-start">'
       + '<button class="btn btn-sm btn-outline-dark" onclick="testSingleQuestion(\'' + q.id + '\')" title="Test this question interactively"><img class="btn-icon" src="assets/svg/play.svg" alt=""></button>'
@@ -5171,8 +5521,454 @@ function renderQuestions() {
       + '<button class="btn btn-sm" onclick="duplicateQuestion(\'' + q.id + '\')" title="Duplicate">' + ICON.duplicate + '</button>'
       + '<button class="btn btn-sm btn-danger" onclick="deleteQuestion(\'' + q.id + '\')" title="Delete">' + ICON.trash + '</button>'
       + '</div></div>';
-  }).join('');
+  });
+  // Section model: APP.settings.sections is the canonical ordered list. Render
+  // every section (even empty ones), in that order. Unsectioned questions get a
+  // synthetic "(Unsectioned)" bucket at the bottom.
+  const sections = APP.settings.sections;
+  const hasAnySection = sections.length > 0 || APP.questions.some(q => q.section);
+  if (!hasAnySection) {
+    list.innerHTML = cards.join('');
+  } else {
+    const buckets = new Map();
+    sections.forEach(s => buckets.set(s, []));
+    let unsectioned = [];
+    APP.questions.forEach((q, i) => {
+      if (q.section && buckets.has(q.section)) buckets.get(q.section).push(cards[i]);
+      else if (q.section) {
+        // Section name exists on a question but isn't in the list — shouldn't happen
+        // after _ensureSectionsList, but defensively still surface it.
+        buckets.set(q.section, [cards[i]]);
+      } else {
+        unsectioned.push(cards[i]);
+      }
+    });
+    const renderGroup = (key, items, opts) => {
+      const isUnsect = key === '__unsectioned__';
+      const label = isUnsect ? '(Unsectioned)' : key;
+      const collapsed = APP.collapsedSections.has(key);
+      const actions = isUnsect ? '' : (
+        '<span class="q-section-actions">'
+        +   '<button title="Rename" onclick="event.stopPropagation();renameSection(this.closest(\'.q-section-header\').dataset.sectionKey)">' + ICON.edit + '</button>'
+        +   '<button title="Delete section" class="del" onclick="event.stopPropagation();deleteSection(this.closest(\'.q-section-header\').dataset.sectionKey)">' + ICON.trash + '</button>'
+        + '</span>'
+      );
+      return '<div class="q-section-group" data-section-key="' + escH(key) + '">'
+        + '<div class="q-section-header" data-section-key="' + escH(key) + '" onclick="toggleSectionCollapse(this.dataset.sectionKey)">'
+        +   '<span class="q-section-chevron' + (collapsed ? '' : ' open') + '">▶</span>'
+        +   '<span class="q-section-name">' + escH(label) + '</span>'
+        +   '<span class="q-section-count">' + items.length + ' question' + (items.length !== 1 ? 's' : '') + '</span>'
+        +   actions
+        + '</div>'
+        + '<div class="q-section-cards"' + (collapsed ? ' style="display:none"' : '') + '>'
+        +   (items.length ? items.join('') : '<div class="q-section-empty">Drop questions here to add them to this section.</div>')
+        + '</div>'
+      + '</div>';
+    };
+    let html = '';
+    for (const [key, items] of buckets.entries()) html += renderGroup(key, items);
+    if (unsectioned.length) html += renderGroup('__unsectioned__', unsectioned);
+    list.innerHTML = html;
+  }
   attachDragHandlers();
+  _attachSectionGroupDnD();
+  _updateQuestionSelectionBar();
+}
+
+function toggleSectionCollapse(key) {
+  if (APP.collapsedSections.has(key)) APP.collapsedSections.delete(key);
+  else APP.collapsedSections.add(key);
+  renderQuestions();
+}
+
+// ── SECTION MANAGEMENT (quiz-level) ──────────────────────────
+async function addSection() {
+  _ensureSectionsList();
+  const name = await cdlg({ title: 'New section', msg: 'Section name:', input: true, confirmText: 'Add', cancelText: 'Cancel' });
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  if (APP.settings.sections.includes(trimmed)) {
+    toast('Section "' + trimmed + '" already exists', 'err');
+    return;
+  }
+  pushQHistory();
+  APP.settings.sections.push(trimmed);
+  renderQuestions();
+}
+
+async function renameSection(oldName) {
+  _ensureSectionsList();
+  if (!APP.settings.sections.includes(oldName)) return;
+  const name = await cdlg({ title: 'Rename section', msg: 'New name for "' + oldName + '":', input: true, inputDefault: oldName, confirmText: 'Save', cancelText: 'Cancel' });
+  if (!name || !name.trim() || name.trim() === oldName) return;
+  const trimmed = name.trim();
+  if (APP.settings.sections.includes(trimmed)) {
+    toast('Section "' + trimmed + '" already exists', 'err');
+    return;
+  }
+  pushQHistory();
+  const idx = APP.settings.sections.indexOf(oldName);
+  APP.settings.sections[idx] = trimmed;
+  // Walk every question with the old section name to update its field
+  APP.questions.forEach(q => { if (q.section === oldName) q.section = trimmed; });
+  // Migrate the collapsed-state too so the header keeps its state through rename
+  if (APP.collapsedSections.has(oldName)) {
+    APP.collapsedSections.delete(oldName);
+    APP.collapsedSections.add(trimmed);
+  }
+  renderQuestions();
+  updateBadges();
+}
+
+async function deleteSection(name) {
+  _ensureSectionsList();
+  if (!APP.settings.sections.includes(name)) return;
+  const inSection = APP.questions.filter(q => q.section === name).length;
+  const msg = inSection
+    ? 'Delete section "' + name + '"? Its ' + inSection + ' question' + (inSection !== 1 ? 's' : '') + ' will become unsectioned.'
+    : 'Delete section "' + name + '"?';
+  const ok = await cdlg({ title: 'Delete section?', msg, confirmText: 'Delete', cancelText: 'Cancel' });
+  if (!ok) return;
+  pushQHistory();
+  APP.settings.sections = APP.settings.sections.filter(s => s !== name);
+  APP.questions.forEach(q => { if (q.section === name) delete q.section; });
+  APP.collapsedSections.delete(name);
+  renderQuestions();
+  updateBadges();
+  toast('Section deleted');
+}
+
+// Drops onto a section header or onto an empty section body reassign the
+// question's section field and append it at the end of that section.
+function _attachSectionGroupDnD() {
+  document.querySelectorAll('#q-list .q-section-group').forEach(group => {
+    const sectionKey = group.dataset.sectionKey;
+    const header = group.querySelector('.q-section-header');
+    const body   = group.querySelector('.q-section-cards');
+    const handleDragOver = e => {
+      if (_dragSrcIdx === null) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      group.classList.add('drag-section-over');
+    };
+    const handleDrop = e => {
+      e.preventDefault();
+      e.stopPropagation();
+      group.classList.remove('drag-section-over');
+      if (_dragSrcIdx === null) return;
+      // If the drop landed on a specific card inside the section, the card's own
+      // handler already ran and consumed the drop. This handler only fires for
+      // drops on the header or the empty area.
+      const newSection = sectionKey === '__unsectioned__' ? '' : sectionKey;
+      pushQHistory();
+      const item = APP.questions.splice(_dragSrcIdx, 1)[0];
+      if (newSection) item.section = newSection;
+      else delete item.section;
+      // Insert at the end of the target section's questions in the array
+      const lastInSection = _lastIndexOfSection(newSection);
+      if (lastInSection === -1) APP.questions.push(item);
+      else APP.questions.splice(lastInSection + 1, 0, item);
+      _dragSrcIdx = null;
+      renderQuestions();
+      updateBadges();
+      syncToBatch();
+    };
+    if (header) {
+      header.addEventListener('dragover', handleDragOver);
+      header.addEventListener('drop', handleDrop);
+    }
+    if (body) {
+      body.addEventListener('dragover', handleDragOver);
+      body.addEventListener('drop', handleDrop);
+    }
+    group.addEventListener('dragleave', () => group.classList.remove('drag-section-over'));
+  });
+}
+
+function _lastIndexOfSection(sectionName) {
+  // Returns the array index of the last question that belongs to the given section
+  // (empty string === unsectioned). -1 if no question is in that section yet.
+  let idx = -1;
+  for (let i = 0; i < APP.questions.length; i++) {
+    const s = APP.questions[i].section || '';
+    if (s === sectionName) idx = i;
+  }
+  return idx;
+}
+
+// ── BULK-SELECT QUESTIONS → BANK ───────────────────────────
+function toggleQuestionSelection(id, checked) {
+  if (checked) APP.selectedQids.add(id); else APP.selectedQids.delete(id);
+  // Update the card visual without re-rendering everything (preserve scroll)
+  const card = document.querySelector('.q-card .q-sel-cb[onchange*="' + id + '"]');
+  if (card) card.closest('.q-card').classList.toggle('q-selected', checked);
+  _updateQuestionSelectionBar();
+}
+
+function toggleSelectAllQuestions(checked) {
+  if (checked) APP.questions.forEach(q => APP.selectedQids.add(q.id));
+  else APP.selectedQids.clear();
+  renderQuestions();
+}
+
+function clearQuestionSelection() {
+  APP.selectedQids.clear();
+  renderQuestions();
+}
+
+function _updateQuestionSelectionBar() {
+  // Drop selection IDs that no longer exist (e.g. after delete / clear all)
+  const validIds = new Set(APP.questions.map(q => q.id));
+  Array.from(APP.selectedQids).forEach(id => { if (!validIds.has(id)) APP.selectedQids.delete(id); });
+  const bar = document.getElementById('q-sel-bar');
+  const cnt = document.getElementById('q-sel-count');
+  const selAll = document.getElementById('q-sel-all');
+  const actions = document.getElementById('q-sel-actions');
+  if (!bar) return;
+  const n = APP.selectedQids.size;
+  // Bar is visible whenever there are questions, so Select all is always reachable.
+  // The Send/Clear actions only appear once at least one question is selected.
+  bar.style.display = APP.questions.length ? '' : 'none';
+  if (actions) actions.style.display = n ? '' : 'none';
+  if (cnt) cnt.textContent = String(n);
+  if (selAll) selAll.checked = n > 0 && n === APP.questions.length;
+}
+
+async function openSendToBank() {
+  if (!APP.selectedQids.size) { toast('Select at least one question', 'err'); return; }
+  // Refresh bank state so the folder list reflects anything created elsewhere
+  await fetchBank();
+  document.getElementById('qtb-count').textContent = String(APP.selectedQids.size);
+  // Populate both folder dropdowns with full paths so users can identify nested folders
+  const opts = ['<option value="">— select an existing folder —</option>']
+    .concat(BANK.folders.map(f => '<option value="' + f.id + '">' + escH(_bankFolderPath(f.id).join(' / ')) + '</option>'));
+  document.getElementById('qtb-folder-select').innerHTML = opts.join('');
+  const parentOpts = ['<option value="">(at root)</option>']
+    .concat(BANK.folders.map(f => '<option value="' + f.id + '">' + escH(_bankFolderPath(f.id).join(' / ')) + '</option>'));
+  document.getElementById('qtb-new-folder-parent').innerHTML = parentOpts.join('');
+  document.getElementById('qtb-new-folder-name').value = '';
+  document.getElementById('qtb-folder-select').value = '';
+  document.getElementById('qtb-new-folder-parent').value = '';
+  showModal('modal-q-to-bank');
+}
+
+async function confirmSendToBank() {
+  const newName = document.getElementById('qtb-new-folder-name').value.trim();
+  const newParent = document.getElementById('qtb-new-folder-parent').value || null;
+  const existingId = document.getElementById('qtb-folder-select').value;
+  let targetFolderId = null;
+  // New folder takes priority if a name was typed; otherwise use the picked existing folder
+  if (newName) {
+    const id = uuid();
+    const ok = await API.post('/api/bank/folders', { id, name: newName, parentId: newParent });
+    if (!ok) { toast('Could not create folder', 'err'); return; }
+    targetFolderId = id;
+  } else if (existingId) {
+    targetFolderId = existingId;
+  } else {
+    toast('Pick a folder or type a new folder name', 'err');
+    return;
+  }
+  const ids = Array.from(APP.selectedQids);
+  let ok = 0, fail = 0;
+  for (const qid_ of ids) {
+    const src = APP.questions.find(q => q.id === qid_);
+    if (!src) { fail++; continue; }
+    // Send a copy with a fresh short id + the destination folderId
+    const copy = Object.assign({}, src, { id: qid(), folderId: targetFolderId });
+    const res = await API.post('/api/bank/questions', copy);
+    if (res) ok++; else fail++;
+  }
+  await fetchBank();
+  closeModal('modal-q-to-bank');
+  clearQuestionSelection();
+  if (fail) toast('Sent ' + ok + ' to bank, ' + fail + ' failed', 'err');
+  else toast('Sent ' + ok + ' question' + (ok !== 1 ? 's' : '') + ' to bank', 'ok');
+}
+
+// ── ADD FROM BANK PICKER ──────────────────────────────────
+// Modal for picking bank questions and copying them into the current quiz.
+// Uses its own UI state so it doesn't interfere with the Question Bank tab.
+const ADD_FROM_BANK = {
+  selectedIds: new Set(),
+  folderId: null,
+  folderFilter: '',
+  questionFilter: ''
+};
+
+async function openAddFromBank() {
+  await fetchBank();
+  ADD_FROM_BANK.selectedIds = new Set();
+  // Open to the bank tab's last-viewed folder if there is one, else first root folder
+  const rootFolders = BANK.folders.filter(f => !f.parentId);
+  ADD_FROM_BANK.folderId = BANK.selectedFolderId
+    || (rootFolders[0] && rootFolders[0].id)
+    || null;
+  ADD_FROM_BANK.folderFilter = '';
+  ADD_FROM_BANK.questionFilter = '';
+  document.getElementById('afb-folder-search').value = '';
+  document.getElementById('afb-q-search').value = '';
+  _afbRenderFolders();
+  _afbRenderQuestions();
+  _afbUpdateFooter();
+  showModal('modal-add-from-bank');
+}
+
+function _afbRenderFolders() {
+  const tree = document.getElementById('afb-folder-tree');
+  if (!BANK.folders.length) {
+    tree.innerHTML = '<div class="bank-empty">No folders in the bank yet.<br><br>Add some on the Question Bank tab.</div>';
+    return;
+  }
+  const filter = (ADD_FROM_BANK.folderFilter || '').trim().toLowerCase();
+  const visible = filter ? _bankFolderVisibleSet(filter) : null;
+  if (filter && !visible.size) {
+    tree.innerHTML = '<div class="bank-empty">No folders match "' + escH(ADD_FROM_BANK.folderFilter) + '".</div>';
+    return;
+  }
+  tree.innerHTML = _afbFoldersHtml(null, visible);
+}
+
+function _afbFoldersHtml(parentId, visibleSet) {
+  const kids = _bankFolderChildren(parentId).filter(f => !visibleSet || visibleSet.has(f.id));
+  if (!kids.length) return '';
+  return kids.map(f => {
+    const hasKids = _bankFolderChildren(f.id).length > 0;
+    const isSelected = ADD_FROM_BANK.folderId === f.id;
+    const count = _bankQuestionCount(f.id);
+    // Count how many selected questions live in this folder (helps when navigating away)
+    const selInFolder = BANK.questions.filter(q => q.folderId === f.id && ADD_FROM_BANK.selectedIds.has(q.id)).length;
+    return '<div class="bank-folder' + (isSelected ? ' selected' : '') + '" onclick="afbSelectFolder(\'' + f.id + '\')">'
+      + '<span class="bank-folder-toggle' + (hasKids ? ' open' : ' leaf') + '">▶</span>'
+      + '<svg class="bank-folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
+      + '<span class="bank-folder-name">' + escH(f.name) + '</span>'
+      + (selInFolder ? '<span class="bank-folder-count" style="color:var(--green-dk);font-weight:700">' + selInFolder + '✓</span>' : (count ? '<span class="bank-folder-count">' + count + '</span>' : ''))
+      + '</div>'
+      + (hasKids ? '<div class="bank-folder-children">' + _afbFoldersHtml(f.id, visibleSet) + '</div>' : '');
+  }).join('');
+}
+
+function afbSelectFolder(id) {
+  if (ADD_FROM_BANK.folderId !== id) {
+    ADD_FROM_BANK.questionFilter = '';
+    const inp = document.getElementById('afb-q-search');
+    if (inp) inp.value = '';
+  }
+  ADD_FROM_BANK.folderId = id;
+  _afbRenderFolders();
+  _afbRenderQuestions();
+}
+
+function _afbRenderQuestions() {
+  const placeholder = document.getElementById('afb-q-placeholder');
+  const pane = document.getElementById('afb-q-pane');
+  if (!ADD_FROM_BANK.folderId) { placeholder.style.display = ''; pane.style.display = 'none'; return; }
+  placeholder.style.display = 'none';
+  pane.style.display = '';
+  const path = _bankFolderPath(ADD_FROM_BANK.folderId);
+  const titleEl = document.getElementById('afb-q-title');
+  titleEl.innerHTML = path.length > 1
+    ? '<span style="color:var(--muted);font-weight:500;font-size:13px">' + path.slice(0, -1).map(escH).join(' / ') + ' / </span>' + escH(path[path.length - 1])
+    : escH(path[0] || '—');
+  const all = BANK.questions.filter(q => q.folderId === ADD_FROM_BANK.folderId);
+  const filter = (ADD_FROM_BANK.questionFilter || '').trim().toLowerCase();
+  const qs = filter ? all.filter(q => _stripHtml(q.question || '').toLowerCase().includes(filter)) : all;
+  const countEl = document.getElementById('afb-q-count');
+  if (filter) countEl.textContent = qs.length + ' of ' + all.length + ' match';
+  else countEl.textContent = all.length + ' question' + (all.length === 1 ? '' : 's');
+  // "Select all" reflects whether every (filtered) question is selected
+  const selAll = document.getElementById('afb-select-all');
+  if (selAll) selAll.checked = qs.length > 0 && qs.every(q => ADD_FROM_BANK.selectedIds.has(q.id));
+  const list = document.getElementById('afb-q-list');
+  if (!qs.length) {
+    list.innerHTML = '<div class="bank-empty">' + (filter ? 'No questions match.' : 'This folder is empty.') + '</div>';
+    return;
+  }
+  list.innerHTML = qs.map(q => {
+    const text = _stripHtml(q.question || '');
+    const preview = text.length > 180 ? text.slice(0, 180) + '…' : text;
+    const isSel = ADD_FROM_BANK.selectedIds.has(q.id);
+    return '<div class="afb-q-row' + (isSel ? ' afb-selected' : '') + '" onclick="afbToggleQuestion(\'' + q.id + '\')">'
+      + '<input type="checkbox" class="afb-q-cb"' + (isSel ? ' checked' : '') + ' onclick="event.stopPropagation();afbToggleQuestion(\'' + q.id + '\')">'
+      + '<div class="afb-q-body">'
+        + '<div class="afb-q-text">' + escH(preview) + '</div>'
+        + '<div class="afb-q-meta"><span class="afb-q-type">' + _bankTypeLabel(q.questionType) + '</span>'
+        + (q.options ? '<span>' + q.options.length + ' options</span>' : '')
+        + (q.pairs ? '<span>' + q.pairs.length + ' pairs</span>' : '')
+        + (q.steps ? '<span>' + q.steps.length + ' steps</span>' : '')
+        + (q.hotspots ? '<span>' + q.hotspots.length + ' hotspots</span>' : '')
+        + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function afbToggleQuestion(id) {
+  if (ADD_FROM_BANK.selectedIds.has(id)) ADD_FROM_BANK.selectedIds.delete(id);
+  else ADD_FROM_BANK.selectedIds.add(id);
+  // Only re-render the right pane + folder counts; left tree refresh keeps the green checkmark in sync
+  _afbRenderQuestions();
+  _afbRenderFolders();
+  _afbUpdateFooter();
+}
+
+function afbToggleSelectAllInFolder(checked) {
+  const all = BANK.questions.filter(q => q.folderId === ADD_FROM_BANK.folderId);
+  const filter = (ADD_FROM_BANK.questionFilter || '').trim().toLowerCase();
+  const qs = filter ? all.filter(q => _stripHtml(q.question || '').toLowerCase().includes(filter)) : all;
+  qs.forEach(q => {
+    if (checked) ADD_FROM_BANK.selectedIds.add(q.id);
+    else ADD_FROM_BANK.selectedIds.delete(q.id);
+  });
+  _afbRenderQuestions();
+  _afbRenderFolders();
+  _afbUpdateFooter();
+}
+
+function afbFilterFolders(value) {
+  ADD_FROM_BANK.folderFilter = value || '';
+  _afbRenderFolders();
+}
+
+function afbFilterQuestions(value) {
+  ADD_FROM_BANK.questionFilter = value || '';
+  _afbRenderQuestions();
+}
+
+function _afbUpdateFooter() {
+  const n = ADD_FROM_BANK.selectedIds.size;
+  document.getElementById('afb-total-count').textContent = String(n);
+  const btn = document.getElementById('afb-confirm-btn');
+  btn.disabled = !n;
+  btn.textContent = n ? 'Add ' + n + ' to Quiz' : 'Add to Quiz';
+}
+
+function confirmAddFromBank() {
+  const ids = Array.from(ADD_FROM_BANK.selectedIds);
+  if (!ids.length) return;
+  pushQHistory();
+  _ensureSectionsList();
+  let added = 0;
+  ids.forEach(bid => {
+    const src = BANK.questions.find(q => q.id === bid);
+    if (!src) return;
+    // Copy with a fresh id; strip the folderId (quiz questions don't carry one) but
+    // remember the origin as a section label so the quiz keeps its subject grouping.
+    const folder = BANK.folders.find(f => f.id === src.folderId);
+    const sectionName = folder ? folder.name : (src.section || '');
+    // Register the section in the quiz's canonical list so the user can manage it
+    if (sectionName && !APP.settings.sections.includes(sectionName)) APP.settings.sections.push(sectionName);
+    const copy = Object.assign({}, src, { id: qid(), section: sectionName });
+    if (!sectionName) delete copy.section;
+    delete copy.folderId;
+    APP.questions.push(copy);
+    added++;
+  });
+  closeModal('modal-add-from-bank');
+  renderQuestions();
+  updateBadges();
+  syncToBatch();
+  toast('Added ' + added + ' question' + (added !== 1 ? 's' : '') + ' from bank', 'ok');
 }
 
 let _dragSrcIdx = null;
@@ -5202,12 +5998,22 @@ function attachDragHandlers() {
     });
     card.addEventListener('drop', e => {
       e.preventDefault();
+      e.stopPropagation();
       const targetIdx = parseInt(card.dataset.qidx);
       if (_dragSrcIdx === null || _dragSrcIdx === targetIdx) return;
       const rect = card.getBoundingClientRect();
       const insertAfter = e.clientY >= rect.top + rect.height / 2;
+      // If we're dropping onto a card in a different section, reassign the
+      // dragged question's section field so the visual position matches reality.
+      const targetGroup = card.closest('.q-section-group');
+      const targetSectionKey = targetGroup ? targetGroup.dataset.sectionKey : null;
       pushQHistory();
       const item = APP.questions.splice(_dragSrcIdx, 1)[0];
+      if (targetSectionKey) {
+        const newSection = targetSectionKey === '__unsectioned__' ? '' : targetSectionKey;
+        if (newSection) item.section = newSection;
+        else delete item.section;
+      }
       let insertIdx = targetIdx > _dragSrcIdx ? targetIdx - 1 : targetIdx;
       if (insertAfter) insertIdx++;
       APP.questions.splice(insertIdx, 0, item);
@@ -5249,7 +6055,8 @@ const BUILTIN_PRESETS = [
       randomizeOptions: true,
       randomizeQuestions: true,
       allowBlankAnswers: true,
-      warnOnBlankAnswers: true
+      warnOnBlankAnswers: true,
+      partialCreditMultiSelect: false
     }
   },
   {
@@ -5260,11 +6067,15 @@ const BUILTIN_PRESETS = [
       cooldownDays: 0,
       passingPercentage: 70,
       timeLimitMinutes: 0,
+      questionsPerAttempt: 0,
       confirmBeforeSubmit: false,
       randomizeOptions: true,
       randomizeQuestions: true,
       allowBlankAnswers: true,
-      warnOnBlankAnswers: true
+      warnOnBlankAnswers: true,
+      showAnswerReview: false,
+      bestScoreTracking: false,
+      partialCreditMultiSelect: true
     }
   }
 ];
@@ -5351,6 +6162,506 @@ async function deletePreset(id) {
   renderPresetsDropdown();
   if (!APP.presets.length) document.getElementById('presets-dropdown').classList.remove('open');
   toast('Preset deleted');
+}
+
+// ── QUESTION BANK ─────────────────────────────────────────
+// In-memory mirror of the server-side bank. {folders, questions, selectedFolderId,
+// expandedFolderIds, editingTarget}. editingTarget is set to 'bank' when the
+// editor modal is opened from the bank tab, so saveQuestion knows where to write.
+const BANK = {
+  folders: [],
+  questions: [],
+  selectedFolderId: null,
+  expanded: new Set(),
+  editingTarget: 'quiz', // 'quiz' (default) or 'bank'
+  importTarget: null,    // set to a folderId during a bank-import file drop/select
+  folderFilter: '',      // text filter for the folder tree
+  questionFilter: '',    // text filter for the active folder's question list
+  quizSelectedIds: new Set() // ids of bank questions checked for in-place "Add to Quiz"
+};
+
+// Called by the file handlers when BANK.importTarget is set. Takes whatever
+// the parser produced and posts each question to the bank under the target
+// folder, then refreshes the UI. Returns true when it took ownership.
+async function _bankImportQuestions(parsedQuestions, sourceLabel) {
+  if (!BANK.importTarget) return false;
+  const folderId = BANK.importTarget;
+  let ok = 0, fail = 0;
+  for (const q of parsedQuestions) {
+    // Mint a fresh short id so imports don't collide with anything already in the bank
+    const bq = Object.assign({}, q, { id: qid(), folderId });
+    const res = await API.post('/api/bank/questions', bq);
+    if (res) ok++; else fail++;
+  }
+  await fetchBank();
+  BANK.selectedFolderId = folderId;
+  renderBank();
+  if (fail) toast('Imported ' + ok + ' to bank, ' + fail + ' failed', 'err');
+  else toast('Imported ' + ok + ' question' + (ok !== 1 ? 's' : '') + ' to bank', 'ok');
+  return true;
+}
+
+async function fetchBank() {
+  const data = await API.get('/api/bank');
+  if (data) {
+    BANK.folders = data.folders || [];
+    BANK.questions = data.questions || [];
+    // Auto-expand all root folders for first-time UX
+    if (!BANK.expanded.size) BANK.folders.filter(f => !f.parentId).forEach(f => BANK.expanded.add(f.id));
+    // Drop selection if folder was deleted elsewhere
+    if (BANK.selectedFolderId && !BANK.folders.some(f => f.id === BANK.selectedFolderId)) BANK.selectedFolderId = null;
+  }
+}
+
+function _bankFolderChildren(parentId) {
+  return BANK.folders.filter(f => f.parentId === (parentId || null))
+                     .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0) || a.name.localeCompare(b.name));
+}
+
+function _bankQuestionCount(folderId) {
+  return BANK.questions.filter(q => q.folderId === folderId).length;
+}
+
+function _bankFolderPath(folderId) {
+  const parts = [];
+  let cur = BANK.folders.find(f => f.id === folderId);
+  let safety = 50;
+  while (cur && safety-- > 0) {
+    parts.unshift(cur.name);
+    cur = cur.parentId ? BANK.folders.find(f => f.id === cur.parentId) : null;
+  }
+  return parts;
+}
+
+function renderBank() {
+  renderBankFolders();
+  renderBankQuestions();
+}
+
+function renderBankFolders() {
+  const tree = document.getElementById('bank-folder-tree');
+  if (!BANK.folders.length) {
+    tree.innerHTML = '<div class="bank-empty">No folders yet.<br><br><button class="btn btn-sm btn-outline-green" onclick="bankNewFolder(null)">+ Create your first folder</button></div>';
+    return;
+  }
+  const filter = (BANK.folderFilter || '').trim().toLowerCase();
+  const visible = filter ? _bankFolderVisibleSet(filter) : null;
+  if (filter && !visible.size) {
+    tree.innerHTML = '<div class="bank-empty">No folders match "' + escH(BANK.folderFilter) + '".</div>';
+    return;
+  }
+  tree.innerHTML = _bankFoldersHtml(null, visible);
+  _bankAttachFolderDnD();
+}
+
+// Returns the set of folder IDs that should be visible given a filter — any
+// folder whose name matches, plus all of its ancestors (so the path is
+// reachable in the tree). Returns an empty Set when nothing matches.
+function _bankFolderVisibleSet(filter) {
+  const direct = new Set(BANK.folders.filter(f => f.name.toLowerCase().includes(filter)).map(f => f.id));
+  const visible = new Set(direct);
+  direct.forEach(id => {
+    let cur = BANK.folders.find(f => f.id === id);
+    let safety = 50;
+    while (cur && cur.parentId && safety-- > 0) {
+      visible.add(cur.parentId);
+      cur = BANK.folders.find(f => f.id === cur.parentId);
+    }
+  });
+  return visible;
+}
+
+function _bankFoldersHtml(parentId, visibleSet) {
+  const kids = _bankFolderChildren(parentId).filter(f => !visibleSet || visibleSet.has(f.id));
+  if (!kids.length) return '';
+  return kids.map(f => {
+    const subKids = _bankFolderChildren(f.id);
+    const hasKids = subKids.length > 0;
+    // Force-expand any folder on the match path when filtering, otherwise honor user state
+    const isOpen = visibleSet ? true : BANK.expanded.has(f.id);
+    const isSelected = BANK.selectedFolderId === f.id;
+    const count = _bankQuestionCount(f.id);
+    return '<div class="bank-folder' + (isSelected ? ' selected' : '') + '" data-folder-id="' + f.id + '" onclick="bankSelectFolder(\'' + f.id + '\')" oncontextmenu="bankFolderMenu(event,\'' + f.id + '\');return false">'
+      + '<span class="bank-folder-toggle' + (hasKids ? (isOpen ? ' open' : '') : ' leaf') + '" onclick="event.stopPropagation();bankToggleFolder(\'' + f.id + '\')">▶</span>'
+      + '<svg class="bank-folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
+      + '<span class="bank-folder-name">' + escH(f.name) + '</span>'
+      + (count ? '<span class="bank-folder-count">' + count + '</span>' : '')
+      + '<span class="bank-folder-actions">'
+        + '<button title="New subfolder" onclick="event.stopPropagation();bankNewFolder(\'' + f.id + '\')">+</button>'
+        + '<button title="Rename" onclick="event.stopPropagation();bankRenameFolder(\'' + f.id + '\')">✎</button>'
+        + '<button title="Delete" onclick="event.stopPropagation();bankDeleteFolder(\'' + f.id + '\')">×</button>'
+      + '</span>'
+      + '</div>'
+      + (hasKids && isOpen ? '<div class="bank-folder-children">' + _bankFoldersHtml(f.id, visibleSet) + '</div>' : '');
+  }).join('');
+}
+
+function bankFilterFolders(value) {
+  BANK.folderFilter = value || '';
+  renderBankFolders();
+}
+
+function bankToggleFolder(id) {
+  if (BANK.expanded.has(id)) BANK.expanded.delete(id); else BANK.expanded.add(id);
+  renderBankFolders();
+}
+
+function bankSelectFolder(id) {
+  if (BANK.selectedFolderId !== id) {
+    // Reset the question filter when switching folders — stale filters across folders are confusing
+    BANK.questionFilter = '';
+    const inp = document.getElementById('bank-q-search');
+    if (inp) inp.value = '';
+  }
+  BANK.selectedFolderId = id;
+  renderBank();
+}
+
+function bankFilterQuestions(value) {
+  BANK.questionFilter = value || '';
+  renderBankQuestionList();
+}
+
+async function bankNewFolder(parentId) {
+  const name = await cdlg({ title: 'New folder' + (parentId ? ' (subfolder)' : ''), msg: 'Folder name:', input: true, confirmText: 'Create', cancelText: 'Cancel' });
+  if (!name || !name.trim()) return;
+  const id = uuid();
+  const ok = await API.post('/api/bank/folders', { id, name: name.trim(), parentId: parentId || null });
+  if (!ok) { toast('Could not create folder', 'err'); return; }
+  await fetchBank();
+  if (parentId) BANK.expanded.add(parentId);
+  BANK.selectedFolderId = id;
+  renderBank();
+}
+
+async function bankRenameFolder(id) {
+  const f = BANK.folders.find(x => x.id === id);
+  if (!f) return;
+  const name = await cdlg({ title: 'Rename folder', msg: 'New name:', input: true, inputDefault: f.name, confirmText: 'Save', cancelText: 'Cancel' });
+  if (!name || !name.trim() || name.trim() === f.name) return;
+  const ok = await API.patch('/api/bank/folders/' + id, { name: name.trim() });
+  if (!ok) { toast('Could not rename folder', 'err'); return; }
+  await fetchBank();
+  renderBank();
+}
+
+async function bankDeleteFolder(id) {
+  const f = BANK.folders.find(x => x.id === id);
+  if (!f) return;
+  const childFolders = BANK.folders.filter(x => x.parentId === id).length;
+  const childQs = _bankQuestionCount(id);
+  if (childFolders || childQs) {
+    toast('Folder is not empty — move or delete its contents first', 'err');
+    return;
+  }
+  const ok = await cdlg({ title: 'Delete folder?', msg: 'Delete "' + f.name + '"? This cannot be undone.', confirmText: 'Delete', cancelText: 'Cancel' });
+  if (!ok) return;
+  const res = await API.del('/api/bank/folders/' + id);
+  if (!res) { toast('Could not delete folder', 'err'); return; }
+  if (BANK.selectedFolderId === id) BANK.selectedFolderId = null;
+  await fetchBank();
+  renderBank();
+  toast('Folder deleted');
+}
+
+function renderBankQuestions() {
+  const placeholder = document.getElementById('bank-q-placeholder');
+  const pane = document.getElementById('bank-q-pane');
+  if (!BANK.selectedFolderId) {
+    placeholder.style.display = '';
+    pane.style.display = 'none';
+    return;
+  }
+  placeholder.style.display = 'none';
+  pane.style.display = '';
+  const folder = BANK.folders.find(f => f.id === BANK.selectedFolderId);
+  const path = _bankFolderPath(BANK.selectedFolderId);
+  const titleEl = document.getElementById('bank-q-title');
+  titleEl.innerHTML = path.length > 1
+    ? '<span style="color:var(--muted);font-weight:500;font-size:13px">' + path.slice(0, -1).map(escH).join(' / ') + ' / </span>' + escH(path[path.length - 1])
+    : escH(path[0] || '—');
+  // Show the Import-questions button only when the folder already has questions
+  const total = BANK.questions.filter(q => q.folderId === BANK.selectedFolderId).length;
+  document.getElementById('bank-q-import-btn').style.display = total ? '' : 'none';
+  renderBankQuestionList();
+}
+
+function renderBankQuestionList() {
+  const folder = BANK.folders.find(f => f.id === BANK.selectedFolderId);
+  const all = BANK.questions.filter(q => q.folderId === BANK.selectedFolderId);
+  const filter = (BANK.questionFilter || '').trim().toLowerCase();
+  const qs = filter
+    ? all.filter(q => _stripHtml(q.question || '').toLowerCase().includes(filter))
+    : all;
+  // Header count: "5 questions" normally, "2 of 5 match" when filtering
+  const countEl = document.getElementById('bank-q-count');
+  if (filter) countEl.textContent = qs.length + ' of ' + all.length + ' match';
+  else countEl.textContent = all.length + ' question' + (all.length === 1 ? '' : 's');
+  const list = document.getElementById('bank-q-list');
+  if (!all.length) {
+    list.innerHTML = '<div class="drop-zone" id="dz-bank-folder" style="padding:30px 22px">'
+      +   '<div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:36px;height:36px"></div>'
+      +   '<div style="font-size:15px;font-weight:600;margin:6px 0 4px">Drop a file here, or click to browse</div>'
+      +   '<div style="display:flex;justify-content:center;align-items:flex-start;gap:14px;flex-wrap:wrap;margin:14px 0 6px">'
+      +     '<div class="ft-chip"><span class="ft-tag" style="border-color:#9ca3af;color:#4b5563">TXT</span><span class="ft-sub">AIKEN</span></div>'
+      +     '<div class="ft-chip"><span class="ft-tag" style="border-color:#f59e0b;color:#b45309">XML</span><span class="ft-sub">Moodle</span></div>'
+      +     '<div class="ft-chip"><span class="ft-tag" style="border-color:#eab308;color:#854d0e">ZIP</span><span class="ft-sub">SCORM</span></div>'
+      +     '<div class="ft-chip"><span class="ft-tag" style="border-color:#2563eb;color:#1e40af">DOCX</span><span class="ft-sub">Word</span></div>'
+      +     '<div class="ft-chip"><span class="ft-tag" style="border-color:#dc2626;color:#991b1b">PPTX</span><span class="ft-sub">PowerPoint</span></div>'
+      +   '</div>'
+      +   '<div style="font-size:12px;color:var(--muted);margin-top:4px">Imported questions will be added to <strong>' + escH(folder ? folder.name : '') + '</strong>.</div>'
+      +   '<input type="file" id="file-bank-folder" accept=".txt,.xml,.zip,.docx,.pptx,.md">'
+      + '</div>';
+    _wireDropZone('dz-bank-folder', 'file-bank-folder', { bankFolderId: () => BANK.selectedFolderId });
+    return;
+  }
+  if (!qs.length) {
+    list.innerHTML = '<div class="bank-empty">No questions match "' + escH(BANK.questionFilter) + '".</div>';
+    return;
+  }
+  list.innerHTML = qs.map(q => {
+    const text = _stripHtml(q.question || '');
+    const preview = text.length > 200 ? text.slice(0, 200) + '…' : text;
+    const isSel = BANK.quizSelectedIds.has(q.id);
+    return '<div class="bank-q-row' + (isSel ? ' q-selected' : '') + '" data-question-id="' + q.id + '">'
+      + '<input type="checkbox" class="bank-q-sel-cb"' + (isSel ? ' checked' : '') + ' onclick="event.stopPropagation()" onchange="toggleBankQuestionForQuiz(\'' + q.id + '\', this.checked)" title="Select to add to current quiz">'
+      + '<span class="bank-q-grip" title="Drag to reorder, or onto a folder to move">⋮⋮</span>'
+      + '<div class="bank-q-body">'
+        + '<div class="bank-q-text">' + escH(preview) + '</div>'
+        + '<div class="bank-q-meta"><span class="bank-q-type">' + _bankTypeLabel(q.questionType) + '</span>'
+        + (q.options ? '<span>' + q.options.length + ' options</span>' : '')
+        + (q.pairs ? '<span>' + q.pairs.length + ' pairs</span>' : '')
+        + (q.steps ? '<span>' + q.steps.length + ' steps</span>' : '')
+        + (q.hotspots ? '<span>' + q.hotspots.length + ' hotspots</span>' : '')
+        + '</div>'
+      + '</div>'
+      + '<div class="bank-q-actions">'
+        + '<button title="Edit" onclick="bankEditQuestion(\'' + q.id + '\')">' + ICON.edit + '</button>'
+        + '<button title="Duplicate" onclick="bankDuplicateQuestion(\'' + q.id + '\')">' + ICON.duplicate + '</button>'
+        + '<button class="del" title="Delete" onclick="bankDeleteQuestion(\'' + q.id + '\')">' + ICON.trash + '</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+  _bankAttachQuestionDnD();
+  _updateBankQuizSelectionBar();
+}
+
+function _bankTypeLabel(t) {
+  return { single:'Single', multiple:'Multiple', matching:'Matching', sequencing:'Sequencing', hotspot:'Hotspot' }[t || 'single'] || 'Single';
+}
+
+function bankAddQuestion() {
+  if (!BANK.selectedFolderId) { toast('Select a folder first', 'err'); return; }
+  openEditor(null, 'bank');
+}
+
+function bankEditQuestion(id) {
+  if (!BANK.questions.some(x => x.id === id)) return;
+  openEditor(id, 'bank');
+}
+
+async function bankDuplicateQuestion(id) {
+  const q = BANK.questions.find(x => x.id === id);
+  if (!q) return;
+  const copy = JSON.parse(JSON.stringify(q));
+  copy.id = qid();
+  const ok = await API.post('/api/bank/questions', copy);
+  if (!ok) { toast('Could not duplicate', 'err'); return; }
+  await fetchBank();
+  renderBankQuestions();
+  toast('Question duplicated', 'ok');
+}
+
+async function bankDeleteQuestion(id) {
+  const q = BANK.questions.find(x => x.id === id);
+  if (!q) return;
+  const ok = await cdlg({ title: 'Delete question?', msg: 'Remove this question from the bank? This cannot be undone.', confirmText: 'Delete', cancelText: 'Cancel' });
+  if (!ok) return;
+  const res = await API.del('/api/bank/questions/' + id);
+  if (!res) { toast('Could not delete', 'err'); return; }
+  await fetchBank();
+  renderBankQuestions();
+  toast('Question deleted');
+}
+
+// ── BANK DRAG-DROP ──
+// Row is non-draggable by default. The grip handle flips draggable=true on
+// mousedown so only grabbing the dots starts a drag. Rows accept drops from
+// other rows to reorder within the same folder (handled here); folder tree
+// drops are handled in _bankAttachFolderDnD.
+function _bankAttachQuestionDnD() {
+  document.querySelectorAll('#bank-questions .bank-q-row').forEach(row => {
+    const grip = row.querySelector('.bank-q-grip');
+    if (grip) {
+      grip.addEventListener('mousedown', () => { row.draggable = true; });
+      grip.addEventListener('mouseup',   () => { row.draggable = false; });
+    }
+    row.addEventListener('dragstart', e => {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', 'q:' + row.dataset.questionId);
+      row.classList.add('dragging');
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('dragging');
+      row.draggable = false;
+      // Clear any drop-line indicators left around
+      document.querySelectorAll('#bank-q-list .bank-q-row').forEach(r => r.classList.remove('drag-over-top','drag-over-bottom'));
+    });
+    row.addEventListener('dragover', e => {
+      const data = e.dataTransfer.types.includes('text/plain') ? null : null; // can't read data during dragover
+      // Only act on intra-folder reorders — accept all q:* drags as candidates;
+      // the actual cross-folder move case is handled by the folder tree's drop.
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = row.getBoundingClientRect();
+      const isTop = (e.clientY - rect.top) < rect.height / 2;
+      row.classList.toggle('drag-over-top', isTop);
+      row.classList.toggle('drag-over-bottom', !isTop);
+    });
+    row.addEventListener('dragleave', () => {
+      row.classList.remove('drag-over-top','drag-over-bottom');
+    });
+    row.addEventListener('drop', async e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const wasTop = row.classList.contains('drag-over-top');
+      row.classList.remove('drag-over-top','drag-over-bottom');
+      const data = e.dataTransfer.getData('text/plain') || '';
+      if (!data.startsWith('q:')) return;
+      const draggedId = data.slice(2);
+      const targetId = row.dataset.questionId;
+      if (draggedId === targetId) return;
+      const dragged = BANK.questions.find(q => q.id === draggedId);
+      const target  = BANK.questions.find(q => q.id === targetId);
+      if (!dragged || !target) return;
+      // Cross-folder drag: defer to a normal folderId update (no positional move yet)
+      if (dragged.folderId !== target.folderId) {
+        const ok = await API.patch('/api/bank/questions/' + draggedId, { folderId: target.folderId });
+        if (!ok) { toast('Move failed', 'err'); return; }
+        await fetchBank();
+        renderBank();
+        toast('Moved');
+        return;
+      }
+      // Same-folder reorder: build the new id order and ship it
+      const inFolder = BANK.questions.filter(q => q.folderId === dragged.folderId).map(q => q.id);
+      const without = inFolder.filter(id => id !== draggedId);
+      const ti = without.indexOf(targetId);
+      const insertAt = wasTop ? ti : ti + 1;
+      without.splice(insertAt, 0, draggedId);
+      const ok = await API.post('/api/bank/questions/reorder', { folderId: dragged.folderId, orderedIds: without });
+      if (!ok) { toast('Reorder failed', 'err'); return; }
+      await fetchBank();
+      renderBankQuestionList();
+    });
+  });
+}
+
+function _bankAttachFolderDnD() {
+  document.querySelectorAll('#bank-folders .bank-folder').forEach(el => {
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      el.classList.add('drag-over');
+    });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', async e => {
+      e.preventDefault();
+      el.classList.remove('drag-over');
+      const data = e.dataTransfer.getData('text/plain');
+      const targetFolderId = el.dataset.folderId;
+      if (data.startsWith('q:')) {
+        const qId = data.slice(2);
+        const q = BANK.questions.find(x => x.id === qId);
+        if (!q || q.folderId === targetFolderId) return;
+        const ok = await API.patch('/api/bank/questions/' + qId, { folderId: targetFolderId });
+        if (!ok) { toast('Move failed', 'err'); return; }
+        await fetchBank();
+        renderBank();
+        toast('Moved');
+      }
+    });
+  });
+}
+
+// Right-click context menu: just a shortcut to rename for now
+function bankFolderMenu(e, id) {
+  bankRenameFolder(id);
+}
+
+// ── BANK ➜ QUIZ MULTI-SELECT (in-place on the Bank tab) ──
+function toggleBankQuestionForQuiz(id, checked) {
+  if (checked) BANK.quizSelectedIds.add(id); else BANK.quizSelectedIds.delete(id);
+  // Toggle the row's selected styling without re-rendering the whole list (preserves scroll)
+  const cb = document.querySelector('.bank-q-row[data-question-id="' + id + '"]');
+  if (cb) cb.classList.toggle('q-selected', checked);
+  _updateBankQuizSelectionBar();
+}
+
+function toggleBankSelectAllForQuiz(checked) {
+  // Applies to the currently-visible (filtered) questions in the selected folder
+  const all = BANK.questions.filter(q => q.folderId === BANK.selectedFolderId);
+  const filter = (BANK.questionFilter || '').trim().toLowerCase();
+  const qs = filter ? all.filter(q => _stripHtml(q.question || '').toLowerCase().includes(filter)) : all;
+  qs.forEach(q => {
+    if (checked) BANK.quizSelectedIds.add(q.id);
+    else BANK.quizSelectedIds.delete(q.id);
+  });
+  renderBankQuestionList();
+}
+
+function clearBankQuizSelection() {
+  BANK.quizSelectedIds.clear();
+  renderBankQuestionList();
+}
+
+function _updateBankQuizSelectionBar() {
+  // Drop any ids whose bank questions no longer exist (e.g. deleted from another session)
+  const validIds = new Set(BANK.questions.map(q => q.id));
+  Array.from(BANK.quizSelectedIds).forEach(id => { if (!validIds.has(id)) BANK.quizSelectedIds.delete(id); });
+  const bar = document.getElementById('bank-q-sel-bar');
+  const cnt = document.getElementById('bank-q-sel-count');
+  const selAll = document.getElementById('bank-q-sel-all');
+  if (!bar) return;
+  const n = BANK.quizSelectedIds.size;
+  bar.style.display = n ? '' : 'none';
+  if (cnt) cnt.textContent = String(n);
+  if (selAll) {
+    // "Select all" reflects whether every visible question in this folder is selected
+    const all = BANK.questions.filter(q => q.folderId === BANK.selectedFolderId);
+    const filter = (BANK.questionFilter || '').trim().toLowerCase();
+    const qs = filter ? all.filter(q => _stripHtml(q.question || '').toLowerCase().includes(filter)) : all;
+    selAll.checked = qs.length > 0 && qs.every(q => BANK.quizSelectedIds.has(q.id));
+  }
+}
+
+function addBankSelectionToQuiz() {
+  const ids = Array.from(BANK.quizSelectedIds);
+  if (!ids.length) return;
+  pushQHistory();
+  _ensureSectionsList();
+  let added = 0;
+  ids.forEach(bid => {
+    const src = BANK.questions.find(q => q.id === bid);
+    if (!src) return;
+    // Copy with a fresh quiz-side id; carry the bank folder name across as a quiz section
+    const folder = BANK.folders.find(f => f.id === src.folderId);
+    const sectionName = folder ? folder.name : (src.section || '');
+    if (sectionName && !APP.settings.sections.includes(sectionName)) APP.settings.sections.push(sectionName);
+    const copy = Object.assign({}, src, { id: qid(), section: sectionName });
+    if (!sectionName) delete copy.section;
+    delete copy.folderId;
+    APP.questions.push(copy);
+    added++;
+  });
+  BANK.quizSelectedIds.clear();
+  renderBankQuestionList();
+  renderQuestions();
+  updateBadges();
+  syncToBatch();
+  toast('Added ' + added + ' question' + (added !== 1 ? 's' : '') + ' to the quiz', 'ok');
+  // Hop the user over to the Questions tab so they can see the result immediately
+  document.querySelector('.tab-btn[data-tab="questions"]').click();
 }
 
 // ── SETTINGS ──────────────────────────────────────────────
@@ -5547,6 +6858,7 @@ function readSettingsToForm() {
   _updateCertificateToggleForQuizType(s.quizType || 'course_completion');
   _refreshPassExitPlaceholder();
   if (_gi('tog-best-score')) _gi('tog-best-score').checked = s.bestScoreTracking !== false;
+  if (_gi('tog-partial-credit')) _gi('tog-partial-credit').checked = !!s.partialCreditMultiSelect;
   if (_gi('s-cert-url')) _gi('s-cert-url').value = s.certificateUrl || 'https://www.nvidia.com/en-us/training/academy/certificates/';
   if (_gi('s-cert-text')) _gi('s-cert-text').value = s.certificateLinkText || '';
   // AI Assistant is configured server-side via env vars — no per-user form to populate.
@@ -5588,6 +6900,7 @@ function saveSettings() {
     certificateUrl: (document.getElementById('s-cert-url').value || '').trim() || 'https://www.nvidia.com/en-us/training/academy/certificates/',
     certificateLinkText: (document.getElementById('s-cert-text').value || '').trim(),
     bestScoreTracking: document.getElementById('tog-best-score').checked,
+    partialCreditMultiSelect: document.getElementById('tog-partial-credit').checked,
     customQuizTypeName: (document.getElementById('s-custom-name') && document.getElementById('s-custom-name').value || '').trim(),
     customQuizMode: (document.querySelector('input[name="s-custom-mode"]:checked') || {}).value || 'quiz',
     manifestIdentifier: APP.settings.manifestIdentifier || '',
@@ -5657,6 +6970,7 @@ function buildQuizHTML(settings, questions, isTest, useRemote) {
     certificateUrl: settings.certificateUrl || '',
     certificateLinkText: settings.certificateLinkText || '',
     bestScoreTracking: settings.bestScoreTracking !== false,
+    partialCreditMultiSelect: !!settings.partialCreditMultiSelect,
     customQuizTypeName: settings.customQuizTypeName || '',
     customQuizMode: settings.customQuizMode === 'exam' ? 'exam' : 'quiz',
     previewScreen: settings._previewScreen || null
@@ -7072,6 +8386,7 @@ const ICON = {
   trash:    '<img class="btn-icon" src="assets/svg/trash.svg" alt="">',
   preview:  '<img class="btn-icon" src="assets/svg/eye 1.svg" alt="">',
   duplicate:'<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  edit:     '<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>',
   drag:     '<svg class="q-drag-handle" viewBox="0 0 10 18" width="14" height="18" fill="currentColor"><circle cx="3" cy="3" r="1.5"/><circle cx="7" cy="3" r="1.5"/><circle cx="3" cy="9" r="1.5"/><circle cx="7" cy="9" r="1.5"/><circle cx="3" cy="15" r="1.5"/><circle cx="7" cy="15" r="1.5"/></svg>'
 };
 
