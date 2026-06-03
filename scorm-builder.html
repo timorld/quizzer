@@ -418,9 +418,218 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .prev-hotspot{position:relative;display:inline-block;max-width:100%;border-radius:var(--radius-sm);overflow:hidden;border:1.5px solid var(--border)}
 .prev-hotspot img{display:block;width:100%;max-height:300px;object-fit:contain}
 .prev-hotspot svg{position:absolute;top:0;left:0;width:100%;height:100%}
+
+/* ════════════════════════════════════════════════════════════════
+   REDESIGN — new app shell (left rail nav + work area)
+   All classes prefixed with .r- to avoid colliding with the
+   legacy styles above. Old tab buttons stay in the DOM (hidden)
+   so existing code that simulates clicks on .tab-btn still works.
+   ════════════════════════════════════════════════════════════════ */
+:root{
+  /* New design tokens — additive, won't disturb the legacy vars */
+  --g000:#fff;--g025:#f7f7f7;--g050:#eee;--g100:#e0e0e0;--g150:#d9d9d9;--g200:#cccccc;--g300:#a7a7a7;
+  --g400:#898989;--g500:#757575;--g600:#636363;--g700:#4b4b4b;--g800:#313131;--g900:#222;
+  --green-600:#3f8500;--green-lt2:#e7f6cf;
+  --r:8px;--r-sm:6px;--r-lg:12px;
+  --sh-card:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.06);
+  --sh-pop:0 12px 32px rgba(16,24,40,.16);
+}
+
+/* Hide the legacy top header — its .tab-btn buttons are kept in DOM (just invisible)
+   so existing code that simulates clicks on them still works during the migration. */
+.app-hdr{display:none !important}
+
+/* Shell: left rail + work area, full viewport height */
+.r-shell{display:flex;height:100vh;overflow:hidden;background:var(--bg)}
+
+/* Left rail navigation */
+.r-rail{width:212px;flex:none;background:#fbfbfc;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 12px}
+.r-rail-logo{display:flex;align-items:center;gap:10px;padding:4px 8px 20px;font-size:17px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
+.r-rail-logo img{width:28px;height:28px}
+.r-rail-logo .r-dot{color:var(--text)}
+.r-rail-grp{display:flex;flex-direction:column;gap:2px}
+.r-rail-lbl{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#a3a8b2;padding:14px 10px 6px}
+.r-nav{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:8px;font-size:13.5px;font-weight:500;color:#3f4654;border:none;background:none;text-align:left;width:100%;cursor:pointer;transition:background .12s;font-family:inherit}
+.r-nav svg{width:18px;height:18px;color:#878d99;flex:none}
+.r-nav:hover{background:#eceef1}
+.r-nav.r-nav-on{background:var(--green-lt);color:var(--green-600);font-weight:600}
+.r-nav.r-nav-on svg{color:var(--green-600)}
+.r-rail-sp{flex:1}
+.r-rail-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;margin-top:8px}
+.r-rail-user .r-av{width:30px;height:30px;border-radius:50%;background:#dff0fe;color:#047ffa;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex:none}
+.r-rail-user .r-nm{font-size:12.5px;font-weight:600;line-height:1.2}
+.r-rail-user .r-rl{font-size:11px;color:var(--muted)}
+
+/* Work area: scrollable column to the right of the rail */
+.r-work{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+
+/* Top bar at the top of the work area — for now holds the existing
+   Test in Browser + Download SCORM buttons. Will be rebuilt per-view in
+   subsequent commits. */
+.r-topbar{flex:none;height:64px;background:var(--g000);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 22px}
+.r-topbar .r-top-actions{margin-left:auto;display:flex;align-items:center;gap:9px}
+
+/* Old .main needs to scroll inside the new work area instead of the body */
+.r-work .main{flex:1;min-height:0;overflow-y:auto;max-width:none}
+
+@media(max-width:980px){
+  .r-rail{width:62px}
+  .r-rail-logo span,.r-nav span,.r-rail-lbl,.r-rail-user .r-nm,.r-rail-user .r-rl{display:none}
+  .r-nav{justify-content:center}
+  .r-rail-logo{justify-content:center;padding-left:0}
+}
+
+/* ════════════════════════════════════════════════════════════════
+   REDESIGN — Quiz Builder canvas (inside #tab-questions)
+   All rules scoped under .r-canvas so they don't bleed into the
+   legacy tab content. Class names match the design mockup.
+   ════════════════════════════════════════════════════════════════ */
+.r-canvas{flex:1;min-width:0;overflow-y:auto;padding:24px 28px 60px}
+.r-canvas .canvas-inner{max-width:960px;margin:0 auto}
+.r-canvas .field-lbl{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#9aa0aa;margin-bottom:9px}
+.r-canvas .seg{display:inline-flex;background:#eef0f3;border-radius:9px;padding:4px;gap:2px;flex-wrap:wrap}
+.r-canvas .seg button{border:none;background:none;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:600;color:#5b626f;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center}
+.r-canvas .seg button.on{background:#fff;color:var(--seg-c,var(--green-dk));box-shadow:var(--sh-card)}
+.r-canvas .seg button:hover:not(.on){color:var(--text)}
+.r-canvas .seg .seg-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;opacity:.5;flex:none}
+.r-canvas .seg button.on .seg-dot{opacity:1}
+.r-canvas .custom-wrap{display:flex;align-items:center;gap:14px;margin-top:10px;padding:12px 14px;background:#fff;border:1px solid var(--g100);border-radius:11px;box-shadow:var(--sh-card)}
+.r-canvas .custom-input{flex:1;border:1px solid var(--g150);border-radius:7px;padding:8px 11px;font:inherit;font-size:13.5px;outline:none;min-width:0}
+.r-canvas .custom-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.14)}
+.r-canvas .custom-mode{display:flex;gap:14px;font-size:13px;color:var(--g700)}
+.r-canvas .custom-mode label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.r-canvas .custom-mode input{accent-color:var(--green)}
+.r-canvas .qbar{display:flex;align-items:center;justify-content:space-between;margin:26px 0 14px;gap:12px;flex-wrap:wrap}
+.r-canvas .qbar h2{font-size:16px;font-weight:800;letter-spacing:-.2px}
+.r-canvas .qbar .sub{font-size:12.5px;color:var(--muted);margin-top:1px}
+.r-canvas .qbar-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.r-canvas .search{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--g100);border-radius:7px;padding:6px 10px;color:var(--muted);font-size:13px;width:170px}
+.r-canvas .search svg{width:14px;height:14px}
+.r-canvas .search input{border:none;outline:none;font:inherit;font-size:13px;width:100%;background:none;color:var(--text)}
+.r-canvas .exp-tog{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:500;color:var(--g700);cursor:pointer;user-select:none;padding:0 2px}
+.r-canvas .tog{display:inline-block;vertical-align:middle;width:38px;height:22px;border-radius:11px;background:var(--g200);position:relative;flex:none;transition:background .15s}
+.r-canvas .tog.on{background:var(--green)}
+.r-canvas .tog::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.28)}
+.r-canvas .tog.on::after{left:18px}
+.r-canvas .sel-row{display:flex;align-items:center;gap:14px;padding:4px 2px 12px;font-size:13px;color:var(--g600)}
+.r-canvas .sel-row label{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:var(--g700)}
+.r-canvas .sel-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--green);cursor:pointer;margin:0}
+.r-canvas .sel-row .selinfo{color:var(--green-600);font-weight:700}
+.r-canvas .sel-row .bulk{margin-left:auto;display:flex;gap:8px}
+.r-canvas .qlist{display:flex;flex-direction:column;gap:0}
+.r-canvas .qc{background:#fff;border:1px solid var(--g100);border-radius:10px;padding:13px 15px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--sh-card);transition:border-color .12s,box-shadow .12s;margin-bottom:8px}
+.r-canvas .qc:hover{border-color:#cfd4dc;box-shadow:0 2px 8px rgba(16,24,40,.08)}
+.r-canvas .qc.sel{border-color:#cdd5de;box-shadow:inset 3px 0 0 var(--green),0 1px 3px rgba(16,24,40,.07)}
+.r-canvas .qc .qcheck{width:16px;height:16px;accent-color:var(--green);margin-top:5px;flex:none;cursor:pointer}
+.r-canvas .qc .grip{color:#c7ccd4;cursor:grab;margin-top:2px;flex:none;font-size:15px;line-height:1;user-select:none}
+.r-canvas .qc .num{min-width:24px;height:24px;border-radius:7px;background:var(--green-lt);color:var(--green-600);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+.r-canvas .qc .main{flex:1;min-width:0}
+.r-canvas .qc .qt{font-size:14px;font-weight:500;color:var(--text);margin-bottom:7px;line-height:1.45;word-break:break-word}
+.r-canvas .qc .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.r-canvas .qc .acts{display:flex;gap:4px;flex:none}
+.r-canvas .qc .qbody{display:none}
+.r-canvas .qc.open .qbody{display:block}
+.r-canvas .qc.open .meta{margin-top:11px}
+.r-canvas .qc .exp svg{transition:transform .15s}
+.r-canvas .qc.open .exp svg{transform:rotate(180deg)}
+.r-canvas .iconbtn{width:30px;height:30px;border:1px solid transparent;border-radius:7px;background:none;display:flex;align-items:center;justify-content:center;color:#9aa0aa;cursor:pointer;transition:.12s}
+.r-canvas .iconbtn:hover{background:#f0f1f4;color:var(--text)}
+.r-canvas .iconbtn svg{width:15px;height:15px}
+.r-canvas .tag{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:3px 9px;border-radius:20px;display:inline-flex;align-items:center;line-height:1}
+.r-canvas .tag.s{background:#e6f0ff;color:#0046a4}
+.r-canvas .tag.m{background:#e3f6dd;color:#327100}
+.r-canvas .tag.mt{background:#ecebff;color:#3f31c9}
+.r-canvas .tag.sq{background:#ffeede;color:#b93100}
+.r-canvas .tag.hs{background:#fff4e2;color:#b45309}
+.r-canvas .qopts{list-style:none;margin:9px 0 2px;display:flex;flex-direction:column;gap:5px;padding:0}
+.r-canvas .qopts li{display:flex;align-items:center;gap:9px;font-size:12.5px;padding:6px 10px;border:1px solid var(--g100);border-radius:7px;color:var(--g700)}
+.r-canvas .qopts li.correct{background:var(--green-lt);border-color:#cfe89a;color:var(--green-600);font-weight:600}
+.r-canvas .qopts .ol{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--g200);flex:none;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:var(--g400)}
+.r-canvas .qopts .ol svg{width:11px;height:11px}
+.r-canvas .qopts li.correct .ol{border-color:var(--green);background:var(--green);color:#fff}
+.r-canvas .qopts .ol.num{border-radius:6px;border-color:var(--g150);color:var(--g600)}
+.r-canvas .qopts .pair{justify-content:flex-start}
+.r-canvas .qopts .pair .trm{font-weight:700;min-width:58px;color:var(--text)}
+.r-canvas .qopts .pair .arr{color:var(--g300)}
+.r-canvas .qsection{margin-top:20px}
+.r-canvas .qsection:first-child{margin-top:2px}
+.r-canvas .qsection .sband{display:flex;align-items:center;gap:7px;padding:4px 2px 9px}
+.r-canvas .qsection .schev{width:18px;height:18px;border:none;background:none;color:#b6bbc4;display:flex;align-items:center;justify-content:center;border-radius:5px;flex:none;cursor:pointer}
+.r-canvas .qsection .schev svg{width:12px;height:12px;transition:transform .15s}
+.r-canvas .qsection .schev:not(.open) svg{transform:rotate(-90deg)}
+.r-canvas .qsection .schev:hover{background:#f0f1f4;color:var(--g600)}
+.r-canvas .stitle-eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--g500);padding:2px 6px;border:1px solid transparent;border-radius:6px;outline:none;cursor:text;white-space:nowrap}
+.r-canvas .stitle-eyebrow.plain{cursor:default}
+.r-canvas .stitle-eyebrow:not(.plain):hover{background:#eef0f3}
+.r-canvas .stitle-eyebrow:focus{background:#fff;border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.14);color:var(--text);letter-spacing:.02em}
+.r-canvas .qsection .scount{font-size:11px;color:#9aa0aa;font-weight:600}
+.r-canvas .qsection .skebab{margin-left:auto;width:28px;height:28px;border:none;background:none;border-radius:6px;color:#c2c6ce;display:flex;align-items:center;justify-content:center;flex:none;opacity:0;transition:.12s;cursor:pointer}
+.r-canvas .qsection:hover .skebab{opacity:1}
+.r-canvas .qsection .skebab svg{width:16px;height:16px}
+.r-canvas .qsection .skebab:hover{background:#f0f1f4;color:var(--g600)}
+.r-canvas .qsection .scollapsed{font-size:12px;color:#9aa0aa;padding:0 0 0 34px}
+.r-canvas .qsection:not(.closed) .scollapsed{display:none}
+.r-canvas .qsection.closed .sqs{display:none}
+.r-canvas .qsection .sqs{display:flex;flex-direction:column;gap:8px;padding-left:15px;border-left:2px solid var(--g100);margin-left:8px}
+.r-canvas .qsection.ungrouped-sec .sqs{padding-left:0;border-left:none;margin-left:0}
+.r-canvas .qsection .sempty{font-size:12.5px;color:#a3a8b2;padding:11px 14px;border:1.5px dashed #d9dde3;border-radius:9px;background:#fcfcfd}
+.r-canvas .addrow{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.r-canvas .addbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border:1.5px dashed #cdd3db;border-radius:10px;background:#fff;color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;transition:.12s;font-family:inherit}
+.r-canvas .addbtn:hover{border-color:var(--green);color:var(--green-600);background:var(--green-lt)}
+.r-canvas .addbtn svg{width:16px;height:16px}
+.r-canvas .addbtn.sec-add{flex:0 0 auto;padding-left:18px;padding-right:18px}
+.r-canvas .addsplit{flex:0 0 auto;display:inline-flex;border:1px solid var(--green);border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(118,185,0,.12);position:relative}
+.r-canvas .addsplit .as-main{display:flex;align-items:center;gap:8px;padding:11px 16px;border:none;background:none;color:var(--green-600);font-size:13.5px;font-weight:600;white-space:nowrap;border-radius:7px 0 0 7px;cursor:pointer;font-family:inherit}
+.r-canvas .addsplit .as-main svg{width:16px;height:16px}
+.r-canvas .addsplit .as-main:hover{background:var(--green-lt)}
+.r-canvas .addsplit .as-caret{padding:0 11px;border:none;border-left:1px solid var(--green-lt2);background:none;color:var(--green-600);display:flex;align-items:center;border-radius:0 7px 7px 0;cursor:pointer}
+.r-canvas .addsplit .as-caret svg{width:15px;height:15px;transition:transform .15s}
+.r-canvas .addsplit.open .as-caret svg{transform:rotate(180deg)}
+.r-canvas .addsplit .as-caret:hover{background:var(--green-lt)}
+.r-canvas .addmenu{display:none;position:absolute;bottom:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--g100);border-radius:10px;box-shadow:var(--sh-pop);padding:5px;min-width:272px;z-index:40}
+.r-canvas .addsplit.open .addmenu{display:block}
+.r-canvas .addmenu>button{display:flex;align-items:flex-start;gap:11px;width:100%;padding:9px 11px;border:none;background:none;border-radius:7px;font:inherit;text-align:left;color:var(--text);cursor:pointer;font-family:inherit}
+.r-canvas .addmenu>button:hover{background:#f4f5f7}
+.r-canvas .addmenu>button>svg{width:16px;height:16px;color:var(--green-600);flex:none;margin-top:1px}
+.r-canvas .addmenu .al{font-size:13px;font-weight:600;display:block}
+.r-canvas .addmenu .ad{display:block;font-size:11.5px;color:var(--muted);font-weight:400;margin-top:1px}
+.r-floatpop{position:fixed;z-index:300;background:#fff;border:1px solid var(--g100);border-radius:11px;box-shadow:var(--sh-pop)}
+.r-secmenu{padding:5px;min-width:208px}
+.r-secmenu button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 11px;border:none;background:none;border-radius:7px;font:inherit;font-size:13px;font-weight:500;color:var(--text);text-align:left;cursor:pointer;font-family:inherit}
+.r-secmenu button svg{width:15px;height:15px;color:var(--g500);flex:none}
+.r-secmenu button:hover{background:#f4f5f7}
+.r-secmenu button.danger{color:#e52020}
+.r-secmenu button.danger svg{color:#e52020}
+.r-secmenu button.danger:hover{background:#fdeaea}
+.r-secmenu button:disabled{opacity:.38;cursor:default}
+.r-secmenu button:disabled:hover{background:none}
+.r-secmenu .fm-sep{height:1px;background:var(--g050);margin:4px 6px}
+.r-topbar .qtitle-wrap{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.r-topbar .qtitle{font-size:18px;font-weight:800;letter-spacing:-.3px;border:1px solid transparent;border-radius:6px;padding:2px 6px;margin-left:-6px;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none;font-family:inherit;color:var(--text)}
+.r-topbar .qtitle:hover{background:#f4f5f7}
+.r-topbar .qtitle:focus{outline:none;background:#fff;border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.14)}
 </style>
 </head>
 <body>
+
+<div class="r-shell">
+  <!-- ── LEFT RAIL NAV ── -->
+  <aside class="r-rail">
+    <div class="r-rail-logo"><img src="assets/favicon_io/android-chrome-192x192.png" alt=""><span>Quizz<span class="r-dot">er</span></span></div>
+    <div class="r-rail-lbl">Workspace</div>
+    <div class="r-rail-grp">
+      <button class="r-nav r-nav-on" data-tab="questions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg><span>Quiz builder</span></button>
+      <button class="r-nav" data-tab="bank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>Question bank</span></button>
+      <button class="r-nav" data-tab="batch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg><span>Batch builder</span></button>
+      <button class="r-nav" data-tab="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span>History</span></button>
+    </div>
+    <div class="r-rail-sp"></div>
+    <button class="r-nav" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Builder settings</span></button>
+    <div class="r-rail-user"><div class="r-av">U</div><div><div class="r-nm">SCORM Quizzer</div><div class="r-rl">Local</div></div></div>
+  </aside>
+
+  <!-- ── WORK AREA (top bar + tab content) ── -->
+  <main class="r-work">
 
 <header class="app-hdr">
   <div class="app-logo"><img src="assets/favicon_io/android-chrome-192x192.png" alt=""><span>Quizzer</span></div>
@@ -443,6 +652,24 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
     </div>
   </div>
 </header>
+
+<!-- ── NEW TOPBAR (per-view content; title input shows on Quiz Builder only) ── -->
+<div class="r-topbar">
+  <div class="qtitle-wrap" id="r-qtitle-wrap">
+    <input class="qtitle" id="r-qtitle" placeholder="Untitled quiz" oninput="syncQuizInfo('title',this.value)" spellcheck="false">
+  </div>
+  <div class="r-top-actions">
+    <button class="btn btn-sm btn-outline-dark" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
+    <div class="split-btn">
+      <button class="btn btn-sm btn-primary split-main" onclick="generateAndDownload()"><img class="btn-icon" src="assets/svg/download.svg" alt=""> Download SCORM</button>
+      <button class="btn btn-sm btn-primary split-arrow" onclick="toggleDlDropdown(event)" aria-label="More download options">&#9660;</button>
+      <div class="split-dropdown" id="r-dl-dropdown">
+        <button onclick="downloadWordDoc();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/ms word.svg" alt=""> Download as Word Doc</button>
+        <button onclick="downloadQuestionBank();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/txt.svg" alt=""> Download as AIKEN</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="main">
 
@@ -982,6 +1209,8 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 </div>
 
 </div><!-- .main -->
+  </main><!-- .r-work -->
+</div><!-- .r-shell -->
 <div id="toast-wrap"></div>
 
 <!-- CUSTOM DIALOG -->
@@ -3283,23 +3512,26 @@ function closeModal(id) { document.getElementById(id).classList.remove('active')
 function triggerFile(id) { document.getElementById(id).click(); }
 
 // ── TABS ───────────────────────────────────────────────────
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const activeTab = document.querySelector('.tab-btn.active');
-    if (activeTab && activeTab.dataset.tab === 'settings') saveSettings();
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-    if (btn.dataset.tab === 'questions') renderQuestions();
-    if (btn.dataset.tab === 'history') {
-      document.getElementById('hist-list').innerHTML = '<div class="hist-loading"><div class="hist-spinner"></div><span>Loading history…</span></div>';
-      fetchHistory().then(renderHistory).then(updateBadges);
-    }
-    if (btn.dataset.tab === 'settings') readSettingsToForm();
-    if (btn.dataset.tab === 'bank') fetchBank().then(renderBank);
-  });
-});
+// switchTab: single source of truth for view switching. Called from both the
+// legacy .tab-btn (hidden but still in DOM) and the new .r-nav rail buttons.
+// Existing code that does `.tab-btn[data-tab="X"].click()` still works because
+// the click handler below just calls this.
+function switchTab(tabName) {
+  const activeTab = document.querySelector('.tab-btn.active');
+  if (activeTab && activeTab.dataset.tab === 'settings') saveSettings();
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabName));
+  document.querySelectorAll('.r-nav[data-tab]').forEach(b => b.classList.toggle('r-nav-on', b.dataset.tab === tabName));
+  if (tabName === 'questions') renderQuestions();
+  if (tabName === 'history') {
+    document.getElementById('hist-list').innerHTML = '<div class="hist-loading"><div class="hist-spinner"></div><span>Loading history…</span></div>';
+    fetchHistory().then(renderHistory).then(updateBadges);
+  }
+  if (tabName === 'settings') readSettingsToForm();
+  if (tabName === 'bank') fetchBank().then(renderBank);
+}
+document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+document.querySelectorAll('.r-nav[data-tab]').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 
 // ── AIKEN EXAMPLE ─────────────────────────────────────────
 const AIKEN_EXAMPLE = `TITLE: General Knowledge Trivia
@@ -3600,7 +3832,7 @@ async function handleAikenFile(file) {
     }
     pushQHistory();
     APP.questions = replace ? imported : [...APP.questions, ...imported];
-    if (aikenTitle && (replace || !APP.settings.title) && !IMPORT_FORCE_APPEND) { APP.settings.title = aikenTitle; document.getElementById('q-title') && (document.getElementById('q-title').value = aikenTitle); document.getElementById('s-title') && (document.getElementById('s-title').value = aikenTitle); document.getElementById('gen-title-display') && (document.getElementById('gen-title-display').textContent = aikenTitle || '—'); }
+    if (aikenTitle && (replace || !APP.settings.title) && !IMPORT_FORCE_APPEND) { _setQuizTitle(aikenTitle); }
     updateBadges();
     showImportResult('&#10003; Imported <strong>' + imported.length + ' questions</strong> from &ldquo;' + escH(file.name) + '&rdquo;. ' + (replace ? 'Replaced existing questions.' : 'Appended to existing questions.'));
     toast(imported.length + ' questions imported', 'ok');
@@ -3672,7 +3904,7 @@ async function handleAikenWithImages(txtFile, imgFiles) {
     }
     pushQHistory();
     APP.questions = replace ? imported : [...APP.questions, ...imported];
-    if (aikenTitle && (replace || !APP.settings.title) && !IMPORT_FORCE_APPEND) { APP.settings.title = aikenTitle; document.getElementById('q-title') && (document.getElementById('q-title').value = aikenTitle); document.getElementById('s-title') && (document.getElementById('s-title').value = aikenTitle); document.getElementById('gen-title-display') && (document.getElementById('gen-title-display').textContent = aikenTitle || '—'); }
+    if (aikenTitle && (replace || !APP.settings.title) && !IMPORT_FORCE_APPEND) { _setQuizTitle(aikenTitle); }
     updateBadges();
     showImportResult('&#10003; Imported <strong>' + imported.length + ' questions</strong> with ' + imgFiles.length + ' image file' + (imgFiles.length !== 1 ? 's' : '') + '.');
     toast(imported.length + ' questions imported', 'ok');
@@ -3705,7 +3937,7 @@ async function handleQBankZipFile(file) {
       if (!confirm('Replace the current ' + APP.questions.length + ' question(s) with ' + imported.length + ' from "' + file.name + '"?')) return;
     }
     APP.questions = IMPORT_FORCE_APPEND ? [...APP.questions, ...imported] : imported;
-    if (aikenTitle && !IMPORT_FORCE_APPEND) { APP.settings.title = aikenTitle; document.getElementById('q-title') && (document.getElementById('q-title').value = aikenTitle); document.getElementById('s-title') && (document.getElementById('s-title').value = aikenTitle); document.getElementById('gen-title-display') && (document.getElementById('gen-title-display').textContent = aikenTitle || '—'); }
+    if (aikenTitle && !IMPORT_FORCE_APPEND) { _setQuizTitle(aikenTitle); }
     renderQuestions();
     updateBadges();
     showImportResult('&#10003; Imported <strong>' + imported.length + ' questions</strong> from &ldquo;' + escH(file.name) + '&rdquo;.');
@@ -4316,10 +4548,7 @@ async function importAIConverted() {
   pushQHistory();
   APP.questions = replace ? imported : [...APP.questions, ...imported];
   if (aikenTitle && (replace || !APP.settings.title)) {
-    APP.settings.title = aikenTitle;
-    const qT = document.getElementById('q-title'); if (qT) qT.value = aikenTitle;
-    const sT = document.getElementById('s-title'); if (sT) sT.value = aikenTitle;
-    const gT = document.getElementById('gen-title-display'); if (gT) gT.textContent = aikenTitle || '—';
+    _setQuizTitle(aikenTitle);
   }
   updateBadges();
   toast(imported.length + ' question' + (imported.length !== 1 ? 's' : '') + ' imported', 'ok');
@@ -6730,11 +6959,24 @@ function toggleSettingInput(key, on) {
   }
 }
 
+// Set the quiz title across all title inputs (called from imports + AI conversion)
+function _setQuizTitle(value) {
+  APP.settings.title = value;
+  ['q-title', 's-title', 'r-qtitle'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value !== value) el.value = value;
+  });
+  const gt = document.getElementById('gen-title-display'); if (gt) gt.textContent = value || '—';
+}
+
 function syncQuizInfo(field, value) {
   if (field === 'title') {
     APP.settings.title = value;
-    const other = document.getElementById(document.activeElement.id === 'q-title' ? 's-title' : 'q-title');
-    if (other && other.value !== value) other.value = value;
+    // Keep every visible title input in sync (legacy q-title + s-title, plus the new r-qtitle in the topbar)
+    ['q-title', 's-title', 'r-qtitle'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el !== document.activeElement && el.value !== value) el.value = value;
+    });
     document.getElementById('gen-title-display').textContent = value || '—';
   } else if (field === 'quizType') {
     const prevType = APP.settings.quizType;
@@ -6810,6 +7052,7 @@ function readSettingsToForm() {
   const s = APP.settings;
   document.getElementById('s-title').value = s.title || '';
   document.getElementById('q-title').value = s.title || '';
+  const rT = document.getElementById('r-qtitle'); if (rT) rT.value = s.title || '';
   const qt = s.quizType || 'course_completion';
   const _qs1 = document.querySelector('input[name="s-type"][value="' + qt + '"]');
   const _qs2 = document.querySelector('input[name="q-type"][value="' + qt + '"]');
