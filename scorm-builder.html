@@ -608,6 +608,77 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .r-topbar .qtitle{font-size:18px;font-weight:800;letter-spacing:-.3px;border:1px solid transparent;border-radius:6px;padding:2px 6px;margin-left:-6px;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none;font-family:inherit;color:var(--text)}
 .r-topbar .qtitle:hover{background:#f4f5f7}
 .r-topbar .qtitle:focus{outline:none;background:#fff;border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.14)}
+
+/* ════════════════════════════════════════════════════════════════
+   REDESIGN — split layout (canvas + inspector) + inspector content
+   ════════════════════════════════════════════════════════════════ */
+.r-split{display:flex;align-items:stretch;flex:1;min-height:0;height:100%}
+.r-inspector{width:424px;flex:none;background:#f4f5f7;border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+@media(max-width:1180px){.r-inspector{width:372px}}
+@media(max-width:980px){.r-inspector{display:none}}
+.r-insp-hd{flex:none;display:flex;align-items:center;gap:10px;padding:16px 18px 14px;border-bottom:1px solid var(--border);background:#fff}
+.r-insp-hd .t{font-size:16px;font-weight:800;letter-spacing:-.2px;line-height:1.25}
+.r-insp-scroll{flex:1;padding:14px;display:flex;flex-direction:column;gap:11px;min-height:0}
+.r-insp-scroll>*{flex:0 0 auto}
+.r-preset{background:#fff;border:1px solid var(--g100);border-radius:11px;box-shadow:var(--sh-card);padding:13px 14px}
+.r-preset .r-row{display:flex;align-items:center;gap:8px}
+.r-preset .r-pdrop{flex:1;display:flex;align-items:center;gap:8px;border:1px solid var(--g150);border-radius:7px;padding:8px 11px;font-size:13px;font-weight:600;background:#fff;cursor:pointer;font-family:inherit;color:var(--text);position:relative}
+.r-preset .r-pdrop svg{width:15px;height:15px;color:var(--green-600)}
+.r-preset .r-pdrop .cv{margin-left:auto;color:var(--g400);font-size:11px}
+.r-preset .r-save{border:1px solid var(--g150);background:#fff;border-radius:7px;padding:8px 11px;font-size:12.5px;font-weight:600;color:var(--g700);cursor:pointer;font-family:inherit}
+.r-preset .r-save:hover{background:#f3f4f6}
+.r-sum-wrap{background:#fff;border:1px solid var(--g100);border-radius:11px;box-shadow:var(--sh-card);padding:12px 13px}
+.r-sum-lbl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a3a8b2;margin-bottom:9px}
+.r-summary{display:flex;flex-wrap:wrap;gap:6px}
+.r-chip{display:inline-flex;align-items:center;gap:6px;background:var(--g025);border:1px solid var(--g100);border-radius:20px;padding:4px 10px 4px 8px;font-size:12px;font-weight:600;color:var(--g700);transition:.12s;cursor:pointer;font-family:inherit}
+.r-chip:hover{border-color:var(--green);background:var(--green-lt);color:var(--green-600)}
+.r-chip .ic{width:13px;height:13px;color:var(--green-600);flex:none}
+.r-chip.off{color:#a3a8b2;background:#fafafa}
+.r-chip.off .ic{color:#c2c6cd}
+.r-grp{background:#fff;border:1px solid var(--g100);border-radius:11px;box-shadow:var(--sh-card);overflow:hidden}
+.r-grp-hd{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #f1f2f4;user-select:none;cursor:pointer}
+.r-grp.closed .r-grp-hd{border-bottom:none}
+.r-grp-hd .gi{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex:none}
+.r-grp-hd .gi svg{width:15px;height:15px}
+.r-grp-hd .gt{font-size:13.5px;font-weight:700}
+.r-grp-hd .chev{margin-left:auto;color:#c2c6ce;display:flex}
+.r-grp-hd .chev svg{width:14px;height:14px;transition:transform .15s}
+.r-grp.closed .chev svg{transform:rotate(-90deg)}
+.r-grp-bd{padding:5px 14px 13px}
+.r-grp.closed .r-grp-bd{display:none}
+.r-ctl{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid #f3f4f6}
+.r-ctl:first-child{border-top:none}
+.r-ctl .lab{flex:1;min-width:0}
+.r-ctl .lab .l{font-size:13px;font-weight:600;color:var(--text)}
+.r-ctl .lab .d{font-size:11.5px;color:var(--muted);margin-top:1px;line-height:1.4}
+.r-ctl .val{flex:none;display:flex;align-items:center;gap:8px}
+.r-ctl.off .lab{opacity:.45}
+.r-ctl.off .r-stepper{opacity:.5}
+.r-tog{display:inline-block;vertical-align:middle;width:38px;height:22px;border-radius:11px;background:var(--g200);position:relative;flex:none;transition:background .15s;cursor:pointer;border:none;padding:0;font:inherit}
+.r-tog.on{background:var(--green)}
+.r-tog::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.28)}
+.r-tog.on::after{left:18px}
+.r-stepper{display:inline-flex;align-items:center;border:1px solid var(--g150);border-radius:7px;overflow:hidden;background:#fff}
+.r-stepper button{width:28px;height:30px;border:none;background:#fff;color:var(--g600);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+.r-stepper button:hover{background:#f1f2f4;color:var(--text)}
+.r-stepper button:disabled{opacity:.3;cursor:not-allowed}
+.r-stepper .v{min-width:38px;text-align:center;font-size:13px;font-weight:700;border-left:1px solid var(--g100);border-right:1px solid var(--g100);padding:0 4px;height:30px;display:flex;align-items:center;justify-content:center}
+.r-stepper .u{font-size:11px;color:var(--muted);padding:0 8px 0 7px;white-space:nowrap}
+.r-sub{margin:2px 0 4px 0;padding:10px 12px;background:var(--g025);border:1px solid #eef0f3;border-radius:8px}
+.r-sub .r-ctl{padding:7px 0}
+.r-sub .r-ctl:first-child{border-top:none}
+.r-fieldrow{display:flex;flex-direction:column;gap:5px;padding:7px 0}
+.r-fieldrow:first-child{padding-top:2px}
+.r-fieldrow label{font-size:12px;font-weight:600;color:var(--g600)}
+.r-ti{border:1px solid var(--g150);border-radius:7px;padding:8px 10px;font:inherit;font-size:12.5px;outline:none;width:100%;font-family:inherit}
+.r-ti:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.14)}
+.r-insp-ft{flex:none;border-top:1px solid var(--border);padding:11px 16px;display:flex;align-items:center;gap:8px;background:#fff}
+.r-insp-ft .r-pv{display:flex;align-items:center;gap:6px}
+.r-insp-ft .r-lnk{font-size:12px;font-weight:600;color:var(--g600);background:#fff;border:1px solid var(--g150);border-radius:7px;padding:6px 9px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-family:inherit}
+.r-insp-ft .r-lnk:hover{background:#f3f4f6}
+.r-insp-ft .r-lnk svg{width:13px;height:13px}
+.r-insp-ft .r-adv{margin-left:auto;border-color:transparent;background:none;color:var(--blue,#0074df)}
+.r-insp-ft .r-adv:hover{text-decoration:underline;background:none}
 </style>
 </head>
 <body>
@@ -776,7 +847,8 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 </div><!-- end q-tab-main legacy -->
 </div><!-- end r-legacy-q (hidden) -->
 
-<!-- ───────────── NEW QUIZ BUILDER CANVAS ───────────── -->
+<!-- ───────────── NEW QUIZ BUILDER CANVAS + INSPECTOR ───────────── -->
+<div class="r-split">
 <section class="r-canvas">
   <div class="canvas-inner">
     <!-- Quiz type segmented control -->
@@ -831,6 +903,11 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
     </div>
   </div>
 </section>
+
+<!-- Inspector (right pane). renderInspector() fills this. -->
+<aside class="r-inspector" id="r-inspector"></aside>
+
+</div><!-- end .r-split -->
 <div id="batch-sidebar" style="display:none">
   <div class="batch-sidebar-hdr">
     <span>Batch Quizzes</span>
@@ -5909,6 +5986,271 @@ function _rMoveSection(key, dir) {
   renderQuestions();
 }
 
+// ════════════════════════════════════════════════════════════════
+// REDESIGN — Inspector (right pane: Quiz Settings)
+// Each control mirrors a legacy hidden form input. Clicking a tog
+// or pressing a stepper button updates the legacy input, fires its
+// change event so any associated logic runs, then calls saveSettings().
+// The legacy Settings tab still exists in the rail as "Builder
+// settings" for advanced sections not yet migrated.
+// ════════════════════════════════════════════════════════════════
+const R_ICO = {
+  scoring: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13l1.5 8-5-3-5 3 1.5-8"/></svg>',
+  attempts:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>',
+  timing:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>',
+  pool:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  during:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>',
+  after:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  cert:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M8.5 12.5 7 21l5-2.6L17 21l-1.5-8.5"/></svg>',
+  chev:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+  flag:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
+  eye:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+};
+const R_ACC = {
+  scoring:{c:'#3f8500',bg:'#eef8da'},
+  attempts:{c:'#0060c7',bg:'#e6f0ff'},
+  timing:{c:'#b45309',bg:'#fff2db'},
+  pool:{c:'#4f46e5',bg:'#ecebff'},
+  during:{c:'#0d8473',bg:'#ddf3ef'},
+  after:{c:'#be185d',bg:'#fde7f3'},
+  cert:{c:'#a16207',bg:'#fbf0cf'}
+};
+
+// Read a legacy checkbox's checked state (true/false)
+function _rIsOn(legacyId) {
+  const el = document.getElementById(legacyId);
+  return !!(el && el.checked);
+}
+// Read a legacy number input's value (clamped to min/max)
+function _rVal(legacyId, fallback) {
+  const el = document.getElementById(legacyId);
+  return (el && el.value) ? (parseInt(el.value) || fallback) : fallback;
+}
+// Build a tog button that mirrors a legacy checkbox
+function _rTogHtml(legacyId) {
+  return '<button class="r-tog' + (_rIsOn(legacyId) ? ' on' : '') + '" data-mirror="' + legacyId + '" type="button" aria-label="Toggle"></button>';
+}
+// Build a stepper that mirrors a legacy number input
+function _rStepHtml(legacyId, unit, min, max, fallback) {
+  const v = _rVal(legacyId, fallback);
+  return '<span class="r-stepper" data-mirror="' + legacyId + '" data-min="' + min + '" data-max="' + max + '"><button data-d="-1" type="button">−</button><span class="v">' + v + '</span><span class="u">' + escH(unit) + '</span><button data-d="1" type="button">+</button></span>';
+}
+// Build a single .r-ctl row
+function _rCtlRow(togLegacyId, label, desc, val) {
+  const isOff = togLegacyId && !_rIsOn(togLegacyId);
+  return '<div class="r-ctl' + (isOff && !togLegacyId.startsWith('s-') ? ' off' : '') + '">'
+    + '<div class="lab"><div class="l">' + escH(label) + '</div>' + (desc ? '<div class="d">' + escH(desc) + '</div>' : '') + '</div>'
+    + '<div class="val">' + val + '</div></div>';
+}
+// Wrap a group of rows in a card
+function _rGroupHtml(key, title, bodyHtml) {
+  const a = R_ACC[key];
+  return '<div class="r-grp" data-grp="' + key + '">'
+    + '<div class="r-grp-hd" data-ghd="' + key + '"><span class="gi" style="background:' + a.bg + ';color:' + a.c + '">' + R_ICO[key] + '</span><span class="gt">' + escH(title) + '</span><span class="chev">' + R_ICO.chev + '</span></div>'
+    + '<div class="r-grp-bd">' + bodyHtml + '</div></div>';
+}
+// At-a-glance chip
+function _rChipHtml(grp, text, isOn) {
+  const a = R_ACC[grp];
+  const ic = R_ICO[grp] || '';
+  return '<button class="r-chip ' + (isOn ? '' : 'off') + '" data-chip="' + grp + '" type="button"><span class="ic" style="' + (isOn ? 'color:' + a.c : '') + '">' + ic + '</span>' + escH(text) + '</button>';
+}
+
+function renderInspector() {
+  const insp = document.getElementById('r-inspector');
+  if (!insp) return;
+  // Pull current preset label — if a built-in preset matches, show its name; otherwise generic
+  const presetName = _rDetectActivePreset();
+
+  // Build group rows
+  const rowsScoring = _rCtlRow('tog-passing', 'Passing score', 'Minimum to pass', _rStepHtml('s-passing', '%', 1, 100, 70) + _rTogHtml('tog-passing'))
+    + _rCtlRow('tog-best-score', 'Best-score tracking', 'Let a passed learner retake; LMS keeps the highest', _rTogHtml('tog-best-score'))
+    + _rCtlRow('tog-partial-credit', 'Partial credit on multi-select', 'Each correct pick earns a fraction; wrong picks deduct', _rTogHtml('tog-partial-credit'));
+
+  const rowsAttempts = _rCtlRow('tog-attempts', 'Limit attempts', '', _rStepHtml('s-attempts', 'tries', 1, 99, 2) + _rTogHtml('tog-attempts'))
+    + '<div class="r-sub" data-sub="attempts">' + _rCtlRow('tog-cooldown', 'Cooldown between tries', '', _rStepHtml('s-cooldown', 'days', 1, 365, 7) + _rTogHtml('tog-cooldown')) + '</div>';
+
+  const rowsTiming = _rCtlRow('tog-timelimit', 'Time limit', 'Per attempt', _rStepHtml('s-timelimit', 'min', 1, 999, 45) + _rTogHtml('tog-timelimit'))
+    + '<div class="r-sub"><div class="r-ctl" style="padding-top:2px"><div class="lab"><div class="l">Pace by question</div><div class="d">Apply a per-question budget as the total time limit</div></div></div>'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-top:2px">' + _rStepHtml('s-mins-per-q', 'min / question', 1, 60, 3) + '<button class="r-lnk" onclick="applyMinsPerQuestion()" style="margin-left:auto">Apply</button></div></div>';
+
+  const rowsPool = _rCtlRow('tog-qcount', 'Questions per attempt', 'Randomly drawn from the pool', _rStepHtml('s-qcount', 'questions', 1, 999, 10) + _rTogHtml('tog-qcount'))
+    + _rCtlRow('s-randomize', 'Shuffle question order', '', _rTogHtml('s-randomize'))
+    + _rCtlRow('s-randomize-options', 'Shuffle answer options', '', _rTogHtml('s-randomize-options'));
+
+  const rowsDuring = _rCtlRow('s-allow-blank', 'Allow blank answers', '', _rTogHtml('s-allow-blank'))
+    + _rCtlRow('s-warn-blank', 'Warn before blank submit', '', _rTogHtml('s-warn-blank'))
+    + _rCtlRow('s-confirm-submit', 'Confirm before submitting', '', _rTogHtml('s-confirm-submit'));
+
+  const rowsAfter = _rCtlRow('tog-review', 'Show answer review', 'Let learners review their answers', _rTogHtml('tog-review'))
+    + '<div class="r-sub" data-sub="review">' + _rCtlRow('s-show-correct', 'Reveal correct answers', '', _rTogHtml('s-show-correct'))
+    + _rCtlRow('tog-min-attempts-review', 'Only after N failed tries', '', _rStepHtml('s-min-attempts-review', 'fails', 1, 20, 2) + _rTogHtml('tog-min-attempts-review')) + '</div>';
+
+  const rowsCert = _rCtlRow('tog-certificate', 'Show certificate link on pass', 'Pass screen · completion quiz only', _rTogHtml('tog-certificate'))
+    + '<div class="r-sub" data-sub="certificate"><div class="r-fieldrow"><label>Certificate URL</label><input class="r-ti" type="url" id="r-cert-url" placeholder="https://…" oninput="document.getElementById(\'s-cert-url\').value=this.value;saveSettings()"></div><div class="r-fieldrow"><label>Link text</label><input class="r-ti" type="text" id="r-cert-text" placeholder="Click here to see your certificate" oninput="document.getElementById(\'s-cert-text\').value=this.value;saveSettings()"></div></div>';
+
+  insp.innerHTML =
+    '<div class="r-insp-hd"><div><span class="t">Quiz settings</span></div></div>'
+    + '<div class="r-insp-scroll">'
+    +   '<div class="r-preset"><div class="r-row"><button class="r-pdrop" onclick="togglePresetsDropdown()">' + R_ICO.flag + '<span>' + escH(presetName) + '</span><span class="cv">▾</span></button><button class="r-save" onclick="toggleSavePresetPopover()">Save as…</button></div></div>'
+    +   '<div class="r-sum-wrap"><div class="r-sum-lbl">At a glance</div><div class="r-summary" id="r-summary"></div></div>'
+    +   _rGroupHtml('scoring', 'Scoring', rowsScoring)
+    +   _rGroupHtml('attempts', 'Attempts', rowsAttempts)
+    +   _rGroupHtml('timing', 'Timing', rowsTiming)
+    +   _rGroupHtml('pool', 'Question pool', rowsPool)
+    +   _rGroupHtml('during', 'During the quiz', rowsDuring)
+    +   _rGroupHtml('after', 'After submitting', rowsAfter)
+    +   _rGroupHtml('cert', 'Certificate', rowsCert)
+    + '</div>'
+    + '<div class="r-insp-ft"><div class="r-pv"><button class="r-lnk" onclick="testInBrowser(null)">' + R_ICO.eye + ' Start</button><button class="r-lnk" onclick="previewScreen(\'pass\')">Pass</button><button class="r-lnk" onclick="previewScreen(\'fail\')">Fail</button></div><button class="r-lnk r-adv" onclick="switchTab(\'settings\')">Advanced…</button></div>';
+
+  // Populate the cert URL/text inputs (their values can't be in the HTML string above)
+  const certUrl = document.getElementById('s-cert-url');
+  const certText = document.getElementById('s-cert-text');
+  if (certUrl) document.getElementById('r-cert-url').value = certUrl.value;
+  if (certText) document.getElementById('r-cert-text').value = certText.value;
+
+  _rWireInspector();
+  _rSyncSubs();
+  _rRefreshChips();
+}
+
+// Determine which preset name to show in the dropdown button.
+// Picks a built-in preset whose values match APP.settings, falling back to generic.
+function _rDetectActivePreset() {
+  if (typeof BUILTIN_PRESETS === 'undefined') return 'Quiz settings';
+  for (const p of BUILTIN_PRESETS) {
+    let matches = true;
+    for (const k of Object.keys(p.settings)) {
+      const v = APP.settings[k];
+      const pv = p.settings[k];
+      if (typeof pv === 'boolean') { if (!!v !== pv) { matches = false; break; } }
+      else if (v !== pv) { matches = false; break; }
+    }
+    if (matches) return p.name;
+  }
+  return 'Custom settings';
+}
+
+function _rWireInspector() {
+  // group header collapse (but ignore clicks on internal controls)
+  document.querySelectorAll('.r-grp-hd[data-ghd]').forEach(h => {
+    h.onclick = e => {
+      if (e.target.closest('.r-tog, .r-stepper, button')) return;
+      h.parentElement.classList.toggle('closed');
+    };
+  });
+  // toggles → flip the legacy checkbox + fire its change + saveSettings
+  document.querySelectorAll('.r-tog[data-mirror]').forEach(t => {
+    t.onclick = e => {
+      e.stopPropagation();
+      const id = t.dataset.mirror;
+      const legacy = document.getElementById(id);
+      if (legacy) {
+        legacy.checked = !legacy.checked;
+        // Fire the existing onchange so wired logic runs (e.g. toggleSettingInput)
+        legacy.dispatchEvent(new Event('change'));
+        t.classList.toggle('on', legacy.checked);
+      } else {
+        t.classList.toggle('on');
+      }
+      saveSettings();
+      _rRefreshChips();
+      _rSyncSubs();
+      _rUpdateRowStates();
+    };
+  });
+  // steppers → update legacy number input + saveSettings
+  document.querySelectorAll('.r-stepper[data-mirror]').forEach(s => {
+    const id = s.dataset.mirror;
+    const mn = +s.dataset.min;
+    const mx = +s.dataset.max;
+    const vEl = s.querySelector('.v');
+    s.querySelectorAll('button').forEach(b => {
+      b.onclick = e => {
+        e.stopPropagation();
+        const legacy = document.getElementById(id);
+        let v = parseInt(legacy && legacy.value) || +vEl.textContent || mn;
+        v = Math.max(mn, Math.min(mx, v + (+b.dataset.d)));
+        if (legacy) { legacy.value = v; legacy.dispatchEvent(new Event('input')); legacy.dispatchEvent(new Event('change')); }
+        vEl.textContent = v;
+        // If this stepper sits next to a toggle that's currently off, turn the toggle on too
+        const togSibling = s.parentElement.querySelector('.r-tog');
+        if (togSibling && !togSibling.classList.contains('on')) {
+          const togId = togSibling.dataset.mirror;
+          const togLegacy = togId ? document.getElementById(togId) : null;
+          if (togLegacy && !togLegacy.checked) {
+            togLegacy.checked = true;
+            togLegacy.dispatchEvent(new Event('change'));
+            togSibling.classList.add('on');
+          }
+        }
+        saveSettings();
+        _rRefreshChips();
+        _rSyncSubs();
+        _rUpdateRowStates();
+      };
+    });
+  });
+  // At-a-glance chip jumps to its section
+  document.querySelectorAll('.r-chip[data-chip]').forEach(el => {
+    el.onclick = () => {
+      const grp = document.querySelector('[data-grp="' + el.dataset.chip + '"]');
+      if (!grp) return;
+      grp.classList.remove('closed');
+      grp.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+  });
+}
+
+// Hide sub-rows when their parent toggle is off
+function _rSyncSubs() {
+  document.querySelectorAll('.r-sub[data-sub]').forEach(sub => {
+    const parentToggleId = 'tog-' + sub.dataset.sub.replace('attempts','attempts').replace('review','review').replace('certificate','certificate');
+    // Map sub keys to their parent toggle IDs
+    const map = { attempts: 'tog-attempts', review: 'tog-review', certificate: 'tog-certificate' };
+    const onId = map[sub.dataset.sub];
+    sub.style.display = onId && _rIsOn(onId) ? '' : 'none';
+  });
+}
+
+// Dim rows whose toggle is off (visual hint that their stepper is inactive)
+function _rUpdateRowStates() {
+  document.querySelectorAll('.r-ctl').forEach(ctl => {
+    const tog = ctl.querySelector('.r-tog[data-mirror]');
+    if (!tog) return;
+    const isOn = tog.classList.contains('on');
+    ctl.classList.toggle('off', !isOn);
+  });
+}
+
+// Refresh the "At a glance" chip summary
+function _rRefreshChips() {
+  const sm = document.getElementById('r-summary');
+  if (!sm) return;
+  const s = APP.settings;
+  const chips = [];
+  chips.push(_rChipHtml('scoring', s.passingPercentage ? s.passingPercentage + '% to pass' : 'No pass mark', !!s.passingPercentage));
+  if (s.maxAttempts) chips.push(_rChipHtml('attempts', s.maxAttempts + ' attempts' + (s.cooldownDays ? ' · ' + s.cooldownDays + 'd cooldown' : ''), true));
+  else chips.push(_rChipHtml('attempts', 'Unlimited tries', true));
+  chips.push(_rChipHtml('timing', s.timeLimitMinutes ? s.timeLimitMinutes + ' min' : 'No time limit', !!s.timeLimitMinutes));
+  const n = APP.questions.length;
+  if (s.questionsPerAttempt && n) chips.push(_rChipHtml('pool', s.questionsPerAttempt + ' of ' + n + ' Qs', true));
+  else if (n) chips.push(_rChipHtml('pool', 'All ' + n + ' Qs', true));
+  chips.push(_rChipHtml('pool', s.randomizeQuestions !== false ? 'Shuffled' : 'In order', s.randomizeQuestions !== false));
+  chips.push(_rChipHtml('after', s.showAnswerReview ? 'Review on' : 'No review', !!s.showAnswerReview));
+  sm.innerHTML = chips.join('');
+  // Rebind clicks on the new chip elements
+  document.querySelectorAll('.r-chip[data-chip]').forEach(el => {
+    el.onclick = () => {
+      const grp = document.querySelector('[data-grp="' + el.dataset.chip + '"]');
+      if (!grp) return;
+      grp.classList.remove('closed');
+      grp.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+  });
+}
+
 function renderQuestions() {
   const list = document.getElementById('q-list');
   const n = APP.questions.length;
@@ -5973,6 +6315,7 @@ function renderQuestions() {
   attachDragHandlers();
   _attachSectionGroupDnD();
   _updateQuestionSelectionBar();
+  if (typeof _rRefreshChips === 'function') _rRefreshChips();
 }
 
 /* Old verbose renderer kept under a different name in case we need to reference it.
@@ -7255,6 +7598,8 @@ function syncQuizInfo(field, value) {
     _updateCertificateToggleForQuizType(value, true);
     _refreshPassExitPlaceholder();
     renderSegmentedType();
+    // Re-render the inspector so the cert toggle and chip summary reflect the new type
+    setTimeout(() => { if (typeof renderInspector === 'function') renderInspector(); }, 0);
     // If the user just switched to Knowledge Check, offer to apply the KC preset.
     if (value === 'topic_quiz' && prevType !== 'topic_quiz') _promptKnowledgeCheckPreset();
   } else if (field === 'customQuizTypeName') {
@@ -7321,6 +7666,8 @@ function readSettingsToForm() {
   document.getElementById('q-title').value = s.title || '';
   const rT = document.getElementById('r-qtitle'); if (rT) rT.value = s.title || '';
   renderSegmentedType();
+  // Defer inspector render so legacy form-input values are populated below first
+  setTimeout(() => { if (typeof renderInspector === 'function') renderInspector(); }, 0);
   const qt = s.quizType || 'course_completion';
   const _qs1 = document.querySelector('input[name="s-type"][value="' + qt + '"]');
   const _qs2 = document.querySelector('input[name="q-type"][value="' + qt + '"]');
