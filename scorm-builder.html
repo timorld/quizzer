@@ -675,7 +675,12 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 
 <!-- QUESTIONS TAB -->
 <div id="tab-questions" class="tab-panel active">
-<div class="q-tab-wrap">
+
+<!-- ───────────── LEGACY DOM (hidden) — kept so the rest of the JS that
+     reads/writes these IDs (q-title, s-type radios, q-custom-name, etc.)
+     keeps working. New segmented control / qbar / addrow below mirror
+     their state via the existing syncQuizInfo / saveSettings hooks. ───────────── -->
+<div id="r-legacy-q" style="display:none">
 <div class="q-tab-main">
   <div class="s-section" id="q-info-section" style="margin-bottom:16px">
     <div class="form-grid" style="align-items:end">
@@ -760,7 +765,6 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
       <button class="btn btn-sm" onclick="clearQuestionSelection()">Clear selected</button>
     </div>
   </div>
-  <div id="q-list"></div>
   <div class="gen-bar">
     <div class="gen-info"><strong id="gen-count">0 questions</strong> ready &nbsp;·&nbsp; Title: <strong id="gen-title-display">—</strong></div>
     <div class="btn-group">
@@ -769,7 +773,64 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
       <button class="btn btn-outline-green" onclick="openEditor(null)">+ Add Question</button>
     </div>
   </div>
-</div><!-- end q-tab-main -->
+</div><!-- end q-tab-main legacy -->
+</div><!-- end r-legacy-q (hidden) -->
+
+<!-- ───────────── NEW QUIZ BUILDER CANVAS ───────────── -->
+<section class="r-canvas">
+  <div class="canvas-inner">
+    <!-- Quiz type segmented control -->
+    <div class="field-lbl">Quiz type</div>
+    <div class="seg" id="r-seg"></div>
+    <div class="custom-wrap" id="r-custom-wrap" style="display:none">
+      <input class="custom-input" id="r-custom-name" type="text" placeholder="Name this quiz type… e.g. Mid-term Assessment" spellcheck="false" oninput="syncQuizInfo('customQuizTypeName',this.value)">
+      <div class="custom-mode">
+        <label><input type="radio" name="r-cmode" value="quiz" checked onchange="syncQuizInfo('customQuizMode',this.value)"> &ldquo;Quiz&rdquo;</label>
+        <label><input type="radio" name="r-cmode" value="exam" onchange="syncQuizInfo('customQuizMode',this.value)"> &ldquo;Exam&rdquo;</label>
+      </div>
+    </div>
+
+    <!-- Questions toolbar -->
+    <div class="qbar">
+      <div>
+        <h2>Questions</h2>
+        <div class="sub" id="r-qsub">0 questions</div>
+      </div>
+      <div class="qbar-tools">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg><input id="r-qsearch" placeholder="Search questions"></div>
+        <label class="exp-tog" onclick="toggleExpandQuestions(!Q_EXPANDED)"><span>Expand all</span><span class="tog" id="r-expand-tog"></span></label>
+        <button class="btn btn-sm btn-danger" onclick="clearAll()">Clear All</button>
+      </div>
+    </div>
+
+    <!-- Select-all + bulk actions row -->
+    <div class="sel-row">
+      <label><input type="checkbox" id="r-sel-all" onchange="toggleSelectAllQuestions(this.checked)"> Select all</label>
+      <span class="selinfo" id="r-sel-info"></span>
+      <div class="bulk" id="r-sel-bulk" style="display:none">
+        <button class="btn btn-sm btn-outline-green" onclick="openSendToBank()"><img class="btn-icon" src="assets/svg/upload.svg" alt=""> Send to Bank</button>
+        <button class="btn btn-sm" onclick="clearQuestionSelection()">Clear selected</button>
+      </div>
+    </div>
+
+    <!-- Question list (renderQuestions writes here — same id as legacy) -->
+    <div class="qlist" id="q-list"></div>
+
+    <!-- Add row at the bottom -->
+    <div class="addrow">
+      <div class="addsplit" id="r-add-split">
+        <button class="as-main" onclick="openEditor(null)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add question</button>
+        <button class="as-caret" onclick="rToggleAddMenu(event)" aria-label="More ways to add questions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="addmenu" id="r-add-menu">
+          <button onclick="rCloseAddMenu();openEditor(null)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span class="al">Write a new question<span class="ad">Open the editor and build one by hand</span></span></button>
+          <button onclick="rCloseAddMenu();openAddFromBank()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M9 6l3 3 3-3"/><path d="M5 14h14"/><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg><span class="al">Pull from question bank<span class="ad">Reuse questions from your shared library</span></span></button>
+          <button onclick="rCloseAddMenu();openImportMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span class="al">Import from file…<span class="ad">SCORM · XML · AIKEN · DOCX · PPTX</span></span></button>
+        </div>
+      </div>
+      <button class="addbtn sec-add" onclick="addSection()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><rect x="4" y="9" width="16" height="11" rx="2"/></svg> Add section</button>
+    </div>
+  </div>
+</section>
 <div id="batch-sidebar" style="display:none">
   <div class="batch-sidebar-hdr">
     <span>Batch Quizzes</span>
@@ -781,8 +842,7 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
   <span style="font-size:13px">&#10094;</span>
   <span class="batch-sidebar-open-label">Batch</span>
 </button>
-</div><!-- end q-tab-wrap -->
-</div>
+</div><!-- end #tab-questions -->
 
 <!-- SETTINGS TAB -->
 <div id="tab-settings" class="tab-panel">
@@ -5657,6 +5717,195 @@ let Q_EXPANDED = false;
 
 function toggleExpandQuestions(on) {
   Q_EXPANDED = on;
+  // Sync the new toggle visual + the legacy checkbox
+  const rTog = document.getElementById('r-expand-tog'); if (rTog) rTog.classList.toggle('on', !!on);
+  const legacyTog = document.getElementById('q-expand-toggle'); if (legacyTog) legacyTog.checked = !!on;
+  renderQuestions();
+}
+
+// ════════════════════════════════════════════════════════════════
+// REDESIGN — Quiz Builder canvas renderers + interactions
+// All "r-" functions belong to the new design and only touch the new
+// .r-canvas markup. They coexist with the legacy renderers above.
+// ════════════════════════════════════════════════════════════════
+const R_TYPES = [
+  { id:'course_completion',    label:'Course completion', short:'Completion',     c:'#3f8500' },
+  { id:'topic_quiz',           label:'Knowledge check',   short:'Knowledge check', c:'#0060c7' },
+  { id:'course_final_exam',    label:'Final exam',        short:'Final exam',     c:'#6d28d9' },
+  { id:'gpu_genius_fast_track',label:'GPU Genius',        short:'GPU Genius',     c:'#b45309' },
+  { id:'custom',               label:'Custom',            short:'Custom',         c:'#be185d' }
+];
+
+// Renders the new segmented quiz-type control from APP.settings.quizType.
+// Clicks call syncQuizInfo so the legacy radios + downstream logic stay in sync.
+function renderSegmentedType() {
+  const seg = document.getElementById('r-seg');
+  if (!seg) return;
+  const active = APP.settings.quizType || 'course_completion';
+  seg.innerHTML = R_TYPES.map(t => {
+    const isOn = t.id === active;
+    return '<button data-type="' + t.id + '" class="' + (isOn ? 'on' : '') + '" style="' + (isOn ? '--seg-c:' + t.c : '') + '"><span class="seg-dot" style="background:' + t.c + '"></span>' + escH(t.label) + '</button>';
+  }).join('');
+  seg.querySelectorAll('button').forEach(b => {
+    b.onclick = () => syncQuizInfo('quizType', b.dataset.type);
+  });
+  // Custom-name + mode row visible only for the custom quiz type
+  const cw = document.getElementById('r-custom-wrap');
+  if (cw) cw.style.display = active === 'custom' ? 'flex' : 'none';
+  // Mirror custom-name + mode into the new inputs
+  const cn = document.getElementById('r-custom-name');
+  if (cn && cn !== document.activeElement) cn.value = APP.settings.customQuizTypeName || '';
+  const mode = APP.settings.customQuizMode === 'exam' ? 'exam' : 'quiz';
+  const cmodeR = document.querySelector('input[name="r-cmode"][value="' + mode + '"]');
+  if (cmodeR) cmodeR.checked = true;
+}
+
+// Single-card renderer for the new canvas. Emits .qc markup.
+function _renderQuestionCardNew(q, i) {
+  const t = q.questionType || 'single';
+  const tagMap = { single:['s','Single'], multiple:['m','Multiple'], matching:['mt','Matching'], sequencing:['sq','Sequencing'], hotspot:['hs','Hotspot'] };
+  const [tagCls, tagLab] = tagMap[t] || ['s','Single'];
+  const isSel = APP.selectedQids.has(q.id);
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  // Options preview (.qbody) — only visible when card is expanded
+  let optsBlock;
+  if (t === 'matching') {
+    optsBlock = '<ul class="qopts">' + (q.pairs||[]).map(p =>
+      '<li class="pair"><span class="trm">' + escH(p.left) + '</span><span class="arr">→</span><span>' + escH(p.right) + '</span></li>'
+    ).join('') + '</ul>';
+  } else if (t === 'sequencing') {
+    optsBlock = '<ul class="qopts">' + (q.steps||[]).map((s, idx) =>
+      '<li><span class="ol num">' + (idx+1) + '</span>' + escH(s) + '</li>'
+    ).join('') + '</ul>';
+  } else if (t === 'hotspot') {
+    const hsImg = q.images && q.images[0] ? q.images[0].data : null;
+    const regCount = (q.hotspots || []).length;
+    optsBlock = hsImg
+      ? '<div style="margin:8px 0"><img src="' + hsImg + '" style="display:block;max-width:100%;max-height:160px;object-fit:contain;border-radius:6px;border:1px solid var(--g100)"></div><div style="font-size:12.5px;color:var(--muted)">' + regCount + ' region' + (regCount !== 1 ? 's' : '') + '</div>'
+      : '<div style="font-size:12.5px;color:var(--muted);padding:6px 10px">' + regCount + ' region' + (regCount !== 1 ? 's' : '') + '</div>';
+  } else {
+    const correctArr = Array.isArray(q.correctAnswer) ? q.correctAnswer : (q.correctAnswer ? [q.correctAnswer] : []);
+    optsBlock = '<ul class="qopts">' + (q.options||[]).map((opt, idx) => {
+      const letter = opt.letter || letters[idx];
+      const isCorrect = correctArr.indexOf(letter) !== -1;
+      const marker = isCorrect ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : letter;
+      return '<li class="' + (isCorrect ? 'correct' : '') + '"><span class="ol">' + marker + '</span>' + escH(opt.text || '') + '</li>';
+    }).join('') + '</ul>';
+  }
+  // Question text preview — strip HTML for the .qt line; full HTML available via expand
+  const qPreview = stripHtml(q.question || '').replace(/\s+/g, ' ').trim();
+  const cnt = i + 1;
+  return '<div class="qc' + (isSel ? ' sel' : '') + (Q_EXPANDED ? ' open' : '') + '" draggable="true" data-qidx="' + i + '" data-qid="' + escH(q.id) + '">'
+    + '<input type="checkbox" class="qcheck"' + (isSel ? ' checked' : '') + ' onclick="event.stopPropagation()" onchange="toggleQuestionSelection(\'' + q.id + '\', this.checked)" aria-label="Select question ' + cnt + '">'
+    + '<span class="grip">⠿</span>'
+    + '<span class="num">' + cnt + '</span>'
+    + '<div class="main">'
+      + '<div class="qt">' + escH(qPreview) + '</div>'
+      + '<div class="qbody">' + optsBlock + '</div>'
+      + '<div class="meta"><span class="tag ' + tagCls + '">' + tagLab + '</span></div>'
+    + '</div>'
+    + '<div class="acts">'
+      + '<button class="iconbtn exp" onclick="event.stopPropagation();this.closest(\'.qc\').classList.toggle(\'open\')" title="Expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>'
+      + '<button class="iconbtn" onclick="openEditor(\'' + q.id + '\')" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>'
+      + '<button class="iconbtn" onclick="duplicateQuestion(\'' + q.id + '\')" title="Duplicate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>'
+      + '<button class="iconbtn" onclick="deleteQuestion(\'' + q.id + '\')" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>'
+    + '</div>'
+  + '</div>';
+}
+
+// Inline-edit save handler for section title
+function rSaveSectionTitle(el) {
+  const oldName = el.dataset.secTitle;
+  const newName = (el.textContent || '').trim();
+  if (!newName || newName === oldName) {
+    el.textContent = oldName;
+    return;
+  }
+  if (APP.settings.sections.includes(newName)) {
+    toast('Section "' + newName + '" already exists', 'err');
+    el.textContent = oldName;
+    return;
+  }
+  pushQHistory();
+  const idx = APP.settings.sections.indexOf(oldName);
+  if (idx >= 0) APP.settings.sections[idx] = newName;
+  APP.questions.forEach(q => { if (q.section === oldName) q.section = newName; });
+  if (APP.collapsedSections.has(oldName)) { APP.collapsedSections.delete(oldName); APP.collapsedSections.add(newName); }
+  renderQuestions();
+}
+
+// Add-question split-button menu
+function rToggleAddMenu(e) {
+  if (e) e.stopPropagation();
+  const sp = document.getElementById('r-add-split');
+  if (!sp) return;
+  const isOpen = sp.classList.toggle('open');
+  if (isOpen) setTimeout(() => document.addEventListener('click', _rAddMenuCloser, { once:true }), 0);
+}
+function _rAddMenuCloser(e) {
+  const sp = document.getElementById('r-add-split');
+  if (sp && sp.contains(e.target)) { setTimeout(() => document.addEventListener('click', _rAddMenuCloser, { once:true }), 0); return; }
+  rCloseAddMenu();
+}
+function rCloseAddMenu() { const sp = document.getElementById('r-add-split'); if (sp) sp.classList.remove('open'); }
+
+// Floating section kebab menu
+let _rSecMenuCloser = null;
+function _rCloseFloaters() {
+  const m = document.querySelector('.r-floatpop'); if (m) m.remove();
+  if (_rSecMenuCloser) { document.removeEventListener('click', _rSecMenuCloser); _rSecMenuCloser = null; }
+}
+function rOpenSecMenu(key, anchor) {
+  _rCloseFloaters();
+  const idx = APP.settings.sections.indexOf(key);
+  if (idx < 0) return;
+  const pop = document.createElement('div');
+  pop.className = 'r-floatpop r-secmenu';
+  const ICO_UP   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
+  const ICO_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+  const ICO_PEN  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+  const ICO_TR   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+  pop.innerHTML =
+    '<button data-act="rename">' + ICO_PEN + '<span>Rename section</span></button>' +
+    '<button data-act="up" ' + (idx === 0 ? 'disabled' : '') + '>' + ICO_UP + '<span>Move up</span></button>' +
+    '<button data-act="down" ' + (idx === APP.settings.sections.length - 1 ? 'disabled' : '') + '>' + ICO_DOWN + '<span>Move down</span></button>' +
+    '<div class="fm-sep"></div>' +
+    '<button data-act="del" class="danger">' + ICO_TR + '<span>Delete section</span></button>';
+  document.body.appendChild(pop);
+  // Position near the anchor
+  const r = anchor.getBoundingClientRect();
+  pop.style.top = (r.bottom + 6) + 'px';
+  pop.style.left = Math.max(12, Math.min(r.right - pop.offsetWidth, window.innerWidth - pop.offsetWidth - 12)) + 'px';
+  if (parseInt(pop.style.top, 10) + pop.offsetHeight > window.innerHeight - 12) {
+    pop.style.top = Math.max(12, r.top - pop.offsetHeight - 6) + 'px';
+  }
+  pop.querySelectorAll('button').forEach(b => {
+    b.onclick = () => {
+      if (b.disabled) return;
+      const a = b.dataset.act;
+      _rCloseFloaters();
+      if (a === 'rename') {
+        const el = document.querySelector('[data-sec-title="' + key.replace(/"/g, '\\"') + '"]');
+        if (el) { el.focus(); const range = document.createRange(); range.selectNodeContents(el); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range); }
+      } else if (a === 'up')   { _rMoveSection(key, -1); }
+      else if (a === 'down') { _rMoveSection(key, +1); }
+      else if (a === 'del')  { deleteSection(key); }
+    };
+  });
+  setTimeout(() => {
+    _rSecMenuCloser = e => { if (!pop.contains(e.target) && e.target !== anchor && !anchor.contains(e.target)) _rCloseFloaters(); };
+    document.addEventListener('click', _rSecMenuCloser);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') _rCloseFloaters(); }, { once:true });
+  }, 0);
+}
+function _rMoveSection(key, dir) {
+  const i = APP.settings.sections.indexOf(key);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= APP.settings.sections.length) return;
+  pushQHistory();
+  const tmp = APP.settings.sections[i];
+  APP.settings.sections[i] = APP.settings.sections[j];
+  APP.settings.sections[j] = tmp;
   renderQuestions();
 }
 
@@ -5664,14 +5913,72 @@ function renderQuestions() {
   const list = document.getElementById('q-list');
   const n = APP.questions.length;
   _ensureSectionsList();
-  document.getElementById('q-count-text').textContent = n + ' question' + (n !== 1 ? 's' : '');
-  document.getElementById('gen-count').textContent = n + ' question' + (n !== 1 ? 's' : '');
-  document.getElementById('gen-title-display').textContent = APP.settings.title || '—';
-  document.querySelector('.gen-bar').style.display = n ? '' : 'none';
+  // Legacy DOM updates (hidden but kept in sync for any other code reading these)
+  const qct = document.getElementById('q-count-text'); if (qct) qct.textContent = n + ' question' + (n !== 1 ? 's' : '');
+  const gc = document.getElementById('gen-count'); if (gc) gc.textContent = n + ' question' + (n !== 1 ? 's' : '');
+  const gtd = document.getElementById('gen-title-display'); if (gtd) gtd.textContent = APP.settings.title || '—';
+  const gb = document.querySelector('.gen-bar'); if (gb) gb.style.display = n ? '' : 'none';
   const emptyEl = document.getElementById('q-empty-state');
   if (emptyEl) emptyEl.style.display = (n || APP.settings.sections.length) ? 'none' : '';
-  if (!n && !APP.settings.sections.length) { list.innerHTML = ''; return; }
-  const cards = APP.questions.map((q, i) => {
+  // New canvas: questions toolbar subtitle
+  const qsub = document.getElementById('r-qsub');
+  if (qsub) {
+    const secCount = APP.settings.sections.length;
+    const secTxt = secCount ? ' · ' + secCount + ' ' + (secCount === 1 ? 'section' : 'sections') : '';
+    const perAttempt = APP.settings.questionsPerAttempt > 0 ? Math.min(APP.settings.questionsPerAttempt, n) : 0;
+    const perAttemptTxt = perAttempt > 0 ? ' · ' + perAttempt + ' shown per attempt' : '';
+    qsub.textContent = (n + ' question' + (n !== 1 ? 's' : '')) + secTxt + perAttemptTxt;
+  }
+  if (!n && !APP.settings.sections.length) { list.innerHTML = ''; _updateQuestionSelectionBar(); return; }
+  const cards = APP.questions.map((q, i) => _renderQuestionCardNew(q, i));
+  // Section model: APP.settings.sections is the canonical ordered list. Render
+  // every section (even empty ones), in that order. Unsectioned questions get
+  // a synthetic "Ungrouped" bucket at the top.
+  const sections = APP.settings.sections;
+  const hasAnySection = sections.length > 0 || APP.questions.some(q => q.section);
+  if (!hasAnySection) {
+    list.innerHTML = cards.join('');
+  } else {
+    const buckets = new Map();
+    sections.forEach(s => buckets.set(s, []));
+    const unsectioned = [];
+    APP.questions.forEach((q, i) => {
+      if (q.section && buckets.has(q.section)) buckets.get(q.section).push(cards[i]);
+      else if (q.section) buckets.set(q.section, [cards[i]]);
+      else unsectioned.push(cards[i]);
+    });
+    const renderSec = (key, items, isUngrouped) => {
+      const label = isUngrouped ? 'Ungrouped' : key;
+      const collapsed = APP.collapsedSections.has(key);
+      let band;
+      if (isUngrouped) {
+        band = '<div class="stitle-eyebrow plain">' + escH(label) + '</div><span class="scount">' + items.length + '</span>';
+      } else {
+        band = '<button class="schev' + (collapsed ? '' : ' open') + '" onclick="toggleSectionCollapse(\'' + key.replace(/'/g, "\\'") + '\')" aria-label="Collapse section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>'
+          + '<div class="stitle-eyebrow" contenteditable spellcheck="false" data-sec-title="' + escH(key) + '" onblur="rSaveSectionTitle(this)" onkeydown="if(event.key===\'Enter\'){event.preventDefault();this.blur();}">' + escH(label) + '</div>'
+          + '<span class="scount">' + items.length + ' ' + (items.length === 1 ? 'question' : 'questions') + '</span>'
+          + '<button class="skebab" onclick="rOpenSecMenu(\'' + key.replace(/'/g, "\\'") + '\', this)" title="Section options"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg></button>';
+      }
+      return '<section class="qsection' + (collapsed ? ' closed' : '') + (isUngrouped ? ' ungrouped-sec' : '') + '" data-section-key="' + escH(key) + '">'
+        + '<div class="sband">' + band + '</div>'
+        + '<div class="scollapsed">' + items.length + ' ' + (items.length === 1 ? 'question' : 'questions') + ' hidden</div>'
+        + '<div class="sqs">' + (items.length ? items.join('') : '<div class="sempty">Drop questions here, or add one to this section.</div>') + '</div>'
+        + '</section>';
+    };
+    let html = '';
+    if (unsectioned.length) html += renderSec('__unsectioned__', unsectioned, true);
+    for (const sec of sections) html += renderSec(sec, buckets.get(sec) || [], false);
+    list.innerHTML = html;
+  }
+  attachDragHandlers();
+  _attachSectionGroupDnD();
+  _updateQuestionSelectionBar();
+}
+
+/* Old verbose renderer kept under a different name in case we need to reference it.
+   Returns the OLD-style q-card HTML for one question — currently unused.
+   The new canvas calls _renderQuestionCardNew below. */
+function _renderQuestionCardLegacy_UNUSED(q, i) {
     const preview = stripHtml(q.question).replace(/\s+/g,' ').trim().slice(0,90);
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const bodyHtml = Q_EXPANDED
@@ -5750,58 +6057,6 @@ function renderQuestions() {
       + '<button class="btn btn-sm" onclick="duplicateQuestion(\'' + q.id + '\')" title="Duplicate">' + ICON.duplicate + '</button>'
       + '<button class="btn btn-sm btn-danger" onclick="deleteQuestion(\'' + q.id + '\')" title="Delete">' + ICON.trash + '</button>'
       + '</div></div>';
-  });
-  // Section model: APP.settings.sections is the canonical ordered list. Render
-  // every section (even empty ones), in that order. Unsectioned questions get a
-  // synthetic "(Unsectioned)" bucket at the bottom.
-  const sections = APP.settings.sections;
-  const hasAnySection = sections.length > 0 || APP.questions.some(q => q.section);
-  if (!hasAnySection) {
-    list.innerHTML = cards.join('');
-  } else {
-    const buckets = new Map();
-    sections.forEach(s => buckets.set(s, []));
-    let unsectioned = [];
-    APP.questions.forEach((q, i) => {
-      if (q.section && buckets.has(q.section)) buckets.get(q.section).push(cards[i]);
-      else if (q.section) {
-        // Section name exists on a question but isn't in the list — shouldn't happen
-        // after _ensureSectionsList, but defensively still surface it.
-        buckets.set(q.section, [cards[i]]);
-      } else {
-        unsectioned.push(cards[i]);
-      }
-    });
-    const renderGroup = (key, items, opts) => {
-      const isUnsect = key === '__unsectioned__';
-      const label = isUnsect ? '(Unsectioned)' : key;
-      const collapsed = APP.collapsedSections.has(key);
-      const actions = isUnsect ? '' : (
-        '<span class="q-section-actions">'
-        +   '<button title="Rename" onclick="event.stopPropagation();renameSection(this.closest(\'.q-section-header\').dataset.sectionKey)">' + ICON.edit + '</button>'
-        +   '<button title="Delete section" class="del" onclick="event.stopPropagation();deleteSection(this.closest(\'.q-section-header\').dataset.sectionKey)">' + ICON.trash + '</button>'
-        + '</span>'
-      );
-      return '<div class="q-section-group" data-section-key="' + escH(key) + '">'
-        + '<div class="q-section-header" data-section-key="' + escH(key) + '" onclick="toggleSectionCollapse(this.dataset.sectionKey)">'
-        +   '<span class="q-section-chevron' + (collapsed ? '' : ' open') + '">▶</span>'
-        +   '<span class="q-section-name">' + escH(label) + '</span>'
-        +   '<span class="q-section-count">' + items.length + ' question' + (items.length !== 1 ? 's' : '') + '</span>'
-        +   actions
-        + '</div>'
-        + '<div class="q-section-cards"' + (collapsed ? ' style="display:none"' : '') + '>'
-        +   (items.length ? items.join('') : '<div class="q-section-empty">Drop questions here to add them to this section.</div>')
-        + '</div>'
-      + '</div>';
-    };
-    let html = '';
-    for (const [key, items] of buckets.entries()) html += renderGroup(key, items);
-    if (unsectioned.length) html += renderGroup('__unsectioned__', unsectioned);
-    list.innerHTML = html;
-  }
-  attachDragHandlers();
-  _attachSectionGroupDnD();
-  _updateQuestionSelectionBar();
 }
 
 function toggleSectionCollapse(key) {
@@ -5949,18 +6204,27 @@ function _updateQuestionSelectionBar() {
   // Drop selection IDs that no longer exist (e.g. after delete / clear all)
   const validIds = new Set(APP.questions.map(q => q.id));
   Array.from(APP.selectedQids).forEach(id => { if (!validIds.has(id)) APP.selectedQids.delete(id); });
+  const n = APP.selectedQids.size;
+  const allChecked = n > 0 && n === APP.questions.length;
+  const partial = n > 0 && n < APP.questions.length;
+
+  // New canvas: sel-row select-all + selinfo + bulk actions
+  const rSelAll = document.getElementById('r-sel-all');
+  const rSelInfo = document.getElementById('r-sel-info');
+  const rSelBulk = document.getElementById('r-sel-bulk');
+  if (rSelAll) { rSelAll.checked = allChecked; rSelAll.indeterminate = partial; }
+  if (rSelInfo) rSelInfo.textContent = n ? n + ' selected' : '';
+  if (rSelBulk) rSelBulk.style.display = n ? 'flex' : 'none';
+
+  // Legacy hidden DOM kept in sync
   const bar = document.getElementById('q-sel-bar');
   const cnt = document.getElementById('q-sel-count');
   const selAll = document.getElementById('q-sel-all');
   const actions = document.getElementById('q-sel-actions');
-  if (!bar) return;
-  const n = APP.selectedQids.size;
-  // Bar is visible whenever there are questions, so Select all is always reachable.
-  // The Send/Clear actions only appear once at least one question is selected.
-  bar.style.display = APP.questions.length ? '' : 'none';
+  if (bar) bar.style.display = APP.questions.length ? '' : 'none';
   if (actions) actions.style.display = n ? '' : 'none';
   if (cnt) cnt.textContent = String(n);
-  if (selAll) selAll.checked = n > 0 && n === APP.questions.length;
+  if (selAll) selAll.checked = allChecked;
 }
 
 async function openSendToBank() {
@@ -6203,7 +6467,7 @@ function confirmAddFromBank() {
 let _dragSrcIdx = null;
 
 function attachDragHandlers() {
-  document.querySelectorAll('#q-list .q-card').forEach(card => {
+  document.querySelectorAll('#q-list .qc').forEach(card => {
     card.addEventListener('dragstart', e => {
       _dragSrcIdx = parseInt(card.dataset.qidx);
       card.classList.add('dragging');
@@ -6211,14 +6475,14 @@ function attachDragHandlers() {
     });
     card.addEventListener('dragend', () => {
       card.classList.remove('dragging');
-      document.querySelectorAll('#q-list .q-card').forEach(c =>
+      document.querySelectorAll('#q-list .qc').forEach(c =>
         c.classList.remove('drag-over-top', 'drag-over-bottom'));
     });
     card.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       const rect = card.getBoundingClientRect();
-      document.querySelectorAll('#q-list .q-card').forEach(c =>
+      document.querySelectorAll('#q-list .qc').forEach(c =>
         c.classList.remove('drag-over-top', 'drag-over-bottom'));
       card.classList.add(e.clientY < rect.top + rect.height / 2 ? 'drag-over-top' : 'drag-over-bottom');
     });
@@ -6234,7 +6498,8 @@ function attachDragHandlers() {
       const insertAfter = e.clientY >= rect.top + rect.height / 2;
       // If we're dropping onto a card in a different section, reassign the
       // dragged question's section field so the visual position matches reality.
-      const targetGroup = card.closest('.q-section-group');
+      // New canvas uses .qsection with data-section-key; legacy uses .q-section-group
+      const targetGroup = card.closest('.qsection,.q-section-group');
       const targetSectionKey = targetGroup ? targetGroup.dataset.sectionKey : null;
       pushQHistory();
       const item = APP.questions.splice(_dragSrcIdx, 1)[0];
@@ -6989,16 +7254,18 @@ function syncQuizInfo(field, value) {
     document.querySelectorAll('input[name="s-type"]:checked, input[name="q-type"]:checked').forEach(r => r.closest('.quiz-type-opt').classList.add('quiz-type-sel'));
     _updateCertificateToggleForQuizType(value, true);
     _refreshPassExitPlaceholder();
+    renderSegmentedType();
     // If the user just switched to Knowledge Check, offer to apply the KC preset.
     if (value === 'topic_quiz' && prevType !== 'topic_quiz') _promptKnowledgeCheckPreset();
   } else if (field === 'customQuizTypeName') {
     APP.settings.customQuizTypeName = value;
     const qInp = document.getElementById('q-custom-name'); if (qInp && qInp.value !== value) qInp.value = value;
     const sInp = document.getElementById('s-custom-name'); if (sInp && sInp.value !== value) sInp.value = value;
+    const rInp = document.getElementById('r-custom-name'); if (rInp && rInp !== document.activeElement && rInp.value !== value) rInp.value = value;
     _refreshPassExitPlaceholder();
   } else if (field === 'customQuizMode') {
     APP.settings.customQuizMode = value;
-    const sel = 'input[name="q-custom-mode"][value="' + value + '"], input[name="s-custom-mode"][value="' + value + '"]';
+    const sel = 'input[name="q-custom-mode"][value="' + value + '"], input[name="s-custom-mode"][value="' + value + '"], input[name="r-cmode"][value="' + value + '"]';
     document.querySelectorAll(sel).forEach(r => r.checked = true);
     _refreshPassExitPlaceholder();
   }
@@ -7053,6 +7320,7 @@ function readSettingsToForm() {
   document.getElementById('s-title').value = s.title || '';
   document.getElementById('q-title').value = s.title || '';
   const rT = document.getElementById('r-qtitle'); if (rT) rT.value = s.title || '';
+  renderSegmentedType();
   const qt = s.quizType || 'course_completion';
   const _qs1 = document.querySelector('input[name="s-type"][value="' + qt + '"]');
   const _qs2 = document.querySelector('input[name="q-type"][value="' + qt + '"]');
