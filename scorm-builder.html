@@ -533,19 +533,15 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-canvas .sel-row .selinfo{color:var(--green-600);font-weight:700}
 .r-canvas .sel-row .bulk{margin-left:auto;display:flex;gap:8px}
 .r-canvas .qlist{display:flex;flex-direction:column;gap:0}
-.r-canvas .qc{background:#fff;border:1px solid var(--g100);border-radius:9px;padding:9px 13px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh-card);transition:border-color .12s,box-shadow .12s;margin-bottom:6px}
+.r-canvas .qc{background:#fff;border:1px solid var(--g100);border-radius:10px;padding:11px 14px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--sh-card);transition:border-color .12s,box-shadow .12s;margin-bottom:6px}
 .r-canvas .qc:hover{border-color:#cfd4dc;box-shadow:0 2px 8px rgba(16,24,40,.08)}
 .r-canvas .qc.sel{border-color:#cdd5de;box-shadow:inset 3px 0 0 var(--green),0 1px 3px rgba(16,24,40,.07)}
-.r-canvas .qc .qcheck{flex:none;cursor:pointer}
-.r-canvas .qc .grip{color:#c7ccd4;cursor:grab;flex:none;font-size:14px;line-height:1;user-select:none}
-.r-canvas .qc .num{min-width:22px;height:22px;border-radius:6px;background:var(--green-lt);color:var(--green-600);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
-.r-canvas .qc .main{flex:1;min-width:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.r-canvas .qc .qt{font-size:14px;font-weight:500;color:var(--text);line-height:1.4;word-break:break-word;flex:1;min-width:0;margin:0}
-.r-canvas .qc .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;flex:none}
-.r-canvas .qc.open{align-items:flex-start}
-.r-canvas .qc.open .main{align-items:flex-start;flex-direction:column;flex-wrap:nowrap}
-.r-canvas .qc.open .qt{flex:0 0 auto;width:100%}
-.r-canvas .qc.open .meta{flex:0 0 auto}
+.r-canvas .qc .qcheck{flex:none;cursor:pointer;margin-top:2px}
+.r-canvas .qc .grip{color:#c7ccd4;cursor:grab;flex:none;font-size:14px;line-height:1;user-select:none;margin-top:3px}
+.r-canvas .qc .num{min-width:22px;height:22px;border-radius:6px;background:var(--green-lt);color:var(--green-600);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+.r-canvas .qc .main{flex:1;min-width:0;text-align:left}
+.r-canvas .qc .qt{font-size:14px;font-weight:500;color:var(--text);line-height:1.45;word-break:break-word;margin:0 0 6px 0;text-align:left}
+.r-canvas .qc .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-start}
 .r-canvas .qc .acts{display:flex;gap:4px;flex:none}
 .r-canvas .qc .qbody{display:none}
 .r-canvas .qc.open .qbody{display:block}
@@ -637,12 +633,12 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
    other tabs keep using .main's outer scroll. */
 #tab-questions.tab-panel.active{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;flex:1}
 .r-split{display:flex;align-items:stretch;flex:1;min-height:0;min-width:0;overflow:hidden}
-.r-inspector{width:424px;flex:none;background:#f4f5f7;border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.r-inspector{width:424px;flex:none;background:#f4f5f7;border-left:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column}
 @media(max-width:1180px){.r-inspector{width:372px}}
 @media(max-width:980px){.r-inspector{display:none}}
 .r-insp-hd{flex:none;display:flex;align-items:center;gap:10px;padding:16px 18px 14px;border-bottom:1px solid var(--border);background:#fff}
 .r-insp-hd .t{font-size:16px;font-weight:800;letter-spacing:-.2px;line-height:1.25}
-.r-insp-scroll{flex:1;padding:14px;display:flex;flex-direction:column;gap:11px;min-height:0}
+.r-insp-scroll{flex:1;padding:14px 14px 22px;display:flex;flex-direction:column;gap:11px;min-height:0;overflow-y:auto}
 .r-insp-scroll>*{flex:0 0 auto}
 .r-preset{background:#fff;border:1px solid var(--g100);border-radius:11px;box-shadow:var(--sh-card);padding:13px 14px}
 .r-preset .r-row{display:flex;align-items:center;gap:8px}
@@ -7008,7 +7004,7 @@ function loadPreset(id) {
 async function _promptKnowledgeCheckPreset() {
   const ok = await cdlg({
     title: 'Switch to Knowledge check settings?',
-    msg: 'Load the Knowledge check preset for this quiz?',
+    msg: '',
     confirmText: 'Switch settings',
     cancelText: 'Keep current'
   });
