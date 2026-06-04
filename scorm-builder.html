@@ -6334,7 +6334,18 @@ function renderQuestions() {
     const perAttemptTxt = perAttempt > 0 ? ' · ' + perAttempt + ' shown per attempt' : '';
     qsub.textContent = (n + ' question' + (n !== 1 ? 's' : '')) + secTxt + perAttemptTxt;
   }
-  if (!n && !APP.settings.sections.length) { list.innerHTML = ''; _updateQuestionSelectionBar(); return; }
+  // Empty-state: hide search / Expand all / Clear All — they're only useful with content
+  const qbarTools = document.querySelector('.r-canvas .qbar-tools');
+  if (qbarTools) qbarTools.style.display = n ? '' : 'none';
+  const selRow = document.querySelector('.r-canvas .sel-row');
+  if (selRow) selRow.style.display = n ? '' : 'none';
+  if (!n && !APP.settings.sections.length) {
+    list.innerHTML = '';
+    _updateQuestionSelectionBar();
+    if (typeof renderAddRow === 'function') renderAddRow();
+    if (typeof _rRefreshChips === 'function') _rRefreshChips();
+    return;
+  }
   const cards = APP.questions.map((q, i) => _renderQuestionCardNew(q, i));
   // Section model: APP.settings.sections is the canonical ordered list. Render
   // every section (even empty ones), in that order. Unsectioned questions get
