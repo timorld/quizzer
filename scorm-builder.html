@@ -485,8 +485,8 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
    their centered max-width via the rule below. */
 .r-work .main{flex:1;min-height:0;max-width:none;padding:0;margin:0;display:flex;flex-direction:column;overflow:hidden}
 .r-work .main > .tab-panel{flex:1;min-height:0}
-.r-work .main > .tab-panel.active:not(#tab-questions){overflow-y:auto;padding:28px 24px;display:block}
-.r-work .main > .tab-panel.active:not(#tab-questions) > *{max-width:1100px;margin-left:auto;margin-right:auto}
+.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank){overflow-y:auto;padding:28px 24px;display:block}
+.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank) > *{max-width:1100px;margin-left:auto;margin-right:auto}
 
 @media(max-width:980px){
   .r-rail{width:62px}
@@ -533,46 +533,46 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-canvas .sel-row .selinfo{color:var(--green-600);font-weight:700}
 .r-canvas .sel-row .bulk{margin-left:auto;display:flex;gap:8px}
 .r-canvas .qlist{display:flex;flex-direction:column;gap:0}
-.r-canvas .qc{background:#fff;border:1px solid var(--g100);border-radius:10px;padding:11px 14px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--sh-card);transition:border-color .12s,box-shadow .12s;margin-bottom:6px}
-.r-canvas .qc:hover{border-color:#cfd4dc;box-shadow:0 2px 8px rgba(16,24,40,.08)}
-.r-canvas .qc.sel{border-color:#cdd5de;box-shadow:inset 3px 0 0 var(--green),0 1px 3px rgba(16,24,40,.07)}
+.r-shell .qc{background:#fff;border:1px solid var(--g100);border-radius:10px;padding:11px 14px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--sh-card);transition:border-color .12s,box-shadow .12s;margin-bottom:6px}
+.r-shell .qc:hover{border-color:#cfd4dc;box-shadow:0 2px 8px rgba(16,24,40,.08)}
+.r-shell .qc.sel{border-color:#cdd5de;box-shadow:inset 3px 0 0 var(--green),0 1px 3px rgba(16,24,40,.07)}
 /* Drop indicator while dragging: a green bar above or below the target card */
-.r-canvas .qc{position:relative}
-.r-canvas .qc.drag-over-top::before,.r-canvas .qc.drag-over-bottom::after{content:"";position:absolute;left:0;right:0;height:3px;background:var(--green);border-radius:2px;box-shadow:0 0 0 2px rgba(118,185,0,.18);pointer-events:none;z-index:2}
-.r-canvas .qc.drag-over-top::before{top:-5px}
-.r-canvas .qc.drag-over-bottom::after{bottom:-5px}
-.r-canvas .qc.dragging{opacity:.55}
-.r-canvas .qc .qcheck{flex:none;cursor:pointer;margin-top:2px}
-.r-canvas .qc .grip{color:#c7ccd4;cursor:grab;flex:none;font-size:14px;line-height:1;user-select:none;margin-top:3px}
-.r-canvas .qc .num{min-width:22px;height:22px;border-radius:6px;background:var(--green-lt);color:var(--green-600);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
-.r-canvas .qc .main{flex:1;min-width:0;text-align:left}
-.r-canvas .qc .qt{font-size:14px;font-weight:500;color:var(--text);line-height:1.45;word-break:break-word;margin:0 0 6px 0;text-align:left}
-.r-canvas .qc .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-start}
-.r-canvas .qc .acts{display:flex;gap:4px;flex:none}
-.r-canvas .qc .qbody{display:none}
-.r-canvas .qc.open .qbody{display:block}
-.r-canvas .qc.open .meta{margin-top:11px}
-.r-canvas .qc .exp svg{transition:transform .15s}
-.r-canvas .qc.open .exp svg{transform:rotate(180deg)}
-.r-canvas .iconbtn{width:30px;height:30px;border:1px solid transparent;border-radius:7px;background:none;display:flex;align-items:center;justify-content:center;color:#9aa0aa;cursor:pointer;transition:.12s}
-.r-canvas .iconbtn:hover{background:#f0f1f4;color:var(--text)}
-.r-canvas .iconbtn svg{width:15px;height:15px}
-.r-canvas .tag{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:3px 9px;border-radius:20px;display:inline-flex;align-items:center;line-height:1}
-.r-canvas .tag.s{background:#e6f0ff;color:#0046a4}
-.r-canvas .tag.m{background:#e3f6dd;color:#327100}
-.r-canvas .tag.mt{background:#ecebff;color:#3f31c9}
-.r-canvas .tag.sq{background:#ffeede;color:#b93100}
-.r-canvas .tag.hs{background:#fff4e2;color:#b45309}
-.r-canvas .qopts{list-style:none;margin:9px 0 2px;display:flex;flex-direction:column;gap:5px;padding:0}
-.r-canvas .qopts li{display:flex;align-items:center;gap:9px;font-size:12.5px;padding:6px 10px;border:1px solid var(--g100);border-radius:7px;color:var(--g700)}
-.r-canvas .qopts li.correct{background:var(--green-lt);border-color:#cfe89a;color:var(--green-600);font-weight:600}
-.r-canvas .qopts .ol{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--g200);flex:none;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:var(--g400)}
-.r-canvas .qopts .ol svg{width:11px;height:11px}
-.r-canvas .qopts li.correct .ol{border-color:var(--green);background:var(--green);color:#fff}
-.r-canvas .qopts .ol.num{border-radius:6px;border-color:var(--g150);color:var(--g600)}
-.r-canvas .qopts .pair{justify-content:flex-start}
-.r-canvas .qopts .pair .trm{font-weight:700;min-width:58px;color:var(--text)}
-.r-canvas .qopts .pair .arr{color:var(--g300)}
+.r-shell .qc{position:relative}
+.r-shell .qc.drag-over-top::before,.r-shell .qc.drag-over-bottom::after{content:"";position:absolute;left:0;right:0;height:3px;background:var(--green);border-radius:2px;box-shadow:0 0 0 2px rgba(118,185,0,.18);pointer-events:none;z-index:2}
+.r-shell .qc.drag-over-top::before{top:-5px}
+.r-shell .qc.drag-over-bottom::after{bottom:-5px}
+.r-shell .qc.dragging{opacity:.55}
+.r-shell .qc .qcheck{flex:none;cursor:pointer;margin-top:2px}
+.r-shell .qc .grip{color:#c7ccd4;cursor:grab;flex:none;font-size:14px;line-height:1;user-select:none;margin-top:3px}
+.r-shell .qc .num{min-width:22px;height:22px;border-radius:6px;background:var(--green-lt);color:var(--green-600);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+.r-shell .qc .main{flex:1;min-width:0;text-align:left}
+.r-shell .qc .qt{font-size:14px;font-weight:500;color:var(--text);line-height:1.45;word-break:break-word;margin:0 0 6px 0;text-align:left}
+.r-shell .qc .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-start}
+.r-shell .qc .acts{display:flex;gap:4px;flex:none}
+.r-shell .qc .qbody{display:none}
+.r-shell .qc.open .qbody{display:block}
+.r-shell .qc.open .meta{margin-top:11px}
+.r-shell .qc .exp svg{transition:transform .15s}
+.r-shell .qc.open .exp svg{transform:rotate(180deg)}
+.r-shell .iconbtn{width:30px;height:30px;border:1px solid transparent;border-radius:7px;background:none;display:flex;align-items:center;justify-content:center;color:#9aa0aa;cursor:pointer;transition:.12s}
+.r-shell .iconbtn:hover{background:#f0f1f4;color:var(--text)}
+.r-shell .iconbtn svg{width:15px;height:15px}
+.r-shell .tag{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:3px 9px;border-radius:20px;display:inline-flex;align-items:center;line-height:1}
+.r-shell .tag.s{background:#e6f0ff;color:#0046a4}
+.r-shell .tag.m{background:#e3f6dd;color:#327100}
+.r-shell .tag.mt{background:#ecebff;color:#3f31c9}
+.r-shell .tag.sq{background:#ffeede;color:#b93100}
+.r-shell .tag.hs{background:#fff4e2;color:#b45309}
+.r-shell .qopts{list-style:none;margin:9px 0 2px;display:flex;flex-direction:column;gap:5px;padding:0}
+.r-shell .qopts li{display:flex;align-items:center;gap:9px;font-size:12.5px;padding:6px 10px;border:1px solid var(--g100);border-radius:7px;color:var(--g700)}
+.r-shell .qopts li.correct{background:var(--green-lt);border-color:#cfe89a;color:var(--green-600);font-weight:600}
+.r-shell .qopts .ol{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--g200);flex:none;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:var(--g400)}
+.r-shell .qopts .ol svg{width:11px;height:11px}
+.r-shell .qopts li.correct .ol{border-color:var(--green);background:var(--green);color:#fff}
+.r-shell .qopts .ol.num{border-radius:6px;border-color:var(--g150);color:var(--g600)}
+.r-shell .qopts .pair{justify-content:flex-start}
+.r-shell .qopts .pair .trm{font-weight:700;min-width:58px;color:var(--text)}
+.r-shell .qopts .pair .arr{color:var(--g300)}
 .r-canvas .qsection{margin-top:20px}
 .r-canvas .qsection:first-child{margin-top:2px}
 .r-canvas .qsection .sband{display:flex;align-items:center;gap:7px;padding:4px 2px 9px}
@@ -645,6 +645,77 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 /* Save-as popover */
 .r-save-pop{padding:12px 14px;min-width:240px}
 .r-save-pop .r-save-lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+
+/* ════════════════════════════════════════════════════════════════
+   REDESIGN — Question Bank view (Phase 2)
+   ════════════════════════════════════════════════════════════════ */
+/* Make #tab-bank fill its parent like #tab-questions does (edge-to-edge) */
+#tab-bank.tab-panel.active{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;flex:1}
+
+/* Shared view header for non-builder tabs */
+.r-vhead{flex:none;background:var(--g000);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:14px 24px;min-height:64px}
+.r-vhead .r-vt{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text);line-height:1.2}
+.r-vhead .r-vs{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.45}
+.r-vhead .r-va{margin-left:auto;display:flex;align-items:center;gap:9px}
+
+/* Bank: two-pane layout (folders left, questions right) */
+.r-bank{flex:1;min-height:0;display:flex;align-items:stretch;overflow:hidden}
+
+/* Left rail: folders */
+.r-bank .folders{width:248px;flex:none;border-right:1px solid var(--border);background:#fbfbfc;display:flex;flex-direction:column;padding:14px 12px;overflow-y:auto}
+.r-bank .fsearch{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--g100);border-radius:7px;padding:7px 10px;color:var(--muted);margin-bottom:10px}
+.r-bank .fsearch svg{width:14px;height:14px;flex:none}
+.r-bank .fsearch input{border:none;outline:none;font:inherit;font-size:13px;width:100%;background:none;color:var(--text)}
+.r-bank .ftree{display:flex;flex-direction:column;gap:1px;flex:1}
+.r-bank .fitem{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;font-size:13px;font-weight:500;color:#3f4654;cursor:pointer;border:none;background:none;text-align:left;width:100%;font-family:inherit;position:relative}
+.r-bank .fitem > svg.r-ficon{width:16px;height:16px;color:#9aa0aa;flex:none}
+.r-bank .fitem:hover{background:#eceef1}
+.r-bank .fitem.on{background:var(--green-lt);color:var(--green-600);font-weight:600}
+.r-bank .fitem.on > svg.r-ficon{color:var(--green-600)}
+.r-bank .fitem .fc{margin-left:auto;font-size:11px;font-weight:700;color:#aab0ba}
+.r-bank .fitem.on .fc{color:var(--green-600)}
+.r-bank .fchev{width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;color:#aab0ba;flex:none;background:none;border:none;padding:0;cursor:pointer}
+.r-bank .fchev svg{width:13px;height:13px;transition:transform .15s;transform:rotate(-90deg)}
+.r-bank .fchev:hover{color:var(--g600)}
+.r-bank .fchev.open svg{transform:rotate(0deg)}
+.r-bank .fchev.spacer{visibility:hidden}
+.r-bank .fchildren{display:flex;flex-direction:column;gap:1px;margin-left:25px;border-left:1.5px solid var(--g100);padding-left:3px}
+.r-bank .fitem .fsub-acts{display:none;align-items:center;gap:2px;margin-left:6px}
+.r-bank .fitem:hover .fsub-acts{display:inline-flex}
+.r-bank .fitem .fsub-acts button{padding:2px 5px;border:none;background:transparent;cursor:pointer;color:#9ca3af;border-radius:4px;line-height:1;font-size:12px;font-family:inherit}
+.r-bank .fitem .fsub-acts button:hover{background:#dde0e4;color:var(--green-600)}
+.r-bank .fitem .fsub-acts button svg{width:13px;height:13px}
+.r-bank .ffadd{margin-top:8px;display:flex;align-items:center;gap:8px;width:100%;padding:9px 11px;border:1px dashed var(--g150);border-radius:8px;background:none;font-size:13px;font-weight:600;color:var(--g600);font-family:inherit;cursor:pointer}
+.r-bank .ffadd:hover{border-color:var(--green);color:var(--green-600);background:var(--green-lt)}
+.r-bank .ffadd svg{width:15px;height:15px}
+.r-bank .fgrouplbl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a3a8b2;padding:14px 10px 6px}
+
+/* Right pane: question list */
+.r-bank .bankq{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.r-bank-q-pane{flex:1;min-height:0;display:flex;flex-direction:column}
+.r-bank .bankq-hd{flex:none;padding:18px 24px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.r-bank .bankq-hd .bt{font-size:17px;font-weight:800;letter-spacing:-.2px;color:var(--text)}
+.r-bank .bankq-hd .bt .crumb{color:var(--muted);font-weight:600}
+.r-bank .bankq-hd .bt .crumb-sep{color:var(--g300);margin:0 7px;font-weight:400}
+.r-bank .bankq-hd .bs{font-size:12.5px;color:var(--muted);margin-top:2px}
+.r-bank .bankq-hd .ba{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.r-bank .bankq-hd .ba .search{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--g100);border-radius:7px;padding:6px 10px;color:var(--muted);font-size:13px;width:200px}
+.r-bank .bankq-hd .ba .search svg{width:14px;height:14px;flex:none}
+.r-bank .bankq-hd .ba .search input{border:none;outline:none;font:inherit;font-size:13px;width:100%;background:none;color:var(--text)}
+.r-bank .bankq-hd .ba .exp-tog{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:500;color:var(--g700);cursor:pointer;user-select:none;padding:0 2px}
+.r-bank .bankq-hd .ba .tog{display:inline-block;vertical-align:middle;width:38px;height:22px;border-radius:11px;background:var(--g200);position:relative;flex:none;transition:background .15s;cursor:pointer}
+.r-bank .bankq-hd .ba .tog.on{background:var(--green)}
+.r-bank .bankq-hd .ba .tog::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.28)}
+.r-bank .bankq-hd .ba .tog.on::after{left:18px}
+.r-bank .bank-selrow{padding:12px 24px;border-bottom:1px solid var(--border);flex:none;display:flex;align-items:center;gap:14px;font-size:13px;color:var(--g600)}
+.r-bank .bank-selrow label{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:var(--g700)}
+.r-bank .bank-selrow .selinfo{color:var(--green-600);font-weight:700}
+.r-bank .bank-selrow .bulk{margin-left:auto;display:flex;gap:8px}
+.r-bank .bankq-list{flex:1;min-height:0;overflow-y:auto;padding:16px 24px}
+.r-bank .bankq-list > *{max-width:960px}
+.r-bank .bankq-empty{padding:18px 12px;font-size:13px;color:var(--muted);font-style:italic;text-align:center}
+/* Reuse the .qc card from Quiz Builder — already styled there */
+.r-bank .bankq-list .qc{margin-bottom:8px;cursor:default}
 .r-topbar .qtitle-wrap{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
 .r-topbar .qtitle{font-size:18px;font-weight:800;letter-spacing:-.3px;border:1px solid transparent;border-radius:6px;padding:2px 6px;margin-left:-6px;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none;font-family:inherit;color:var(--text)}
 .r-topbar .qtitle:hover{background:#f4f5f7}
@@ -1335,45 +1406,53 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 
 <!-- QUESTION BANK TAB -->
 <div id="tab-bank" class="tab-panel">
-  <div class="pg-hdr">
+  <!-- View header (full-width) -->
+  <header class="r-vhead">
     <div>
-      <div class="pg-title">Question Bank</div>
-      <div class="pg-sub">A shared library of questions, organized into folders. Build quizzes faster by pulling from here.</div>
+      <div class="r-vt">Question bank</div>
+      <div class="r-vs">A shared library of questions, organized into folders — pull from here to build quizzes faster.</div>
     </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-sm btn-outline-green" onclick="bankNewFolder(null)">+ New Folder</button>
+    <div class="r-va">
+      <button class="btn btn-sm btn-outline-green" onclick="bankNewFolder(null)"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New folder</button>
     </div>
-  </div>
-  <div class="bank-layout">
-    <aside class="bank-folders" id="bank-folders">
-      <input class="form-input bank-search" id="bank-folder-search" type="text" placeholder="Search folders…" oninput="bankFilterFolders(this.value)">
-      <div id="bank-folder-tree"><div class="bank-empty">Loading…</div></div>
+  </header>
+
+  <!-- Two-pane: folders left, questions right -->
+  <div class="r-bank">
+    <!-- LEFT: folders -->
+    <aside class="folders" id="bank-folders">
+      <div class="fsearch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+        <input id="bank-folder-search" type="text" placeholder="Search folders…" oninput="bankFilterFolders(this.value)">
+      </div>
+      <div id="bank-folder-tree" class="ftree"><div class="bankq-empty">Loading…</div></div>
+      <button class="ffadd" onclick="bankNewFolder(null)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New folder</button>
     </aside>
-    <section class="bank-questions" id="bank-questions">
-      <div class="bank-empty" id="bank-q-placeholder">Select a folder to view its questions.</div>
-      <div id="bank-q-pane" style="display:none">
-        <div id="bank-q-header" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+
+    <!-- RIGHT: question list -->
+    <section class="bankq" id="bank-questions">
+      <div class="bankq-empty" id="bank-q-placeholder" style="padding:40px 24px">Select a folder on the left to view its questions.</div>
+      <div id="bank-q-pane" class="r-bank-q-pane" style="display:none">
+        <div id="bank-q-header" class="bankq-hd">
           <div style="min-width:0;flex-shrink:0;max-width:42%">
-            <h3 id="bank-q-title" style="margin:0;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></h3>
-            <div id="bank-q-count" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+            <div id="bank-q-title" class="bt"></div>
+            <div id="bank-q-count" class="bs"></div>
           </div>
-          <input class="form-input bank-search" id="bank-q-search" type="text" placeholder="Search questions…" oninput="bankFilterQuestions(this.value)" style="flex:1;min-width:120px">
-          <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
-            <button class="btn btn-sm" id="bank-q-import-btn" onclick="bankOpenImportMore()" style="display:none"><img class="btn-icon" src="assets/svg/upload.svg" alt=""> Import more questions</button>
-            <button class="btn btn-sm btn-outline-green" onclick="bankAddQuestion()">+ Add Question</button>
+          <div class="ba">
+            <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg><input id="bank-q-search" type="text" placeholder="Search questions…" oninput="bankFilterQuestions(this.value)"></div>
+            <button class="btn btn-sm" id="bank-q-import-btn" onclick="bankOpenImportMore()" style="display:none"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Import questions</button>
+            <button class="btn btn-sm btn-outline-green" onclick="bankAddQuestion()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add question</button>
           </div>
         </div>
-        <div id="bank-q-sel-bar" class="q-sel-bar" style="display:none">
-          <div class="q-sel-pill">
-            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:500;cursor:pointer;font-size:13px;color:var(--text)"><input type="checkbox" id="bank-q-sel-all" onchange="toggleBankSelectAllForQuiz(this.checked)"> Select all in this folder</label>
-            <span><strong id="bank-q-sel-count">0</strong> selected</span>
-          </div>
-          <div id="bank-q-sel-actions" style="display:flex;gap:8px">
-            <button class="btn btn-sm btn-primary" onclick="addBankSelectionToQuiz()"><svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg> Add to Quiz</button>
+        <div id="bank-q-sel-bar" class="bank-selrow" style="display:none">
+          <label><input type="checkbox" id="bank-q-sel-all" onchange="toggleBankSelectAllForQuiz(this.checked)"> Select all in this folder</label>
+          <span class="selinfo"><strong id="bank-q-sel-count">0</strong> selected</span>
+          <div id="bank-q-sel-actions" class="bulk" style="display:flex;gap:8px;margin-left:auto">
+            <button class="btn btn-sm btn-primary" onclick="addBankSelectionToQuiz()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add to quiz</button>
             <button class="btn btn-sm" onclick="clearBankQuizSelection()">Clear selected</button>
           </div>
         </div>
-        <div id="bank-q-list"></div>
+        <div id="bank-q-list" class="bankq-list"></div>
       </div>
     </section>
   </div>
@@ -7301,6 +7380,12 @@ function _bankFolderVisibleSet(filter) {
 function _bankFoldersHtml(parentId, visibleSet) {
   const kids = _bankFolderChildren(parentId).filter(f => !visibleSet || visibleSet.has(f.id));
   if (!kids.length) return '';
+  // Inline SVG icons for the bank folder rows
+  const ICO_FOLDER = '<svg class="r-ficon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+  const ICO_CHEV   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+  const ICO_PLUS_S = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  const ICO_PEN_S  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+  const ICO_TRASH_S= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
   return kids.map(f => {
     const subKids = _bankFolderChildren(f.id);
     const hasKids = subKids.length > 0;
@@ -7308,18 +7393,20 @@ function _bankFoldersHtml(parentId, visibleSet) {
     const isOpen = visibleSet ? true : BANK.expanded.has(f.id);
     const isSelected = BANK.selectedFolderId === f.id;
     const count = _bankQuestionCount(f.id);
-    return '<div class="bank-folder' + (isSelected ? ' selected' : '') + '" data-folder-id="' + f.id + '" onclick="bankSelectFolder(\'' + f.id + '\')" oncontextmenu="bankFolderMenu(event,\'' + f.id + '\');return false">'
-      + '<span class="bank-folder-toggle' + (hasKids ? (isOpen ? ' open' : '') : ' leaf') + '" onclick="event.stopPropagation();bankToggleFolder(\'' + f.id + '\')">▶</span>'
-      + '<svg class="bank-folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
-      + '<span class="bank-folder-name">' + escH(f.name) + '</span>'
-      + (count ? '<span class="bank-folder-count">' + count + '</span>' : '')
-      + '<span class="bank-folder-actions">'
-        + '<button title="New subfolder" onclick="event.stopPropagation();bankNewFolder(\'' + f.id + '\')">+</button>'
-        + '<button title="Rename" onclick="event.stopPropagation();bankRenameFolder(\'' + f.id + '\')">✎</button>'
-        + '<button title="Delete" onclick="event.stopPropagation();bankDeleteFolder(\'' + f.id + '\')">×</button>'
+    const chev = hasKids
+      ? '<button class="fchev' + (isOpen ? ' open' : '') + '" onclick="event.stopPropagation();bankToggleFolder(\'' + f.id + '\')" aria-label="Toggle">' + ICO_CHEV + '</button>'
+      : '<span class="fchev spacer">' + ICO_CHEV + '</span>';
+    return '<button class="fitem' + (isSelected ? ' on' : '') + '" data-folder-id="' + f.id + '" onclick="bankSelectFolder(\'' + f.id + '\')" oncontextmenu="bankFolderMenu(event,\'' + f.id + '\');return false">'
+      + chev + ICO_FOLDER
+      + '<span>' + escH(f.name) + '</span>'
+      + (count ? '<span class="fc">' + count + '</span>' : '')
+      + '<span class="fsub-acts">'
+      +   '<button title="New subfolder" onclick="event.stopPropagation();bankNewFolder(\'' + f.id + '\')">' + ICO_PLUS_S + '</button>'
+      +   '<button title="Rename" onclick="event.stopPropagation();bankRenameFolder(\'' + f.id + '\')">' + ICO_PEN_S + '</button>'
+      +   '<button title="Delete" onclick="event.stopPropagation();bankDeleteFolder(\'' + f.id + '\')">' + ICO_TRASH_S + '</button>'
       + '</span>'
-      + '</div>'
-      + (hasKids && isOpen ? '<div class="bank-folder-children">' + _bankFoldersHtml(f.id, visibleSet) + '</div>' : '');
+      + '</button>'
+      + (hasKids && isOpen ? '<div class="fchildren">' + _bankFoldersHtml(f.id, visibleSet) + '</div>' : '');
   }).join('');
 }
 
@@ -7446,31 +7533,63 @@ function renderBankQuestionList() {
     list.innerHTML = '<div class="bank-empty">No questions match "' + escH(BANK.questionFilter) + '".</div>';
     return;
   }
-  list.innerHTML = qs.map(q => {
-    const text = _stripHtml(q.question || '');
-    const preview = text.length > 200 ? text.slice(0, 200) + '…' : text;
-    const isSel = BANK.quizSelectedIds.has(q.id);
-    return '<div class="bank-q-row' + (isSel ? ' q-selected' : '') + '" data-question-id="' + q.id + '">'
-      + '<input type="checkbox" class="bank-q-sel-cb"' + (isSel ? ' checked' : '') + ' onclick="event.stopPropagation()" onchange="toggleBankQuestionForQuiz(\'' + q.id + '\', this.checked)" title="Select to add to current quiz">'
-      + '<span class="bank-q-grip" title="Drag to reorder, or onto a folder to move">⋮⋮</span>'
-      + '<div class="bank-q-body">'
-        + '<div class="bank-q-text">' + escH(preview) + '</div>'
-        + '<div class="bank-q-meta"><span class="bank-q-type">' + _bankTypeLabel(q.questionType) + '</span>'
-        + (q.options ? '<span>' + q.options.length + ' options</span>' : '')
-        + (q.pairs ? '<span>' + q.pairs.length + ' pairs</span>' : '')
-        + (q.steps ? '<span>' + q.steps.length + ' steps</span>' : '')
-        + (q.hotspots ? '<span>' + q.hotspots.length + ' hotspots</span>' : '')
-        + '</div>'
-      + '</div>'
-      + '<div class="bank-q-actions">'
-        + '<button title="Edit" onclick="bankEditQuestion(\'' + q.id + '\')">' + ICON.edit + '</button>'
-        + '<button title="Duplicate" onclick="bankDuplicateQuestion(\'' + q.id + '\')">' + ICON.duplicate + '</button>'
-        + '<button class="del" title="Delete" onclick="bankDeleteQuestion(\'' + q.id + '\')">' + ICON.trash + '</button>'
-      + '</div>'
-      + '</div>';
-  }).join('');
+  list.innerHTML = qs.map((q, i) => _renderBankCardNew(q, i)).join('');
   _bankAttachQuestionDnD();
   _updateBankQuizSelectionBar();
+}
+
+// Bank-specific card renderer using the shared .qc markup.
+// Differs from _renderQuestionCardNew in: data-question-id (not data-qidx),
+// selection set (BANK.quizSelectedIds), edit calls openEditor(id, 'bank'),
+// and an "Add to quiz" button for one-click duplication into the active quiz.
+function _renderBankCardNew(q, displayIdx) {
+  const t = q.questionType || 'single';
+  const tagMap = { single:['s','Single'], multiple:['m','Multiple'], matching:['mt','Matching'], sequencing:['sq','Sequencing'], hotspot:['hs','Hotspot'] };
+  const [tagCls, tagLab] = tagMap[t] || ['s','Single'];
+  const isSel = BANK.quizSelectedIds.has(q.id);
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let optsBlock;
+  if (t === 'matching') {
+    optsBlock = '<ul class="qopts">' + (q.pairs||[]).map(p =>
+      '<li class="pair"><span class="trm">' + escH(p.left) + '</span><span class="arr">→</span><span>' + escH(p.right) + '</span></li>'
+    ).join('') + '</ul>';
+  } else if (t === 'sequencing') {
+    optsBlock = '<ul class="qopts">' + (q.steps||[]).map((s, idx) =>
+      '<li><span class="ol num">' + (idx+1) + '</span>' + escH(s) + '</li>'
+    ).join('') + '</ul>';
+  } else if (t === 'hotspot') {
+    const hsImg = q.images && q.images[0] ? q.images[0].data : null;
+    const regCount = (q.hotspots || []).length;
+    optsBlock = hsImg
+      ? '<div style="margin:8px 0"><img src="' + hsImg + '" style="display:block;max-width:100%;max-height:160px;object-fit:contain;border-radius:6px;border:1px solid var(--g100)"></div><div style="font-size:12.5px;color:var(--muted)">' + regCount + ' region' + (regCount !== 1 ? 's' : '') + '</div>'
+      : '<div style="font-size:12.5px;color:var(--muted);padding:6px 10px">' + regCount + ' region' + (regCount !== 1 ? 's' : '') + '</div>';
+  } else {
+    const correctArr = Array.isArray(q.correctAnswer) ? q.correctAnswer : (q.correctAnswer ? [q.correctAnswer] : []);
+    optsBlock = '<ul class="qopts">' + (q.options||[]).map((opt, idx) => {
+      const letter = opt.letter || letters[idx];
+      const isCorrect = correctArr.indexOf(letter) !== -1;
+      const marker = isCorrect ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : letter;
+      return '<li class="' + (isCorrect ? 'correct' : '') + '"><span class="ol">' + marker + '</span>' + escH(opt.text || '') + '</li>';
+    }).join('') + '</ul>';
+  }
+  const qPreview = _stripHtml(q.question || '').replace(/\s+/g, ' ').trim();
+  const cnt = displayIdx + 1;
+  return '<div class="qc' + (isSel ? ' sel' : '') + (BANK.bankExpanded ? ' open' : '') + '" draggable="true" data-question-id="' + escH(q.id) + '">'
+    + '<input type="checkbox" class="qcheck"' + (isSel ? ' checked' : '') + ' onclick="event.stopPropagation()" onchange="toggleBankQuestionForQuiz(\'' + q.id + '\', this.checked)" aria-label="Select question ' + cnt + ' for quiz">'
+    + '<span class="grip" title="Drag onto a folder to move, or reorder within this folder">⠿</span>'
+    + '<span class="num">' + cnt + '</span>'
+    + '<div class="main">'
+      + '<div class="qt">' + escH(qPreview) + '</div>'
+      + '<div class="qbody">' + optsBlock + '</div>'
+      + '<div class="meta"><span class="tag ' + tagCls + '">' + tagLab + '</span></div>'
+    + '</div>'
+    + '<div class="acts">'
+      + '<button class="iconbtn" onclick="event.stopPropagation();this.closest(\'.qc\').classList.toggle(\'open\')" title="Expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>'
+      + '<button class="iconbtn" onclick="bankEditQuestion(\'' + q.id + '\')" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>'
+      + '<button class="iconbtn" onclick="bankDuplicateQuestion(\'' + q.id + '\')" title="Duplicate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>'
+      + '<button class="iconbtn" onclick="bankDeleteQuestion(\'' + q.id + '\')" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>'
+    + '</div>'
+  + '</div>';
 }
 
 function _bankTypeLabel(t) {
