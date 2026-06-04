@@ -603,6 +603,12 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 /* Primary-styled add buttons for the empty state — solid green border like Add question */
 .r-canvas .addbtn.addbtn-prime{border-style:solid;border-color:var(--green);color:var(--green-600);box-shadow:0 1px 2px rgba(118,185,0,.12)}
 .r-canvas .addbtn.addbtn-prime:hover{background:var(--green-lt);border-color:var(--green-600);color:var(--green-600)}
+/* Empty-state container: heading on top of the spread buttons */
+.r-canvas .addrow.r-empty-state{flex-direction:column;align-items:stretch;margin-top:36px;gap:18px}
+.r-canvas .addrow.r-empty-state .r-empty-hero{text-align:center;font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.2px;line-height:1.4}
+.r-canvas .addrow.r-empty-state .r-empty-row{display:flex;gap:10px;flex-wrap:wrap}
+.r-canvas .addrow.r-empty-state .r-empty-row .addbtn{flex:1;min-width:170px}
+.r-canvas .addrow.r-empty-state .r-empty-row .addbtn.sec-add{flex:0 0 auto}
 .r-canvas .addsplit{flex:0 0 auto;display:inline-flex;border:1px solid var(--green);border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(118,185,0,.12);position:relative}
 .r-canvas .addsplit .as-main{display:flex;align-items:center;gap:8px;padding:11px 16px;border:none;background:none;color:var(--green-600);font-size:13.5px;font-weight:600;white-space:nowrap;border-radius:7px 0 0 7px;cursor:pointer;font-family:inherit}
 .r-canvas .addsplit .as-main svg{width:16px;height:16px}
@@ -5942,13 +5948,18 @@ function renderAddRow() {
   const ICO_SEC  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><rect x="4" y="9" width="16" height="11" rx="2"/></svg>';
   const empty = !APP.questions.length;
   if (empty) {
-    // Three primary-styled buttons spread out + Add section
+    // Welcome heading + three primary-styled buttons spread out + Add section
+    row.classList.add('r-empty-state');
     row.innerHTML = ''
-      + '<button class="addbtn addbtn-prime" onclick="openEditor(null)">' + ICO_PEN + ' Write a question</button>'
-      + '<button class="addbtn addbtn-prime" onclick="openAddFromBank()">' + ICO_BANK + ' Pull from bank</button>'
-      + '<button class="addbtn addbtn-prime" onclick="openImportMore()">' + ICO_UP + ' Import from file</button>'
-      + '<button class="addbtn sec-add" onclick="addSection()">' + ICO_SEC + ' Add section</button>';
+      + '<div class="r-empty-hero">Let’s build a quiz — how would you like to start?</div>'
+      + '<div class="r-empty-row">'
+      +   '<button class="addbtn addbtn-prime" onclick="openEditor(null)">' + ICO_PEN + ' Write a question</button>'
+      +   '<button class="addbtn addbtn-prime" onclick="openAddFromBank()">' + ICO_BANK + ' Pull from bank</button>'
+      +   '<button class="addbtn addbtn-prime" onclick="openImportMore()">' + ICO_UP + ' Import from file</button>'
+      +   '<button class="addbtn sec-add" onclick="addSection()">' + ICO_SEC + ' Add section</button>'
+      + '</div>';
   } else {
+    row.classList.remove('r-empty-state');
     row.innerHTML =
       '<div class="addsplit" id="r-add-split">'
       + '<button class="as-main" onclick="openEditor(null)">' + ICO_PLUS + ' Add question</button>'
