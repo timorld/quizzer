@@ -1714,9 +1714,9 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 <!-- IMPORT MORE QUESTIONS MODAL -->
 <div class="m-overlay" id="modal-import-more">
   <div class="modal" style="max-width:600px">
-    <div class="m-hdr"><span class="m-title">Import more questions</span><button class="m-close" onclick="closeModal('modal-import-more')">&#x2715;</button></div>
+    <div class="m-hdr"><span class="m-title" id="r-import-title">Import more questions</span><button class="m-close" onclick="closeModal('modal-import-more')">&#x2715;</button></div>
     <div class="m-body">
-      <p style="font-size:14px;color:#333;line-height:1.65;margin-bottom:16px">The questions from your file will be <strong>added to the current quiz</strong>. Your existing questions and settings will not be changed.</p>
+      <p id="r-import-intro" style="font-size:14px;color:#333;line-height:1.65;margin-bottom:16px">The questions from your file will be <strong>added to the current quiz</strong>. Your existing questions and settings will not be changed.</p>
       <div class="drop-zone" id="dz-import-more" style="padding:34px 24px 28px;position:relative">
         <button class="btn btn-sm" onclick="event.stopPropagation();showModal('modal-aiken')" style="position:absolute;top:12px;right:12px;z-index:2">View AIKEN Example</button>
         <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:38px;height:38px"></div>
@@ -4803,7 +4803,16 @@ async function handleAutoFile(file) {
 // Flag used by import-more flow: forces handlers to append (not replace) and skip the replace prompt and settings overwrite
 let IMPORT_FORCE_APPEND = false;
 
-function openImportMore() { showModal('modal-import-more'); }
+function openImportMore() {
+  // When the quiz is empty, the modal is the entry point — drop the "added to the
+  // current quiz" framing and just present the dropzone with a neutral title.
+  const empty = !APP.questions.length;
+  const title = document.getElementById('r-import-title');
+  const intro = document.getElementById('r-import-intro');
+  if (title) title.textContent = empty ? 'Import a quiz' : 'Import more questions';
+  if (intro) intro.style.display = empty ? 'none' : '';
+  showModal('modal-import-more');
+}
 
 async function _routeFilesToHandler(files) {
   if (files.length === 1) { await handleAutoFile(files[0]); return; }
