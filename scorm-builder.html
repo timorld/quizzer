@@ -536,6 +536,12 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-canvas .qc{background:#fff;border:1px solid var(--g100);border-radius:10px;padding:11px 14px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--sh-card);transition:border-color .12s,box-shadow .12s;margin-bottom:6px}
 .r-canvas .qc:hover{border-color:#cfd4dc;box-shadow:0 2px 8px rgba(16,24,40,.08)}
 .r-canvas .qc.sel{border-color:#cdd5de;box-shadow:inset 3px 0 0 var(--green),0 1px 3px rgba(16,24,40,.07)}
+/* Drop indicator while dragging: a green bar above or below the target card */
+.r-canvas .qc{position:relative}
+.r-canvas .qc.drag-over-top::before,.r-canvas .qc.drag-over-bottom::after{content:"";position:absolute;left:0;right:0;height:3px;background:var(--green);border-radius:2px;box-shadow:0 0 0 2px rgba(118,185,0,.18);pointer-events:none;z-index:2}
+.r-canvas .qc.drag-over-top::before{top:-5px}
+.r-canvas .qc.drag-over-bottom::after{bottom:-5px}
+.r-canvas .qc.dragging{opacity:.55}
 .r-canvas .qc .qcheck{flex:none;cursor:pointer;margin-top:2px}
 .r-canvas .qc .grip{color:#c7ccd4;cursor:grab;flex:none;font-size:14px;line-height:1;user-select:none;margin-top:3px}
 .r-canvas .qc .num{min-width:22px;height:22px;border-radius:6px;background:var(--green-lt);color:var(--green-600);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
@@ -594,6 +600,9 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-canvas .addbtn:hover{border-color:var(--green);color:var(--green-600);background:var(--green-lt)}
 .r-canvas .addbtn svg{width:16px;height:16px}
 .r-canvas .addbtn.sec-add{flex:0 0 auto;padding-left:18px;padding-right:18px}
+/* Primary-styled add buttons for the empty state — solid green border like Add question */
+.r-canvas .addbtn.addbtn-prime{border-style:solid;border-color:var(--green);color:var(--green-600);box-shadow:0 1px 2px rgba(118,185,0,.12)}
+.r-canvas .addbtn.addbtn-prime:hover{background:var(--green-lt);border-color:var(--green-600);color:var(--green-600)}
 .r-canvas .addsplit{flex:0 0 auto;display:inline-flex;border:1px solid var(--green);border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(118,185,0,.12);position:relative}
 .r-canvas .addsplit .as-main{display:flex;align-items:center;gap:8px;padding:11px 16px;border:none;background:none;color:var(--green-600);font-size:13.5px;font-weight:600;white-space:nowrap;border-radius:7px 0 0 7px;cursor:pointer;font-family:inherit}
 .r-canvas .addsplit .as-main svg{width:16px;height:16px}
@@ -908,19 +917,8 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
     <!-- Question list (renderQuestions writes here — same id as legacy) -->
     <div class="qlist" id="q-list"></div>
 
-    <!-- Add row at the bottom -->
-    <div class="addrow">
-      <div class="addsplit" id="r-add-split">
-        <button class="as-main" onclick="openEditor(null)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add question</button>
-        <button class="as-caret" onclick="rToggleAddMenu(event)" aria-label="More ways to add questions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
-        <div class="addmenu" id="r-add-menu">
-          <button onclick="rCloseAddMenu();openEditor(null)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span class="al">Write a new question<span class="ad">Open the editor and build one by hand</span></span></button>
-          <button onclick="rCloseAddMenu();openAddFromBank()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M9 6l3 3 3-3"/><path d="M5 14h14"/><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg><span class="al">Pull from question bank<span class="ad">Reuse questions from your shared library</span></span></button>
-          <button onclick="rCloseAddMenu();openImportMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span class="al">Import from file…<span class="ad">SCORM · XML · AIKEN · DOCX · PPTX</span></span></button>
-        </div>
-      </div>
-      <button class="addbtn sec-add" onclick="addSection()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><rect x="4" y="9" width="16" height="11" rx="2"/></svg> Add section</button>
-    </div>
+    <!-- Add row at the bottom (rendered by renderAddRow based on question count) -->
+    <div class="addrow" id="r-addrow"></div>
   </div>
 </section>
 
@@ -1719,11 +1717,22 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
     <div class="m-hdr"><span class="m-title">Import more questions</span><button class="m-close" onclick="closeModal('modal-import-more')">&#x2715;</button></div>
     <div class="m-body">
       <p style="font-size:14px;color:#333;line-height:1.65;margin-bottom:16px">The questions from your file will be <strong>added to the current quiz</strong>. Your existing questions and settings will not be changed.</p>
-      <div class="drop-zone" id="dz-import-more" style="padding:32px 20px">
-        <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:36px;height:36px"></div>
-        <div style="font-size:15px;font-weight:600;margin:8px 0 4px">Drop your file here, or click to browse</div>
-        <div class="dz-label">Accepts .txt (AIKEN) &nbsp;·&nbsp; .xml (Moodle XML) &nbsp;·&nbsp; .zip (SCORM or question bank) &nbsp;·&nbsp; .docx (Word doc) &nbsp;·&nbsp; .txt + images together</div>
-        <input type="file" id="file-import-more" accept=".txt,.xml,.zip,.docx">
+      <div class="drop-zone" id="dz-import-more" style="padding:34px 24px 28px;position:relative">
+        <button class="btn btn-sm" onclick="event.stopPropagation();showModal('modal-aiken')" style="position:absolute;top:12px;right:12px;z-index:2">View AIKEN Example</button>
+        <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:38px;height:38px"></div>
+        <div style="font-size:16px;font-weight:600;margin:8px 0 2px">Drop your file here, or click to browse</div>
+        <div style="display:flex;justify-content:center;align-items:flex-start;gap:14px;flex-wrap:wrap;margin:16px 0 8px">
+          <div class="ft-chip"><span class="ft-tag" style="border-color:#9ca3af;color:#4b5563">TXT</span><span class="ft-sub">AIKEN</span></div>
+          <div class="ft-chip"><span class="ft-tag" style="border-color:#f59e0b;color:#b45309">XML</span><span class="ft-sub">Moodle</span></div>
+          <div class="ft-chip"><span class="ft-tag" style="border-color:#eab308;color:#854d0e">ZIP</span><span class="ft-sub">SCORM</span></div>
+          <div class="ft-chip"><span class="ft-tag" style="border-color:#2563eb;color:#1e40af">DOCX</span><span class="ft-sub">Word</span></div>
+          <div class="ft-chip"><span class="ft-tag" style="border-color:#dc2626;color:#991b1b">PPTX</span><span class="ft-sub">PowerPoint</span></div>
+        </div>
+        <button type="button" onclick="event.stopPropagation();openAIConvertModal()" style="margin-top:10px;display:inline-flex;align-items:center;gap:7px;padding:7px 14px;background:linear-gradient(135deg,rgba(118,185,0,.12),rgba(168,85,247,.10));border:1px solid rgba(118,185,0,.30);border-radius:22px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit;transition:background .15s,box-shadow .15s,transform .1s" onmouseover="this.style.background='linear-gradient(135deg,rgba(118,185,0,.20),rgba(168,85,247,.18))';this.style.boxShadow='0 2px 10px rgba(118,185,0,.18)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(118,185,0,.12),rgba(168,85,247,.10))';this.style.boxShadow='none'">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 3 L13.8 9.2 L20 11 L13.8 12.8 L12 19 L10.2 12.8 L4 11 L10.2 9.2 Z"/></svg>
+          If needed, your file will be converted using AI
+        </button>
+        <input type="file" id="file-import-more" accept=".txt,.xml,.zip,.docx,.pptx,.md">
       </div>
     </div>
   </div>
@@ -5910,6 +5919,40 @@ function _renderQuestionCardNew(q, i) {
   + '</div>';
 }
 
+// Renders the add row at the bottom of the canvas.
+// 0 questions → spread three "primary" outlined buttons (Write / Pull / Import) + Add section
+// Otherwise   → compact split-button (Add question ▾) + Add section
+function renderAddRow() {
+  const row = document.getElementById('r-addrow');
+  if (!row) return;
+  const ICO_PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  const ICO_PEN  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+  const ICO_BANK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M9 6l3 3 3-3"/><path d="M5 14h14"/><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg>';
+  const ICO_UP   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
+  const ICO_CARET= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+  const ICO_SEC  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><rect x="4" y="9" width="16" height="11" rx="2"/></svg>';
+  const empty = !APP.questions.length;
+  if (empty) {
+    // Three primary-styled buttons spread out + Add section
+    row.innerHTML = ''
+      + '<button class="addbtn addbtn-prime" onclick="openEditor(null)">' + ICO_PEN + ' Write a question</button>'
+      + '<button class="addbtn addbtn-prime" onclick="openAddFromBank()">' + ICO_BANK + ' Pull from bank</button>'
+      + '<button class="addbtn addbtn-prime" onclick="openImportMore()">' + ICO_UP + ' Import from file</button>'
+      + '<button class="addbtn sec-add" onclick="addSection()">' + ICO_SEC + ' Add section</button>';
+  } else {
+    row.innerHTML =
+      '<div class="addsplit" id="r-add-split">'
+      + '<button class="as-main" onclick="openEditor(null)">' + ICO_PLUS + ' Add question</button>'
+      + '<button class="as-caret" onclick="rToggleAddMenu(event)" aria-label="More ways to add questions">' + ICO_CARET + '</button>'
+      + '<div class="addmenu" id="r-add-menu">'
+      +   '<button onclick="rCloseAddMenu();openEditor(null)">' + ICO_PEN + '<span class="al">Write a new question<span class="ad">Open the editor and build one by hand</span></span></button>'
+      +   '<button onclick="rCloseAddMenu();openAddFromBank()">' + ICO_BANK + '<span class="al">Pull from question bank<span class="ad">Reuse questions from your shared library</span></span></button>'
+      +   '<button onclick="rCloseAddMenu();openImportMore()">' + ICO_UP + '<span class="al">Import from file…<span class="ad">SCORM · XML · AIKEN · DOCX · PPTX</span></span></button>'
+      + '</div></div>'
+      + '<button class="addbtn sec-add" onclick="addSection()">' + ICO_SEC + ' Add section</button>';
+  }
+}
+
 // Inline-edit save handler for section title
 function rSaveSectionTitle(el) {
   const oldName = el.dataset.secTitle;
@@ -6118,7 +6161,7 @@ function renderInspector() {
     +   _rGroupHtml('attempts', 'Attempts', rowsAttempts)
     +   _rGroupHtml('timing', 'Timing', rowsTiming)
     +   _rGroupHtml('pool', 'Question pool', rowsPool)
-    +   _rGroupHtml('during', 'During the quiz', rowsDuring)
+    +   _rGroupHtml('during', 'Submit behavior', rowsDuring)
     +   _rGroupHtml('after', 'After submitting', rowsAfter)
     +   _rGroupHtml('cert', 'Certificate', rowsCert)
     + '</div>'
@@ -6336,6 +6379,7 @@ function renderQuestions() {
   _attachSectionGroupDnD();
   _updateQuestionSelectionBar();
   if (typeof _rRefreshChips === 'function') _rRefreshChips();
+  if (typeof renderAddRow === 'function') renderAddRow();
 }
 
 /* Old verbose renderer kept under a different name in case we need to reference it.
