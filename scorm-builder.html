@@ -255,8 +255,25 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .hs-correct-btn{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:3px}
 .hs-correct-btn.ok{border-color:var(--green);background:var(--green-lt);color:var(--green-dk)}
 .hs-toolbar{display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
-.hs-tool-btn{padding:5px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--white);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:border-color .12s,background .12s,color .12s}
+.hs-tool-btn{padding:5px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--white);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:border-color .12s,background .12s,color .12s;display:inline-flex;align-items:center;gap:6px}
 .hs-tool-btn.active,.hs-tool-btn:hover{border-color:var(--green);background:var(--green-lt);color:var(--green-dk)}
+.hs-tool-btn>svg{width:14px;height:14px;flex:none}
+.hs-tool-btn.hs-icon-only{padding:6px 8px}
+.hs-tool-btn.hs-icon-only>svg{width:15px;height:15px}
+.hs-tool-sep{display:inline-block;width:1px;align-self:stretch;background:var(--border);margin:0 4px}
+.hs-shape-dd{position:relative;display:inline-flex}
+.hs-shape-dd.shape-active .hs-shape-main{border-color:var(--green);background:var(--green-lt);color:var(--green-dk)}
+.hs-shape-main .hs-shape-icon{display:inline-flex;align-items:center;justify-content:center}
+.hs-shape-main .hs-shape-icon svg{width:14px;height:14px}
+.hs-shape-main .hs-shape-caret{width:14px;height:14px;transition:transform .15s;color:currentColor}
+.hs-shape-dd.open .hs-shape-main .hs-shape-caret{transform:rotate(180deg)}
+.hs-shape-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--g100);border-radius:10px;box-shadow:0 8px 24px rgba(16,24,40,.12);padding:5px;min-width:168px;z-index:30}
+.hs-shape-dd.open .hs-shape-menu{display:block}
+.hs-shape-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:8px 11px;border:1px solid transparent;border-radius:7px;background:none;color:var(--text);font-size:13px;font-weight:500;text-align:left;cursor:pointer;font-family:inherit}
+.hs-shape-menu button:hover{background:#f4f5f7}
+.hs-shape-menu button.active{background:var(--green-lt);color:var(--green-600)}
+.hs-shape-menu button svg{width:15px;height:15px;color:var(--g500);flex:none}
+.hs-shape-menu button.active svg{color:var(--green-600)}
 .opts-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .opts-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .opt-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px}
@@ -550,6 +567,12 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-shell .qc .main{flex:1;min-width:0;text-align:left}
 .r-shell .qc .qt{font-size:14px;font-weight:500;color:var(--text);line-height:1.45;word-break:break-word;margin:0 0 6px 0;text-align:left}
 .r-shell .qc .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-start}
+/* Image / CLI badges on the collapsed card — hidden while the card is open */
+.r-shell .qc .qchip{display:inline-flex;align-items:center;gap:5px;background:#f3f4f6;border:1px solid var(--g100);border-radius:20px;padding:3px 9px;font-size:10.5px;font-weight:600;color:#5b626f;line-height:1}
+.r-shell .qc .qchip svg{width:11px;height:11px;flex:none;color:#7e8794}
+.r-shell .qc .qchip.qchip-cli{background:#0f172a;border-color:#0f172a;color:#e5e7eb}
+.r-shell .qc .qchip.qchip-cli svg{color:#9ca3af}
+.r-shell .qc.open .meta .qchip{display:none}
 .r-shell .qc .acts{display:flex;gap:4px;flex:none}
 .r-shell .qc .qbody{display:none}
 .r-shell .qc.open .qbody{display:block}
@@ -666,7 +689,7 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-bank{flex:1;min-height:0;display:flex;align-items:stretch;overflow:hidden}
 
 /* Left rail: folders */
-.r-bank .folders{width:288px;flex:none;border-right:1px solid var(--border);background:#fbfbfc;display:flex;flex-direction:column;padding:14px 12px;overflow-y:auto}
+.r-bank .folders{width:415px;flex:none;border-right:1px solid var(--border);background:#fbfbfc;display:flex;flex-direction:column;padding:14px 12px;overflow-y:auto}
 .r-bank .fsearch-row{display:flex;align-items:stretch;gap:6px;margin-bottom:10px}
 .r-bank .fsearch{flex:1;min-width:0;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--g100);border-radius:7px;padding:7px 10px;color:var(--muted)}
 .r-bank .fsearch svg{width:14px;height:14px;flex:none}
@@ -744,6 +767,10 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-bank #bank-q-list .qc.dragging{opacity:.4}
 .r-bank .fitem.drag-over{background:var(--green-lt) !important;outline:2px dashed var(--green);outline-offset:-2px}
 .r-bank .fitem.dragging{opacity:.4}
+/* Folder drag indicators: top/bottom drop-line on root folders promotes the
+   dragged folder to top level; the existing .drag-over fill nests it. */
+.r-bank .fitem.drop-above{box-shadow:inset 0 3px 0 0 var(--green)}
+.r-bank .fitem.drop-below{box-shadow:inset 0 -3px 0 0 var(--green)}
 /* Vertical resizer between the folder rail and the question pane */
 .r-bank .r-bank-resizer{width:5px;flex:none;cursor:col-resize;background:transparent;align-self:stretch;transition:background .12s}
 .r-bank .r-bank-resizer:hover,.r-bank .r-bank-resizer.dragging{background:rgba(118,185,0,.25)}
@@ -865,6 +892,75 @@ body.bank-tab-active .r-topbar{display:none}
 @media(max-width:900px){#tab-batch .bsettings .bs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){#tab-batch .bsettings .bs-grid{grid-template-columns:1fr}}
 #tab-batch .b-empty{padding:16px 8px 0;text-align:center;color:var(--muted);font-size:13px}
+
+/* Question editor modal (Phase 5) — new design overrides */
+#modal-editor .modal{max-width:680px;border-radius:14px;border:none;box-shadow:0 10px 40px rgba(16,24,40,.18)}
+#modal-editor .m-hdr{padding:18px 22px;border-bottom:1px solid var(--border)}
+#modal-editor .m-title{font-size:16px;font-weight:800;letter-spacing:-.2px}
+#modal-editor .m-close{width:32px;height:32px;border:1px solid var(--g100);border-radius:7px;background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:14px;padding:0}
+#modal-editor .m-close:hover{background:#f3f4f6;color:var(--text)}
+#modal-editor .m-body{padding:20px 22px}
+#modal-editor .m-footer{padding:14px 22px;border-top:1px solid var(--border);background:#fbfcfd;border-radius:0 0 14px 14px}
+/* Eyebrow labels — uppercase tracking-wide */
+#modal-editor .opts-label,#modal-editor .form-label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#9aa0aa}
+#modal-editor .form-label small{font-weight:400;text-transform:none;letter-spacing:0;color:#aab0ba;font-size:11px;margin-left:6px}
+/* Type-row → pill row + interactive dropdown */
+#modal-editor .type-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:0}
+#modal-editor .type-opt{flex:0 0 auto;padding:8px 13px;border:1px solid var(--g150);border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:var(--g600);cursor:pointer;font-family:inherit;transition:border-color .12s,background .12s,color .12s;text-align:center}
+#modal-editor .type-opt:hover{border-color:#c4c9d1;color:var(--text)}
+#modal-editor .type-opt.sel{border-color:var(--green);background:var(--green-lt);color:var(--green-600)}
+#modal-editor #lbl-interactive{position:relative;display:inline-flex;align-items:center;gap:7px}
+#modal-editor #lbl-interactive svg{width:13px;height:13px;transition:transform .15s}
+#modal-editor #lbl-interactive.menu-open svg{transform:rotate(180deg)}
+#modal-editor #interactive-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:194px;background:#fff;border:1px solid var(--g100);border-radius:10px;box-shadow:var(--sh-pop);padding:5px;z-index:300}
+#modal-editor #lbl-interactive.menu-open #interactive-menu{display:block}
+#modal-editor #interactive-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 11px;border:1px solid transparent;border-radius:7px;background:none;color:var(--text);font-size:13px;font-weight:500;text-align:left;cursor:pointer;font-family:inherit}
+#modal-editor #interactive-menu button:hover{background:#f4f5f7}
+#modal-editor #interactive-menu button svg{width:15px;height:15px;color:var(--g500);flex:none}
+#modal-editor #interactive-menu button.on{background:var(--green-lt);color:var(--green-600)}
+#modal-editor #interactive-menu button.on svg{color:var(--green-600)}
+/* Inputs / textareas */
+#modal-editor .form-input,#modal-editor .form-textarea,#modal-editor .form-select{padding:10px 13px;border:1px solid var(--g150);border-radius:8px;background:#fff;font-size:14px;color:var(--text);transition:border-color .12s,box-shadow .12s}
+#modal-editor .form-input:focus,#modal-editor .form-textarea:focus,#modal-editor .form-select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.14)}
+#modal-editor .form-textarea{min-height:84px;resize:vertical;line-height:1.55}
+/* Answer option rows — new mark / input / delete */
+#modal-editor #ed-opts{display:flex;flex-direction:column;gap:2px}
+#modal-editor .opt{display:flex;align-items:center;gap:10px;padding:6px 0}
+#modal-editor .opt .mark{width:22px;height:22px;border-radius:50%;border:2px solid var(--g200);background:#fff;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;padding:0;transition:background .12s,border-color .12s}
+#modal-editor .opt .mark.sq{border-radius:6px}
+#modal-editor .opt .mark.on{background:var(--green);border-color:var(--green)}
+#modal-editor .opt .mark:hover{border-color:#cfd4dc}
+#modal-editor .opt .mark.on:hover{background:var(--green-dk);border-color:var(--green-dk)}
+#modal-editor .opt .mark svg{width:12px;height:12px}
+#modal-editor .opt .oi{flex:1;min-width:0;font:inherit;font-size:13.5px;color:var(--text);background:#fff;border:1px solid var(--g150);border-radius:7px;padding:8px 11px;outline:none}
+#modal-editor .opt .oi:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.14)}
+#modal-editor .opt .odel{width:30px;height:30px;border:1px solid transparent;border-radius:7px;background:none;color:#9aa0aa;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;font-family:inherit;padding:0}
+#modal-editor .opt .odel:hover{background:#fdeaea;color:#c4302b}
+#modal-editor .opt .odel svg{width:15px;height:15px}
+#modal-editor .opts-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+/* "Add option" → link-style green button */
+#modal-editor .opts-hdr .addopt,#modal-editor button.addopt{margin-top:4px;background:none;border:none;color:var(--green-600);font:inherit;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:5px 2px;cursor:pointer}
+#modal-editor button.addopt svg{width:15px;height:15px}
+#modal-editor button.addopt:hover{color:var(--green-dk)}
+/* Form-field gutter */
+#modal-editor .form-field{display:flex;flex-direction:column;gap:7px}
+#modal-editor .form-field>label.form-label{margin:0}
+/* Section combo — text input with a chevron that opens a full-width menu */
+#modal-editor .section-combo{position:relative}
+#modal-editor .section-combo .form-input{padding-right:38px;width:100%}
+#modal-editor .section-combo-caret{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:none;background:none;color:var(--g500);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0}
+#modal-editor .section-combo-caret:hover{background:#f3f4f6;color:var(--text)}
+#modal-editor .section-combo-caret svg{width:14px;height:14px;transition:transform .15s}
+#modal-editor .section-combo.open .section-combo-caret svg{transform:rotate(180deg)}
+#modal-editor .section-combo-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid var(--g100);border-radius:8px;box-shadow:0 8px 24px rgba(16,24,40,.12);padding:5px;max-height:240px;overflow-y:auto;z-index:30}
+#modal-editor .section-combo.open .section-combo-menu{display:block}
+#modal-editor .section-combo-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:9px 11px;border:none;background:none;text-align:left;font:inherit;font-size:13.5px;color:var(--text);border-radius:6px;cursor:pointer;font-family:inherit}
+#modal-editor .section-combo-menu button:hover,#modal-editor .section-combo-menu button.on{background:#f4f5f7}
+#modal-editor .section-combo-menu button.is-active{background:var(--green-lt);color:var(--green-600);font-weight:600}
+#modal-editor .section-combo-menu button.is-none{color:var(--muted);font-style:italic}
+#modal-editor .section-combo-menu button.is-new{color:var(--green-600);font-weight:600}
+#modal-editor .section-combo-menu button.is-new svg{width:14px;height:14px;color:var(--green-600);flex:none}
+#modal-editor .section-combo-menu .section-combo-empty{padding:10px;color:var(--muted);font-size:12.5px;text-align:center}
 
 /* Send-to-bank modal — cleaner design-system styling */
 .qtb-modal{max-width:520px}
@@ -1714,22 +1810,22 @@ body.bank-tab-active .r-topbar{display:none}
 <div class="m-overlay" id="modal-editor">
   <div class="modal">
     <div class="m-hdr">
-      <span class="m-title" id="ed-title">Add Question</span>
+      <span class="m-title" id="ed-title">New question</span>
       <button class="m-close" onclick="closeModal('modal-editor')">&#x2715;</button>
     </div>
     <div class="m-body">
-      <div style="margin-bottom:14px">
-        <div class="opts-label" style="margin-bottom:8px">Question Type</div>
-        <div class="type-row" style="margin-bottom:16px;position:relative">
-          <label class="type-opt sel" id="lbl-single" onclick="setQType('single')">Single Correct Answer</label>
-          <label class="type-opt" id="lbl-multiple" onclick="setQType('multiple')">Multiple Correct Answers</label>
-          <div id="lbl-interactive" class="type-opt" style="display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;user-select:none;position:relative" onclick="toggleInteractiveMenu(event)">
+      <div class="form-field" style="margin-bottom:16px">
+        <label class="form-label">Question type</label>
+        <div class="type-row">
+          <button type="button" class="type-opt sel" id="lbl-single" onclick="setQType('single')">Single answer</button>
+          <button type="button" class="type-opt" id="lbl-multiple" onclick="setQType('multiple')">Multiple answers</button>
+          <div id="lbl-interactive" class="type-opt" onclick="toggleInteractiveMenu(event)">
             <span id="interactive-lbl-text">Interactive</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            <div id="interactive-menu" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;min-width:130px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);z-index:300;overflow:hidden" onclick="event.stopPropagation()">
-              <button style="display:block;width:100%;text-align:left;padding:10px 14px;border:none;background:#fff;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text)" id="lbl-matching"   onmousedown="setQType('matching')"   onmouseover="this.style.background='var(--green-lt)'" onmouseout="if(APP.editorType!=='matching')this.style.background='#fff'">Matching</button>
-              <button style="display:block;width:100%;text-align:left;padding:10px 14px;border:none;background:#fff;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text)" id="lbl-sequencing" onmousedown="setQType('sequencing')" onmouseover="this.style.background='var(--green-lt)'" onmouseout="if(APP.editorType!=='sequencing')this.style.background='#fff'">Sequencing</button>
-              <button style="display:block;width:100%;text-align:left;padding:10px 14px;border:none;background:#fff;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text)" id="lbl-hotspot"    onmousedown="setQType('hotspot')"    onmouseover="this.style.background='var(--green-lt)'" onmouseout="if(APP.editorType!=='hotspot')this.style.background='#fff'">Hotspot</button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            <div id="interactive-menu" onclick="event.stopPropagation()">
+              <button type="button" id="lbl-matching"   onmousedown="setQType('matching')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg> Matching</button>
+              <button type="button" id="lbl-sequencing" onmousedown="setQType('sequencing')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="20" y2="6"/><line x1="10" y1="12" x2="20" y2="12"/><line x1="10" y1="18" x2="20" y2="18"/><path d="M5 4.5h1V10"/></svg> Sequencing</button>
+              <button type="button" id="lbl-hotspot"    onmousedown="setQType('hotspot')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.4"/></svg> Hotspot</button>
             </div>
           </div>
         </div>
@@ -1737,12 +1833,6 @@ body.bank-tab-active .r-topbar{display:none}
       <div class="form-field" style="margin-bottom:18px">
         <label class="form-label">Question Text <small>HTML supported: &lt;b&gt;, &lt;code&gt;, &lt;pre&gt;</small></label>
         <textarea class="form-textarea" id="ed-question" rows="5" placeholder="Enter your question here..."></textarea>
-      </div>
-      <div class="form-field" style="margin-bottom:18px">
-        <label class="form-label">Section <small>optional — pick a section. Manage the list (add / rename / delete) from the Questions tab.</small></label>
-        <select class="form-input" id="ed-section">
-          <option value="">(none)</option>
-        </select>
       </div>
       <!-- Attachments row -->
       <div style="margin-bottom:18px">
@@ -1786,11 +1876,9 @@ body.bank-tab-active .r-topbar{display:none}
       </div>
       <!-- Standard options (single / multiple) -->
       <div id="ed-section-options">
-        <div class="opts-hdr">
-          <span class="opts-label">Answer Options</span>
-          <button class="btn btn-sm" onclick="addOption()">+ Add Option</button>
-        </div>
+        <div class="opts-hdr"><span class="opts-label" id="ed-opts-label">Answer options</span></div>
         <div id="ed-opts"></div>
+        <button type="button" class="addopt" onclick="addOption()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add option</button>
       </div>
 
       <!-- Matching pairs -->
@@ -1824,11 +1912,20 @@ body.bank-tab-active .r-topbar{display:none}
         <div class="opts-hdr" style="margin-bottom:8px">
           <span class="opts-label">Image &amp; Hotspot Regions</span>
           <div class="hs-toolbar" style="margin:0">
-            <button class="hs-tool-btn active" id="ed-hs-rect-btn" onclick="edHsSetTool('rect')" title="Draw rectangle region"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg> Rect</button>
-            <button class="hs-tool-btn" id="ed-hs-ellipse-btn" onclick="edHsSetTool('ellipse')" title="Draw ellipse region"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="6"/></svg> Ellipse</button>
-            <button class="hs-tool-btn" id="ed-hs-poly-btn" onclick="edHsSetTool('poly')" title="Polygon — click to add points, double-click or click near start to close"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 22,9 18,21 6,21 2,9"/></svg> Polygon</button>
-            <button class="hs-tool-btn" id="ed-hs-sel-btn" onclick="edHsSetTool('select')" title="Select / Move"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-7 1-4 7z"/></svg> Select</button>
-            <button class="hs-tool-btn" onclick="edHsDeleteSelected()" title="Delete selected"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
+            <div class="hs-shape-dd shape-active" id="ed-hs-shape-dd">
+              <button type="button" class="hs-tool-btn hs-shape-main" id="ed-hs-shape-btn" onclick="toggleHsShapeMenu(event)" title="Shape — drawing tool">
+                <span class="hs-shape-icon" id="ed-hs-shape-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></span>
+                <svg class="hs-shape-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="hs-shape-menu" id="ed-hs-shape-menu" onclick="event.stopPropagation()">
+                <button type="button" class="active" id="ed-hs-rect-btn" onclick="edHsSetTool('rect')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg> Rectangle</button>
+                <button type="button" id="ed-hs-ellipse-btn" onclick="edHsSetTool('ellipse')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="6"/></svg> Ellipse</button>
+                <button type="button" id="ed-hs-poly-btn" onclick="edHsSetTool('poly')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 22,9 18,21 6,21 2,9"/></svg> Polygon</button>
+              </div>
+            </div>
+            <span class="hs-tool-sep"></span>
+            <button class="hs-tool-btn hs-icon-only" id="ed-hs-sel-btn" onclick="edHsSetTool('select')" title="Select / Move"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-7 1-4 7z"/></svg></button>
+            <button class="hs-tool-btn hs-icon-only" onclick="edHsDeleteSelected()" title="Delete selected"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
           </div>
         </div>
         <div id="ed-hs-upload" class="hs-ed-upload" onclick="document.getElementById('ed-hs-file').click()"
@@ -1887,11 +1984,19 @@ body.bank-tab-active .r-topbar{display:none}
           </div>
         </div>
       </div>
+      <!-- Section: combo input + custom dropdown (type new, or pick existing) -->
+      <div class="form-field" id="ed-section-field" style="margin-top:18px">
+        <label class="form-label" for="ed-section">Section <small>optional — type a new section name or pick an existing one</small></label>
+        <div class="section-combo" id="ed-section-combo">
+          <input class="form-input" id="ed-section" type="text" placeholder="(none) — type to create" autocomplete="off" onfocus="openSectionMenu()" oninput="openSectionMenu()">
+          <button type="button" class="section-combo-caret" onclick="toggleSectionMenu(event)" aria-label="Show sections" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div class="section-combo-menu" id="ed-section-menu" onclick="event.stopPropagation()"></div>
+        </div>
+      </div>
     </div>
     <div class="m-footer">
-      <button class="btn" onclick="closeModal('modal-editor')">Cancel</button>
-      <button class="btn" onclick="previewEditorQuestion()" style="margin-right:auto"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Preview</button>
-      <button class="btn btn-primary" onclick="saveQuestion()">Save Question</button>
+      <button class="btn btn-sm" onclick="closeModal('modal-editor')">Cancel</button>
+      <button class="btn btn-sm btn-primary" onclick="saveQuestion()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Save question</button>
     </div>
   </div>
 </div>
@@ -5248,14 +5353,74 @@ function bankOpenImportMore() {
 // The current question's section (if outside the list, e.g. legacy data) is added
 // inline so it stays selectable while the user edits.
 function _refreshSectionDatalist(currentValue) {
-  const sel = document.getElementById('ed-section');
-  if (!sel) return;
+  const inp = document.getElementById('ed-section');
+  if (!inp) return;
   _ensureSectionsList();
-  const opts = APP.settings.sections.slice();
-  if (currentValue && !opts.includes(currentValue)) opts.push(currentValue);
-  sel.innerHTML = '<option value="">(none)</option>'
-    + opts.map(s => '<option value="' + escH(s) + '">' + escH(s) + '</option>').join('');
-  if (currentValue) sel.value = currentValue;
+  inp.value = currentValue || '';
+  _renderSectionMenu();
+}
+
+function _renderSectionMenu() {
+  const menu = document.getElementById('ed-section-menu');
+  if (!menu) return;
+  const inp  = document.getElementById('ed-section');
+  const typed = (inp ? inp.value : '').trim();
+  const all   = (APP.settings && Array.isArray(APP.settings.sections)) ? APP.settings.sections : [];
+  // Filter by typed text (case-insensitive starts-with then contains)
+  const lc = typed.toLowerCase();
+  const matches = lc
+    ? all.filter(s => s.toLowerCase().includes(lc))
+    : all.slice();
+  let html = '';
+  html += '<button type="button" class="is-none" data-pick="">No section</button>';
+  matches.forEach(s => {
+    const isActive = s === typed;
+    html += '<button type="button" class="' + (isActive ? 'is-active' : '') + '" data-pick="' + escH(s) + '">' + escH(s) + '</button>';
+  });
+  // If the typed value doesn't match any existing section, offer to create it
+  if (typed && !all.some(s => s.toLowerCase() === lc)) {
+    html += '<button type="button" class="is-new" data-pick="' + escH(typed) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Create &ldquo;' + escH(typed) + '&rdquo;</button>';
+  }
+  if (!html) html = '<div class="section-combo-empty">No sections yet — type to create one</div>';
+  menu.innerHTML = html;
+  menu.querySelectorAll('button[data-pick]').forEach(btn => {
+    btn.onclick = () => pickSection(btn.dataset.pick);
+  });
+}
+
+function openSectionMenu() {
+  const wrap = document.getElementById('ed-section-combo');
+  if (!wrap) return;
+  _renderSectionMenu();
+  if (!wrap.classList.contains('open')) {
+    wrap.classList.add('open');
+    setTimeout(() => document.addEventListener('click', _sectionMenuCloser, { once:true }), 0);
+  }
+}
+function toggleSectionMenu(e) {
+  if (e) e.stopPropagation();
+  const wrap = document.getElementById('ed-section-combo');
+  if (!wrap) return;
+  if (wrap.classList.contains('open')) {
+    wrap.classList.remove('open');
+  } else {
+    openSectionMenu();
+    // Focus the input so further typing filters the list
+    const inp = document.getElementById('ed-section');
+    if (inp) inp.focus();
+  }
+}
+function _sectionMenuCloser(ev) {
+  const wrap = document.getElementById('ed-section-combo');
+  if (!wrap) return;
+  if (wrap.contains(ev.target)) { setTimeout(() => document.addEventListener('click', _sectionMenuCloser, { once:true }), 0); return; }
+  wrap.classList.remove('open');
+}
+function pickSection(value) {
+  const inp = document.getElementById('ed-section');
+  if (inp) inp.value = value || '';
+  const wrap = document.getElementById('ed-section-combo');
+  if (wrap) wrap.classList.remove('open');
 }
 
 // Ensures APP.settings.sections exists and contains every section name currently
@@ -5280,7 +5445,7 @@ function openEditor(id, target) {
   APP.editorImages = [];
   APP.editorImagePosition = 'below';
   APP.editorImageLayout = 'row';
-  document.getElementById('ed-title').textContent = id ? 'Edit Question' : 'Add Question';
+  document.getElementById('ed-title').textContent = id ? 'Edit question' : 'New question';
   document.getElementById('ed-question').value = '';
   document.getElementById('ed-codeblock').value = '';
   document.getElementById('ed-section').value = '';
@@ -5451,22 +5616,29 @@ document.addEventListener('change', function(e) {
 function setQType(type) {
   APP.editorType = type;
   // Close interactive menu
-  const menu = document.getElementById('interactive-menu');
-  if (menu) menu.style.display = 'none';
+  const wrap = document.getElementById('lbl-interactive');
+  if (wrap) wrap.classList.remove('menu-open');
   const isInteractive = type === 'matching' || type === 'sequencing' || type === 'hotspot';
   const isBasic = !isInteractive;
   // Highlight correct top-level button
   document.getElementById('lbl-single')?.classList.toggle('sel', type === 'single');
   document.getElementById('lbl-multiple')?.classList.toggle('sel', type === 'multiple');
   document.getElementById('lbl-interactive')?.classList.toggle('sel', isInteractive);
-  // Highlight active dropdown item
+  // Highlight active dropdown item via .on class (styled by the modal CSS)
   ['matching','sequencing','hotspot'].forEach(t => {
     const btn = document.getElementById('lbl-' + t);
-    if (btn) btn.style.background = type === t ? 'var(--green-lt)' : '#fff';
+    if (btn) btn.classList.toggle('on', type === t);
   });
   // Update interactive button label to show active subtype
   const lblText = document.getElementById('interactive-lbl-text');
   if (lblText) lblText.textContent = isInteractive ? ({matching:'Matching',sequencing:'Sequencing',hotspot:'Hotspot'}[type]) : 'Interactive';
+  // Update the answer-options eyebrow hint based on single/multiple
+  const optsLabel = document.getElementById('ed-opts-label');
+  if (optsLabel) {
+    if (type === 'single')        optsLabel.innerHTML = 'Answer options <small style="font-weight:500;text-transform:none;letter-spacing:0;color:#aab0ba">— select the correct answer</small>';
+    else if (type === 'multiple') optsLabel.innerHTML = 'Answer options <small style="font-weight:500;text-transform:none;letter-spacing:0;color:#aab0ba">— check every correct answer</small>';
+    else                          optsLabel.textContent = 'Answer options';
+  }
   // Adjust textarea height
   const ta = document.getElementById('ed-question');
   if (ta) ta.setAttribute('rows', isBasic ? '5' : '3');
@@ -5486,10 +5658,21 @@ function setQType(type) {
 }
 
 function toggleInteractiveMenu(e) {
-  e.stopPropagation();
+  if (e) e.stopPropagation();
+  const wrap = document.getElementById('lbl-interactive');
+  if (!wrap) return;
+  // Clear any legacy inline display style so the class-based CSS can show the menu
   const menu = document.getElementById('interactive-menu');
-  if (!menu) return;
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  if (menu) menu.style.removeProperty('display');
+  const opening = !wrap.classList.contains('menu-open');
+  wrap.classList.toggle('menu-open', opening);
+  if (opening) setTimeout(() => document.addEventListener('click', _intMenuCloser, { once:true }), 0);
+}
+function _intMenuCloser(ev) {
+  const wrap = document.getElementById('lbl-interactive');
+  if (!wrap) return;
+  if (wrap.contains(ev.target)) { setTimeout(() => document.addEventListener('click', _intMenuCloser, { once:true }), 0); return; }
+  wrap.classList.remove('menu-open');
 }
 
 // ── PAIRS EDITOR ──────────────────────────────────────
@@ -5650,6 +5833,27 @@ function _edHsApplyResize(orig,handle,dx,dy) {
   x=Math.max(0,x);y=Math.max(0,y);w=Math.min(w,100-x);h=Math.min(h,100-y);
   return {xPct:x,yPct:y,wPct:w,hPct:h};
 }
+// Shape icons used by both the dropdown's main button and the menu items.
+const HS_SHAPE_ICONS = {
+  rect:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>',
+  ellipse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="6"/></svg>',
+  poly:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 22,9 18,21 6,21 2,9"/></svg>'
+};
+function toggleHsShapeMenu(e) {
+  if (e) e.stopPropagation();
+  const dd = document.getElementById('ed-hs-shape-dd');
+  if (!dd) return;
+  const opening = !dd.classList.contains('open');
+  dd.classList.toggle('open', opening);
+  if (opening) setTimeout(() => document.addEventListener('click', _hsShapeMenuCloser, { once:true }), 0);
+}
+function _hsShapeMenuCloser(ev) {
+  const dd = document.getElementById('ed-hs-shape-dd');
+  if (!dd) return;
+  if (dd.contains(ev.target)) { setTimeout(() => document.addEventListener('click', _hsShapeMenuCloser, { once:true }), 0); return; }
+  dd.classList.remove('open');
+}
+
 function edHsSetTool(tool) {
   if (edHsTool === 'poly' && tool !== 'poly') {
     _edHsPolyPts = [];
@@ -5659,13 +5863,21 @@ function edHsSetTool(tool) {
     if (ps) ps.style.display = 'none';
   }
   edHsTool = tool;
-  ['rect','ellipse','poly','sel'].forEach(id => {
-    const el = document.getElementById('ed-hs-' + id + '-btn');
-    if (el) el.classList.remove('active');
+  // Menu items reflect the active shape
+  ['rect','ellipse','poly'].forEach(t => {
+    const el = document.getElementById('ed-hs-' + t + '-btn');
+    if (el) el.classList.toggle('active', tool === t);
   });
-  const activeId = tool === 'select' ? 'sel' : tool;
-  const activeEl = document.getElementById('ed-hs-' + activeId + '-btn');
-  if (activeEl) activeEl.classList.add('active');
+  // Standalone Select / Move button highlights when active
+  const selBtn = document.getElementById('ed-hs-sel-btn');
+  if (selBtn) selBtn.classList.toggle('active', tool === 'select');
+  // The shape dropdown is "active" (green) only when a shape tool is current,
+  // and its main icon swaps to whichever shape was picked.
+  const dd = document.getElementById('ed-hs-shape-dd');
+  const iconEl = document.getElementById('ed-hs-shape-icon');
+  if (dd) dd.classList.remove('open');
+  if (dd) dd.classList.toggle('shape-active', ['rect','ellipse','poly'].indexOf(tool) !== -1);
+  if (iconEl && HS_SHAPE_ICONS[tool]) iconEl.innerHTML = HS_SHAPE_ICONS[tool];
   const svg = document.getElementById('ed-hs-svg');
   if (svg) svg.style.cursor = tool === 'select' ? 'default' : 'crosshair';
 }
@@ -5675,6 +5887,15 @@ function edHsSetPinColor(btn, color) {
   btn.style.outline = '3px solid #333';
   btn.style.outlineOffset = '2px';
   btn.style.transform = 'scale(1.15)';
+  // Recolor all existing regions + the in-flight preview shape
+  if (typeof edHsRender === 'function') edHsRender();
+}
+
+// Hex → rgba(...) with the given alpha. Falls back to NVIDIA green if input is bad.
+function _edHsColorRgba(hex, a) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '');
+  if (!m) return 'rgba(118,185,0,' + a + ')';
+  return 'rgba(' + parseInt(m[1],16) + ',' + parseInt(m[2],16) + ',' + parseInt(m[3],16) + ',' + a + ')';
 }
 function edHsSyncPinColorUI() {
   const color = APP.editorHsPinColor || '#76B900';
@@ -5825,6 +6046,17 @@ function edHsRender() {
   svg.querySelectorAll('.edhs-rg').forEach(el=>el.remove());
   const anchor=document.getElementById('ed-hs-prev-rect');
   const svgR=svg.getBoundingClientRect();
+  // Active pin color drives the visual color of every region + the in-flight
+  // preview shape, so what the learner will see matches what the author sees.
+  const pin = APP.editorHsPinColor || '#76B900';
+  const fillSoft = _edHsColorRgba(pin, 0.15);
+  const fillPrev = _edHsColorRgba(pin, 0.10);
+  ['ed-hs-prev-rect','ed-hs-prev-ellipse','ed-hs-prev-poly'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.stroke = pin; el.style.fill = fillPrev; }
+  });
+  const polyStart = document.getElementById('ed-hs-prev-poly-start');
+  if (polyStart) { polyStart.style.stroke = pin; polyStart.style.fill = _edHsColorRgba(pin, 0.35); }
   APP.editorHotspots.forEach((r,i) => {
     const isSel=i===edHsSelected;
     const cls='hs-ed-rgn edhs-rg'+(isSel?' sel':'');
@@ -5846,18 +6078,23 @@ function edHsRender() {
       lx=(r.xPct+r.wPct/2)+'%'; ly=(r.yPct+1.5)+'%';
     }
     shapeEl.setAttribute('class',cls);
+    shapeEl.style.stroke = pin;
+    shapeEl.style.fill = fillSoft;
     svg.insertBefore(shapeEl,anchor);
     const txt=document.createElementNS(ns,'text');
     txt.setAttribute('class','hs-ed-lbl edhs-rg');
     txt.setAttribute('x',lx); txt.setAttribute('y',ly);
     txt.setAttribute('text-anchor','middle'); txt.setAttribute('dominant-baseline','hanging');
+    txt.style.fill = pin;
     txt.textContent=r.label; svg.insertBefore(txt,anchor);
     if (isSel&&r.type!=='polygon') Object.keys(_edHsHandles).forEach(h=>{
       const [hx,hy]=_edHsHandlePos(r,h);
       const circ=document.createElementNS(ns,'circle');
       circ.setAttribute('class','hs-ed-handle edhs-rg');
       circ.setAttribute('cx',hx+'%'); circ.setAttribute('cy',hy+'%'); circ.setAttribute('r','5');
-      circ.style.cursor=_edHsCursors[h]; svg.insertBefore(circ,anchor);
+      circ.style.cursor=_edHsCursors[h];
+      circ.style.stroke = pin;
+      svg.insertBefore(circ,anchor);
     });
   });
   const list=document.getElementById('ed-hs-regions'); if (!list) return;
@@ -5915,22 +6152,26 @@ function syncEditorOptionsFromDOM() {
 function renderEditorOptions() {
   const c = document.getElementById('ed-opts');
   c.innerHTML = '';
+  const isMulti = APP.editorType === 'multiple';
+  const ICO_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  const ICO_TR    = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
   APP.editorOptions.forEach((opt, i) => {
     const letter = String.fromCharCode(65 + i);
     const row = document.createElement('div');
-    row.className = 'opt-row';
+    row.className = 'opt';
     row.innerHTML =
-      '<span class="opt-ltr">' + letter + '</span>'
-      + '<input type="' + (APP.editorType === 'single' ? 'radio' : 'checkbox') + '" class="opt-correct" name="correct" data-idx="' + i + '" ' + (opt.isCorrect ? 'checked' : '') + '>'
-      + '<input type="text" class="form-input" data-idx="' + i + '" value="' + escH(opt.text) + '" placeholder="Option ' + letter + '">'
-      + '<button type="button" class="opt-del" onclick="removeOption(' + i + ')" title="Remove">&#xD7;</button>';
+      '<button type="button" class="mark' + (isMulti ? ' sq' : '') + (opt.isCorrect ? ' on' : '') + '" data-idx="' + i + '" aria-label="' + (opt.isCorrect ? 'Correct answer' : 'Mark as correct') + '">' + (opt.isCorrect ? ICO_CHECK : '') + '</button>'
+      + '<input type="text" class="oi" data-idx="' + i + '" value="' + escH(opt.text) + '" placeholder="Option ' + letter + '">'
+      + '<button type="button" class="odel" data-idx="' + i + '" aria-label="Remove option" title="Remove">' + ICO_TR + '</button>';
     c.appendChild(row);
-    row.querySelector('.form-input').addEventListener('input', e => { APP.editorOptions[parseInt(e.target.dataset.idx)].text = e.target.value; });
-    row.querySelector('.opt-correct').addEventListener('change', e => {
-      const idx = parseInt(e.target.dataset.idx);
-      if (APP.editorType === 'single') { APP.editorOptions.forEach((o,j) => o.isCorrect = j === idx); renderEditorOptions(); }
-      else { APP.editorOptions[idx].isCorrect = e.target.checked; }
+    row.querySelector('.oi').addEventListener('input', e => { APP.editorOptions[parseInt(e.target.dataset.idx)].text = e.target.value; });
+    row.querySelector('.mark').addEventListener('click', e => {
+      const idx = parseInt(e.currentTarget.dataset.idx);
+      if (isMulti) APP.editorOptions[idx].isCorrect = !APP.editorOptions[idx].isCorrect;
+      else APP.editorOptions.forEach((o, j) => o.isCorrect = j === idx);
+      renderEditorOptions();
     });
+    row.querySelector('.odel').addEventListener('click', () => removeOption(parseInt(row.querySelector('.odel').dataset.idx)));
   });
 }
 
@@ -6251,6 +6492,41 @@ function renderSegmentedType() {
 }
 
 // Single-card renderer for the new canvas. Emits .qc markup.
+// Renders the attached-image strip used inside the expanded question card body.
+// Hotspot's image is shown by its own branch (with region count); this helper
+// covers single/multiple/matching/sequencing where images are decorative.
+function _qbodyImagesHtml(q) {
+  if (!q || (q.questionType === 'hotspot')) return '';
+  if (!Array.isArray(q.images) || !q.images.length) return '';
+  const dir = q.imageLayout === 'column' ? 'column' : 'row';
+  const imgs = q.images.map(im =>
+    '<img src="' + (im && im.data || '') + '" alt="" style="display:block;max-width:100%;max-height:200px;object-fit:contain;border-radius:6px;border:1px solid var(--g100);background:#fff">'
+  ).join('');
+  return '<div class="qbody-imgs" style="display:flex;flex-direction:' + dir + ';gap:8px;flex-wrap:wrap;margin:8px 0">' + imgs + '</div>';
+}
+
+// Renders the attached CLI / code block for the expanded body view.
+function _qbodyCodeHtml(q) {
+  if (!q || !q.codeBlock || !String(q.codeBlock).trim()) return '';
+  return '<pre class="qbody-cli" style="font-family:Consolas,\'Courier New\',monospace;font-size:12.5px;line-height:1.55;background:#0f172a;color:#e5e7eb;padding:10px 13px;margin:8px 0;border-radius:6px;white-space:pre-wrap;word-break:break-word;overflow-x:auto">' + escH(q.codeBlock) + '</pre>';
+}
+
+// Small "Image" / "CLI" badges shown on the collapsed card so the user can
+// see at a glance that there's media tucked inside.
+function _qbadgesHtml(q) {
+  if (!q) return '';
+  const hasImg  = Array.isArray(q.images) && q.images.length > 0 && q.questionType !== 'hotspot';
+  const hasCode = !!(q.codeBlock && String(q.codeBlock).trim());
+  let out = '';
+  if (hasImg) {
+    out += '<span class="qchip qchip-img" title="Has attached image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Image</span>';
+  }
+  if (hasCode) {
+    out += '<span class="qchip qchip-cli" title="Has CLI / code block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> CLI</span>';
+  }
+  return out;
+}
+
 function _renderQuestionCardNew(q, i) {
   const t = q.questionType || 'single';
   const tagMap = { single:['s','Single'], multiple:['m','Multiple'], matching:['mt','Matching'], sequencing:['sq','Sequencing'], hotspot:['hs','Hotspot'] };
@@ -6282,6 +6558,11 @@ function _renderQuestionCardNew(q, i) {
       return '<li class="' + (isCorrect ? 'correct' : '') + '"><span class="ol">' + marker + '</span>' + escH(opt.text || '') + '</li>';
     }).join('') + '</ul>';
   }
+  // Splice in any attached image(s) + CLI block above the options
+  const imgsHtml = _qbodyImagesHtml(q);
+  if (imgsHtml) optsBlock = (q.imagePosition === 'below') ? (optsBlock + imgsHtml) : (imgsHtml + optsBlock);
+  const codeHtml = _qbodyCodeHtml(q);
+  if (codeHtml) optsBlock = codeHtml + optsBlock;
   // Question text preview — strip HTML for the .qt line; full HTML available via expand
   const qPreview = stripHtml(q.question || '').replace(/\s+/g, ' ').trim();
   const cnt = i + 1;
@@ -6292,7 +6573,7 @@ function _renderQuestionCardNew(q, i) {
     + '<div class="main">'
       + '<div class="qt">' + escH(qPreview) + '</div>'
       + '<div class="qbody">' + optsBlock + '</div>'
-      + '<div class="meta"><span class="tag ' + tagCls + '">' + tagLab + '</span></div>'
+      + '<div class="meta"><span class="tag ' + tagCls + '">' + tagLab + '</span>' + _qbadgesHtml(q) + '</div>'
     + '</div>'
     + '<div class="acts">'
       + '<button class="iconbtn exp" onclick="event.stopPropagation();this.closest(\'.qc\').classList.toggle(\'open\')" title="Expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>'
@@ -8147,6 +8428,11 @@ function _renderBankCardNew(q, displayIdx) {
       return '<li class="' + (isCorrect ? 'correct' : '') + '"><span class="ol">' + marker + '</span>' + escH(opt.text || '') + '</li>';
     }).join('') + '</ul>';
   }
+  // Splice in any attached image(s) + CLI block using the shared helpers
+  const imgsHtml = _qbodyImagesHtml(q);
+  if (imgsHtml) optsBlock = (q.imagePosition === 'below') ? (optsBlock + imgsHtml) : (imgsHtml + optsBlock);
+  const codeHtml = _qbodyCodeHtml(q);
+  if (codeHtml) optsBlock = codeHtml + optsBlock;
   const qPreview = _stripHtml(q.question || '').replace(/\s+/g, ' ').trim();
   const cnt = displayIdx + 1;
   return '<div class="qc' + (isSel ? ' sel' : '') + (BANK.bankExpanded ? ' open' : '') + '" draggable="true" data-question-id="' + escH(q.id) + '">'
@@ -8156,7 +8442,7 @@ function _renderBankCardNew(q, displayIdx) {
     + '<div class="main">'
       + '<div class="qt">' + escH(qPreview) + '</div>'
       + '<div class="qbody">' + optsBlock + '</div>'
-      + '<div class="meta"><span class="tag ' + tagCls + '">' + tagLab + '</span></div>'
+      + '<div class="meta"><span class="tag ' + tagCls + '">' + tagLab + '</span>' + _qbadgesHtml(q) + '</div>'
     + '</div>'
     + '<div class="acts">'
       + '<button class="iconbtn" onclick="event.stopPropagation();this.closest(\'.qc\').classList.toggle(\'open\')" title="Expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>'
@@ -8321,21 +8607,34 @@ function _bankAttachFolderDnD() {
     el.addEventListener('dragend', () => {
       _bankDraggedFolderId = null;
       el.classList.remove('dragging');
-      document.querySelectorAll('#bank-folder-tree .fitem').forEach(x => x.classList.remove('drag-over'));
+      document.querySelectorAll('#bank-folder-tree .fitem').forEach(x => x.classList.remove('drag-over','drop-above','drop-below'));
     });
     el.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       const targetId = el.dataset.folderId;
-      // Don't highlight when hovering over the dragged folder or one of its descendants
+      el.classList.remove('drag-over','drop-above','drop-below');
+      // Don't show any indicator on the dragged folder itself or any descendant
       if (_bankDraggedFolderId && (targetId === _bankDraggedFolderId || _bankFolderDescendants(_bankDraggedFolderId).has(targetId))) return;
+      // Folder drags: on root targets, top/bottom edge → drop-line (promote to root);
+      // on subfolders or in the middle → standard nest fill.
+      const targetFolder = BANK.folders.find(f => f.id === targetId);
+      const isRoot = targetFolder && targetFolder.parentId === null;
+      if (_bankDraggedFolderId && isRoot) {
+        const rect = el.getBoundingClientRect();
+        const y = e.clientY - rect.top;
+        const edge = Math.max(8, rect.height * 0.3);
+        if (y < edge) { el.classList.add('drop-above'); return; }
+        if (y > rect.height - edge) { el.classList.add('drop-below'); return; }
+      }
       el.classList.add('drag-over');
     });
-    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over','drop-above','drop-below'));
     el.addEventListener('drop', async e => {
       e.preventDefault();
       e.stopPropagation();
-      el.classList.remove('drag-over');
+      const wantPromoteToRoot = el.classList.contains('drop-above') || el.classList.contains('drop-below');
+      el.classList.remove('drag-over','drop-above','drop-below');
       const data = e.dataTransfer.getData('text/plain') || '';
       const targetFolderId = el.dataset.folderId;
       // Question dropped onto a folder → move question into that folder
@@ -8351,7 +8650,7 @@ function _bankAttachFolderDnD() {
         renderBank();
         return;
       }
-      // Folder dropped onto a folder → make it a subfolder, with cycle + depth guards
+      // Folder dropped onto a folder
       if (data.startsWith('f:')) {
         const fId = data.slice(2);
         if (fId === targetFolderId) return;
@@ -8359,7 +8658,20 @@ function _bankAttachFolderDnD() {
           toast('Cannot move a folder into one of its subfolders', 'err'); return;
         }
         const folder = BANK.folders.find(f => f.id === fId);
-        if (!folder || folder.parentId === targetFolderId) return;
+        if (!folder) return;
+        // Drop-line on a root folder → promote the dragged folder to root level
+        if (wantPromoteToRoot) {
+          if (folder.parentId === null) return; // already root
+          const subtreeDepth = _bankFolderSubtreeDepth(fId);
+          if (subtreeDepth > BANK_MAX_DEPTH) { toast('Folders can only nest three levels deep', 'err'); return; }
+          const ok = await API.patch('/api/bank/folders/' + fId, { parentId: null });
+          if (!ok) { toast('Could not move folder', 'err'); return; }
+          await fetchBank();
+          renderBank();
+          return;
+        }
+        // Otherwise → make it a subfolder of the target (existing nest behavior)
+        if (folder.parentId === targetFolderId) return;
         const targetDepth = _bankFolderPath(targetFolderId).length;
         const subtreeDepth = _bankFolderSubtreeDepth(fId);
         if (targetDepth + subtreeDepth > BANK_MAX_DEPTH) {
@@ -10492,10 +10804,8 @@ document.addEventListener('click', function(e) {
     const pop = document.getElementById('save-preset-popover');
     if (pop) pop.style.display = 'none';
   }
-  if (!e.target.closest('#lbl-interactive')) {
-    const m = document.getElementById('interactive-menu');
-    if (m) m.style.display = 'none';
-  }
+  // The interactive type dropdown closes itself via _intMenuCloser inside
+  // toggleInteractiveMenu — no extra inline-style hiding needed here.
 });
 
 // ── QUESTION BANK EXPORT ──────────────────────────────────
