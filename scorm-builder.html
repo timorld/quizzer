@@ -33,10 +33,10 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .btn-primary:hover{background:var(--green-dk);border-color:var(--green-dk);box-shadow:0 4px 16px rgba(118,185,0,.35)}
 .btn-outline-green{background:var(--white);color:var(--green-dk);border-color:var(--green)}
 .btn-outline-green:hover{background:var(--green-lt);box-shadow:0 2px 8px rgba(118,185,0,.2)}
-.btn-outline-green .btn-icon{filter:brightness(0) saturate(100%) invert(40%) sepia(80%) saturate(500%) hue-rotate(60deg) brightness(90%)}
+.btn-outline-green img.btn-icon{filter:brightness(0) saturate(100%) invert(40%) sepia(80%) saturate(500%) hue-rotate(60deg) brightness(90%)}
 .btn-outline-dark{background:var(--white);color:#1f2937;border-color:#1f2937}
 .btn-outline-dark:hover{background:#f3f4f6;box-shadow:0 2px 8px rgba(31,41,55,.18)}
-.btn-outline-dark .btn-icon{filter:brightness(0) saturate(100%) invert(13%) sepia(7%) saturate(1500%) hue-rotate(180deg) brightness(95%)}
+.btn-outline-dark img.btn-icon{filter:brightness(0) saturate(100%) invert(13%) sepia(7%) saturate(1500%) hue-rotate(180deg) brightness(95%)}
 .btn-outline{background:var(--white);color:#666;border-color:#ccc}
 .btn-outline:hover{background:#f5f5f5;border-color:#aaa}
 .btn-danger{color:var(--danger);border-color:#e8c5d8}
@@ -110,9 +110,9 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
 .empty-icon{margin-bottom:16px}.empty-icon img{width:56px;height:56px}
 .gen-bar{background:var(--white);border:1px solid var(--border);border-top:3px solid var(--green);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;bottom:0;margin-top:16px;z-index:10;border-radius:0 0 var(--radius) var(--radius);box-shadow:0 -2px 12px rgba(0,0,0,.06)}
-.split-btn{display:inline-flex;position:relative}
+.split-btn{display:inline-flex;align-items:stretch;position:relative}
 .split-btn .split-main{border-radius:6px 0 0 6px;border-right:none}
-.split-btn .split-arrow{padding:9px 11px;border-radius:0 6px 6px 0;border-left:1px solid rgba(255,255,255,.3);font-size:11px;min-width:0}
+.split-btn .split-arrow{padding:6px 11px;border-radius:0 6px 6px 0;border-left:1px solid rgba(255,255,255,.3);font-size:11px;min-width:0;display:inline-flex;align-items:center;justify-content:center}
 .split-dropdown{display:none;position:absolute;bottom:calc(100% + 6px);right:0;background:var(--white);border:1px solid var(--border);min-width:190px;box-shadow:var(--shadow-md);z-index:200;border-radius:var(--radius-sm);overflow:hidden}
 .app-hdr .split-dropdown,.r-topbar .split-dropdown{bottom:auto;top:calc(100% + 6px)}
 .split-dropdown.open{display:block}
@@ -406,8 +406,10 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .afb-q-type{font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:10px;color:var(--green-dk)}
 .batch-empty{text-align:center;padding:48px 20px;color:var(--muted)}
 .btn-icon{width:14px;height:14px;vertical-align:middle;flex-shrink:0;display:inline-block}
-.btn-primary .btn-icon{filter:brightness(0) invert(1)}
-.btn-danger .btn-icon{filter:brightness(0) saturate(100%) invert(13%) sepia(80%) saturate(3000%) hue-rotate(300deg) brightness(70%)}
+.btn-primary img.btn-icon{filter:brightness(0) invert(1)}
+.btn-danger img.btn-icon{filter:brightness(0) saturate(100%) invert(13%) sepia(80%) saturate(3000%) hue-rotate(300deg) brightness(70%)}
+/* Inline SVG icons use stroke="currentColor" so they inherit the button text color naturally */
+.btn > svg.btn-icon{stroke:currentColor;fill:none}
 .btn-icon-raw{width:16px;height:16px;vertical-align:middle;flex-shrink:0;display:inline-block}
 /* ── Preview modal: interactive question types ── */
 .prev-match-cols{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
@@ -485,8 +487,8 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
    their centered max-width via the rule below. */
 .r-work .main{flex:1;min-height:0;max-width:none;padding:0;margin:0;display:flex;flex-direction:column;overflow:hidden}
 .r-work .main > .tab-panel{flex:1;min-height:0}
-.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank){overflow-y:auto;padding:28px 24px;display:block}
-.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank) > *{max-width:1100px;margin-left:auto;margin-right:auto}
+.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank):not(#tab-batch){overflow-y:auto;padding:28px 24px;display:block}
+.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank):not(#tab-batch) > *{max-width:1100px;margin-left:auto;margin-right:auto}
 
 @media(max-width:980px){
   .r-rail{width:62px}
@@ -744,6 +746,105 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-bank .bankq-empty{padding:18px 12px;font-size:13px;color:var(--muted);font-style:italic;text-align:center}
 /* Reuse the .qc card from Quiz Builder — already styled there */
 .r-bank .bankq-list .qc{margin-bottom:8px;cursor:default}
+
+/* Batch builder (Phase 3) — page-header + drop zone + compact rows + right inspector */
+/* Hide the Quiz-Builder top bar (title + Test in Browser + Download SCORM) on the Batch tab */
+body.batch-tab-active .r-topbar{display:none}
+/* Batch panel rail — only shown inside Quiz Builder when a quiz was loaded from a batch */
+#tab-questions .bp-panel{width:240px;flex:none;background:#fbfbfc;border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0;transition:width .2s cubic-bezier(.4,0,.2,1);overflow:hidden}
+#tab-questions .bp-panel .bp-hd{flex:none;display:flex;align-items:center;gap:10px;padding:15px 14px 13px;border-bottom:1px solid var(--border)}
+#tab-questions .bp-panel .bp-title{font-size:13px;font-weight:800;letter-spacing:-.1px;color:var(--text)}
+#tab-questions .bp-panel .bp-sub{font-size:11px;color:var(--muted);margin-top:1px}
+#tab-questions .bp-panel .bp-collapse{margin-left:auto;width:28px;height:28px;border:1px solid var(--g100);border-radius:7px;background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;padding:0}
+#tab-questions .bp-panel .bp-collapse svg{width:15px;height:15px;transform:rotate(180deg)}
+#tab-questions .bp-panel .bp-collapse:hover{background:#f3f4f6;color:var(--text)}
+#tab-questions .bp-panel .bp-list{flex:1;min-height:0;overflow-y:auto;padding:8px}
+#tab-questions .bp-panel .bp-item{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;padding:10px;border:1px solid transparent;border-radius:9px;background:none;cursor:pointer;transition:background .12s,border-color .12s;font-family:inherit}
+#tab-questions .bp-panel .bp-item+.bp-item{margin-top:2px}
+#tab-questions .bp-panel .bp-item:hover{background:#eceef1}
+#tab-questions .bp-panel .bp-item.active{background:var(--green-lt);border-color:#cfe89a}
+#tab-questions .bp-panel .bp-num{min-width:22px;height:22px;border-radius:50%;background:#cbd0d8;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+#tab-questions .bp-panel .bp-item.active .bp-num{background:var(--green)}
+#tab-questions .bp-panel .bp-body{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+#tab-questions .bp-panel .bp-name{font-size:12.5px;font-weight:600;color:var(--text);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#tab-questions .bp-panel .bp-item.active .bp-name{color:var(--green-600)}
+#tab-questions .bp-panel .bp-meta{font-size:11px;color:#9aa0aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tab-questions .bp-panel .bp-ft{flex:none;border-top:1px solid var(--border);padding:10px}
+#tab-questions .bp-panel .bp-back{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:8px;border:1px solid var(--g150);border-radius:8px;background:#fff;font:inherit;font-size:12.5px;font-weight:600;color:var(--g700);cursor:pointer;font-family:inherit}
+#tab-questions .bp-panel .bp-back svg{width:14px;height:14px}
+#tab-questions .bp-panel .bp-back:hover{background:#f3f4f6}
+#tab-questions .bp-panel .bp-expand{display:none}
+#tab-questions .bp-panel.collapsed{width:46px}
+#tab-questions .bp-panel.collapsed .bp-hd,#tab-questions .bp-panel.collapsed .bp-list,#tab-questions .bp-panel.collapsed .bp-ft{display:none}
+#tab-questions .bp-panel.collapsed .bp-expand{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;height:100%;border:none;background:none;cursor:pointer;padding:14px 0;font-family:inherit}
+#tab-questions .bp-panel .bp-exico{width:26px;height:26px;border:1px solid var(--g100);border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--muted);flex:none}
+#tab-questions .bp-panel .bp-exico svg{width:15px;height:15px}
+#tab-questions .bp-panel .bp-vlabel{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g600);writing-mode:vertical-rl;transform:rotate(180deg)}
+#tab-batch.tab-panel.active{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;flex:1}
+#tab-batch .r-batch{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#tab-batch .r-batch-split{flex:1;min-height:0;display:flex;align-items:stretch;overflow:hidden}
+#tab-batch .r-batch-body{flex:1;min-height:0;overflow-y:auto;padding:22px 26px}
+#tab-batch .r-batch-body-inner{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+#tab-batch .batch-inspector-slot{width:424px;flex:none;background:#f4f5f7;border-left:1px solid var(--border);display:flex;align-items:stretch;overflow:hidden;transition:width .22s cubic-bezier(.4,0,.2,1)}
+#tab-batch .batch-inspector-slot > .b-insp-empty{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 22px;color:var(--muted);font-size:13px;text-align:center}
+#tab-batch .batch-inspector-slot > #r-inspector{flex:1;width:auto;border-left:none}
+@media(max-width:1180px){#tab-batch .batch-inspector-slot{width:372px}}
+@media(max-width:980px){#tab-batch .batch-inspector-slot{display:none}}
+/* Collapsed state — slot retracts to 0px and the floating Settings handle becomes visible */
+#tab-batch .r-batch-split.insp-collapsed .batch-inspector-slot{width:0;border-left:none}
+#tab-batch .r-batch-split{position:relative}
+#tab-batch .batch-insp-handle{position:absolute;top:14px;right:14px;z-index:20;display:none;align-items:center;gap:7px;background:#fff;border:1px solid var(--g150);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--green-600);box-shadow:var(--sh-card);cursor:pointer;font-family:inherit}
+#tab-batch .batch-insp-handle:hover{background:var(--green-lt);border-color:var(--green)}
+#tab-batch .batch-insp-handle svg{width:15px;height:15px}
+#tab-batch .r-batch-split.insp-collapsed .batch-insp-handle{display:inline-flex}
+#tab-batch #batch-list{display:flex;flex-direction:column;gap:10px}
+#tab-batch .b-dz{border:1.5px dashed #cdd3db;border-radius:12px;background:#fff;padding:42px 22px;text-align:center;color:var(--muted);cursor:pointer;transition:border-color .15s,background .15s}
+#tab-batch .b-dz:hover,#tab-batch .b-dz.drag-over{border-color:var(--green);background:var(--green-lt)}
+#tab-batch .b-dz .di{width:42px;height:42px;border-radius:10px;background:var(--green-lt);color:var(--green-600);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+#tab-batch .b-dz .di svg{width:22px;height:22px}
+#tab-batch .b-dz .dt{font-size:14.5px;font-weight:700;color:var(--text)}
+#tab-batch .b-dz .ds{font-size:12.5px;margin-top:3px}
+#tab-batch .b-dz input[type=file]{display:none}
+#tab-batch .b-counter{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a3a8b2;margin-top:4px}
+#tab-batch .brow{background:#fff;border:1px solid var(--g100);border-radius:11px;box-shadow:var(--sh-card);padding:14px 16px;display:flex;align-items:center;gap:14px;transition:border-color .12s,box-shadow .12s,background .12s}
+#tab-batch .brow:hover{border-color:#cfd4dc;box-shadow:0 2px 8px rgba(16,24,40,.08)}
+#tab-batch .brow.on{border-color:var(--green);box-shadow:inset 3px 0 0 var(--green),0 1px 3px rgba(16,24,40,.07)}
+#tab-batch .brow.has-error{border-color:var(--danger)}
+#tab-batch .brow .bnum{width:36px;height:36px;border-radius:9px;background:#f3f4f6;color:#6b7280;display:flex;align-items:center;justify-content:center;flex:none}
+#tab-batch .brow .bnum svg{width:18px;height:18px}
+#tab-batch .brow .bmain{flex:1;min-width:0}
+#tab-batch .brow .bname{font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:9px}
+#tab-batch .brow .bname input{flex:1;min-width:0;font:inherit;font-weight:700;font-size:14px;color:var(--text);background:none;border:1px solid transparent;border-radius:6px;padding:3px 7px;margin-left:-7px;outline:none}
+#tab-batch .brow .bname input:hover{background:#f4f5f7}
+#tab-batch .brow .bname input:focus{background:#fff;border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.14)}
+#tab-batch .brow .bchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+#tab-batch .brow .bacts{display:flex;gap:4px;flex:none}
+#tab-batch .brow .bx{width:32px;height:32px;border:1px solid transparent;border-radius:7px;background:none;display:flex;align-items:center;justify-content:center;color:#9aa0aa;cursor:pointer;font-family:inherit;padding:0}
+#tab-batch .brow .bx:hover{background:#f0f1f4;color:var(--text)}
+#tab-batch .brow .bx.danger:hover{background:#fdeaea;color:#c4302b}
+#tab-batch .brow .bx.on{background:var(--green-lt);color:var(--green-600)}
+#tab-batch .brow .bx svg{width:16px;height:16px}
+#tab-batch .minichip{display:inline-flex;align-items:center;gap:5px;background:#f8f9fa;border:1px solid var(--g100);border-radius:20px;padding:3px 9px;font-size:11.5px;font-weight:600;color:#6b7280}
+#tab-batch .minichip.tag-completion{background:#eaf3ff;border-color:#cfe1ff;color:#1d4ed8}
+#tab-batch .minichip.tag-knowledge{background:#eef9e7;border-color:#cce5ba;color:#3f7d20}
+#tab-batch .minichip.tag-final{background:#fdecec;border-color:#f5cccc;color:#b73838}
+#tab-batch .minichip.tag-genius{background:linear-gradient(135deg,rgba(168,85,247,.10),rgba(118,185,0,.10));border-color:rgba(168,85,247,.30);color:#7c3aed}
+#tab-batch .minichip.tag-custom{background:#f3f4f6;border-color:#e5e7eb;color:#4b5563}
+#tab-batch .berr{color:var(--danger);font-size:12px;margin:0 0 8px;padding:0 18px}
+#tab-batch .bsettings{background:#fbfbfc;border:1px solid var(--g100);border-radius:11px;padding:14px 16px;margin-top:-6px}
+#tab-batch .bsettings .bs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#tab-batch .bsettings .bs-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+#tab-batch .bsettings .bs-label{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9aa0aa}
+#tab-batch .bsettings .bs-label .hint{font-weight:400;text-transform:none;letter-spacing:0;color:#aaa}
+#tab-batch .bsettings .bs-field input[type=number],#tab-batch .bsettings .bs-field select{font:inherit;font-size:13px;color:var(--text);background:#fff;border:1px solid var(--g100);border-radius:7px;padding:6px 9px;outline:none;width:100%}
+#tab-batch .bsettings .bs-field input[type=number]:focus,#tab-batch .bsettings .bs-field select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.14)}
+#tab-batch .bsettings .bs-check{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--g700);cursor:pointer}
+#tab-batch .bsettings .bs-check input{accent-color:var(--green)}
+@media(max-width:900px){#tab-batch .bsettings .bs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){#tab-batch .bsettings .bs-grid{grid-template-columns:1fr}}
+#tab-batch .b-empty{padding:16px 8px 0;text-align:center;color:var(--muted);font-size:13px}
+#tab-batch .brow{margin:0;cursor:pointer}
+#tab-batch .berr{margin:-4px 0 0;padding:0}
 .r-topbar .qtitle-wrap{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
 .r-topbar .qtitle{font-size:18px;font-weight:800;letter-spacing:-.3px;border:1px solid transparent;border-radius:6px;padding:2px 6px;margin-left:-6px;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none;font-family:inherit;color:var(--text)}
 .r-topbar .qtitle:hover{background:#f4f5f7}
@@ -761,7 +862,11 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 @media(max-width:1180px){.r-inspector{width:372px}}
 @media(max-width:980px){.r-inspector{display:none}}
 .r-insp-hd{flex:none;display:flex;align-items:center;gap:10px;padding:16px 18px 14px;border-bottom:1px solid var(--border);background:#fff}
-.r-insp-hd .t{font-size:16px;font-weight:800;letter-spacing:-.2px;line-height:1.25}
+.r-insp-hd .t{font-size:16px;font-weight:800;letter-spacing:-.2px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.r-insp-hd .dh-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa0aa;margin-bottom:3px}
+.r-insp-hd .r-insp-collapse{margin-left:auto;flex:none;width:30px;height:30px;border-radius:7px;border:1px solid var(--g100);background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.r-insp-hd .r-insp-collapse:hover{background:#f3f4f6;color:var(--text)}
+.r-insp-hd .r-insp-collapse svg{width:15px;height:15px}
 .r-insp-scroll{flex:1;padding:14px 14px 22px;display:flex;flex-direction:column;gap:11px;min-height:0;overflow-y:auto}
 .r-insp-scroll>*{flex:0 0 auto}
 .r-preset{background:#fff;border:1px solid var(--g100);border-radius:11px;box-shadow:var(--sh-card);padding:13px 14px}
@@ -874,10 +979,10 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
     <input class="qtitle" id="r-qtitle" placeholder="Untitled quiz" oninput="syncQuizInfo('title',this.value)" spellcheck="false">
   </div>
   <div class="r-top-actions">
-    <button class="btn btn-sm btn-outline-dark" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
+    <button class="btn btn-sm" onclick="testInBrowser(null)"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Test in Browser</button>
     <div class="split-btn">
-      <button class="btn btn-sm btn-primary split-main" onclick="generateAndDownload()"><img class="btn-icon" src="assets/svg/download.svg" alt=""> Download SCORM</button>
-      <button class="btn btn-sm btn-primary split-arrow" onclick="toggleDlDropdown(event)" aria-label="More download options">&#9660;</button>
+      <button class="btn btn-sm btn-primary split-main" onclick="generateAndDownload()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download SCORM</button>
+      <button class="btn btn-sm btn-primary split-arrow" onclick="toggleDlDropdown(event)" aria-label="More download options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="split-dropdown" id="r-dl-dropdown">
         <button onclick="downloadWordDoc();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/ms word.svg" alt=""> Download as Word Doc</button>
         <button onclick="downloadQuestionBank();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/txt.svg" alt=""> Download as AIKEN</button>
@@ -993,6 +1098,7 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 
 <!-- ───────────── NEW QUIZ BUILDER CANVAS + INSPECTOR ───────────── -->
 <div class="r-split">
+<aside class="bp-panel" id="batch-panel" style="display:none"></aside>
 <section class="r-canvas">
   <div class="canvas-inner">
     <!-- Quiz type segmented control -->
@@ -1041,17 +1147,6 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 <aside class="r-inspector" id="r-inspector"></aside>
 
 </div><!-- end .r-split -->
-<div id="batch-sidebar" style="display:none">
-  <div class="batch-sidebar-hdr">
-    <span>Batch Quizzes</span>
-    <button class="batch-sidebar-hide-btn" onclick="toggleBatchSidebar(false)" title="Hide sidebar">&#10095;</button>
-  </div>
-  <div id="batch-sidebar-list"></div>
-</div>
-<button id="batch-sidebar-open-tab" onclick="toggleBatchSidebar(true)" title="Show batch quizzes">
-  <span style="font-size:13px">&#10094;</span>
-  <span class="batch-sidebar-open-label">Batch</span>
-</button>
 </div><!-- end #tab-questions -->
 
 <!-- SETTINGS TAB -->
@@ -1412,22 +1507,35 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 
 <!-- BATCH TAB -->
 <div id="tab-batch" class="tab-panel">
-  <div class="pg-hdr">
-    <div><div class="pg-title">Batch Builder</div><div class="pg-sub">Upload multiple SCORM packages, adjust settings for each, then download all at once</div></div>
-    <button class="btn btn-sm btn-danger" id="btn-clear-batch" onclick="clearBatch()" style="display:none">Clear All</button>
-  </div>
-  <div class="batch-dz" id="batch-dz">
-    <div style="margin-bottom:8px"><img src="assets/svg/upload.svg" alt="" style="width:40px;height:40px"></div>
-    <div style="font-size:15px;font-weight:600;margin-bottom:4px">Drop files here, or click to browse</div>
-    <div style="font-size:12px;color:var(--muted)">Accepts .zip (SCORM) &nbsp;·&nbsp; .xml (Moodle XML) &nbsp;·&nbsp; .txt (AIKEN) &nbsp;·&nbsp; Multiple files accepted</div>
-    <input type="file" id="batch-file-input" accept=".zip,.xml,.txt" multiple style="display:none">
-  </div>
-  <div id="batch-list"></div>
-  <div class="batch-bar" id="batch-bar" style="display:none">
-    <div style="font-size:13px;color:var(--muted)"><strong id="batch-count-label">0 quizzes</strong> loaded</div>
-    <div class="btn-group">
-      <button class="btn btn-danger btn-sm" onclick="clearBatch()">Clear All</button>
-      <button class="btn btn-primary" id="batch-dl-btn" onclick="batchDownloadAll()"><img class="btn-icon" src="assets/svg/download.svg" alt=""> Download All</button>
+  <div class="r-batch">
+    <header class="r-vhead">
+      <div>
+        <div class="r-vt">Batch builder</div>
+        <div class="r-vs">Upload multiple SCORM packages, adjust each one's settings, then download them all at once.</div>
+      </div>
+      <div class="r-va">
+        <button class="btn btn-sm" onclick="document.getElementById('batch-file-input').click()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Add files</button>
+        <button class="btn btn-sm" id="btn-clear-batch" onclick="clearBatch()" style="display:none"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Clear all</button>
+        <button class="btn btn-sm btn-primary" id="batch-dl-btn" onclick="batchDownloadAll()" style="display:none"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> <span id="batch-dl-label">Download all</span></button>
+      </div>
+    </header>
+    <div class="r-batch-split insp-collapsed">
+      <div class="r-batch-body">
+        <div class="r-batch-body-inner">
+          <div class="b-dz" id="batch-dz">
+            <div class="di"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+            <div class="dt">Drop SCORM, XML or AIKEN files here</div>
+            <div class="ds">or click to browse · multiple files accepted</div>
+            <input type="file" id="batch-file-input" accept=".zip,.xml,.txt" multiple>
+          </div>
+          <div id="batch-counter" class="b-counter" style="display:none"></div>
+          <div id="batch-list"></div>
+        </div>
+      </div>
+      <div class="batch-inspector-slot" id="batch-inspector-slot">
+        <div class="b-insp-empty" id="batch-insp-empty">Select a quiz on the left to edit its settings.</div>
+      </div>
+      <button type="button" class="batch-insp-handle" id="batch-insp-handle" onclick="toggleBatchInspector()" title="Open settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</button>
     </div>
   </div>
 </div>
@@ -3819,17 +3927,26 @@ function triggerFile(id) { document.getElementById(id).click(); }
 // the click handler below just calls this.
 function switchTab(tabName) {
   const activeTab = document.querySelector('.tab-btn.active');
-  if (activeTab && activeTab.dataset.tab === 'settings') saveSettings();
+  const prevTab = activeTab ? activeTab.dataset.tab : null;
+  if (prevTab === 'settings') saveSettings();
+  // Leaving the Batch tab while an item was being inspected: restore APP.settings
+  if (prevTab === 'batch' && tabName !== 'batch') {
+    if (typeof _restoreInspectorToQuiz === 'function') _restoreInspectorToQuiz();
+  }
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabName));
   document.querySelectorAll('.r-nav[data-tab]').forEach(b => b.classList.toggle('r-nav-on', b.dataset.tab === tabName));
-  if (tabName === 'questions') renderQuestions();
+  document.body.classList.toggle('batch-tab-active', tabName === 'batch');
+  if (tabName === 'questions') { renderQuestions(); if (typeof renderBatchPanel === 'function') renderBatchPanel(); }
   if (tabName === 'history') {
     document.getElementById('hist-list').innerHTML = '<div class="hist-loading"><div class="hist-spinner"></div><span>Loading history…</span></div>';
     fetchHistory().then(renderHistory).then(updateBadges);
   }
   if (tabName === 'settings') readSettingsToForm();
   if (tabName === 'bank') fetchBank().then(renderBank);
+  if (tabName === 'batch' && typeof _mountInspectorToBatch === 'function' && _inspectorBatchId && BATCH.find(b => b.id === _inspectorBatchId)) {
+    _mountInspectorToBatch(_inspectorBatchId);
+  }
 }
 document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 document.querySelectorAll('.r-nav[data-tab]').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
@@ -4175,7 +4292,8 @@ async function handleScormFile(file) {
       APP.questions = questions;
       Object.assign(APP.settings, settings);
       _activeBatchId = null;
-      document.querySelectorAll('.batch-item').forEach(el => el.classList.remove('batch-item-active'));
+      document.querySelectorAll('#batch-list .brow').forEach(el => el.classList.remove('on'));
+      if (typeof renderBatchPanel === 'function') renderBatchPanel();
       readSettingsToForm();
       showImportResult('&#10003; Loaded <strong>' + questions.length + ' questions</strong> and settings from &ldquo;' + escH(file.name) + '&rdquo;. Edit and re-generate below.');
     }
@@ -6316,8 +6434,15 @@ function renderInspector() {
   const rowsCert = _rCtlRow('tog-certificate', 'Show certificate link on pass', 'Pass screen · completion quiz only', _rTogHtml('tog-certificate'))
     + '<div class="r-sub" data-sub="certificate"><div class="r-fieldrow"><label>Certificate URL</label><input class="r-ti" type="url" id="r-cert-url" placeholder="https://…" oninput="document.getElementById(\'s-cert-url\').value=this.value;saveSettings()"></div><div class="r-fieldrow"><label>Link text</label><input class="r-ti" type="text" id="r-cert-text" placeholder="Click here to see your certificate" oninput="document.getElementById(\'s-cert-text\').value=this.value;saveSettings()"></div></div>';
 
+  // Header: in Batch inspector mode, show the selected item's name with a small
+  // "Quiz settings" eyebrow + a collapse button. In Quiz Builder mode, keep the
+  // simple "Quiz settings" label (the topbar already shows the title).
+  const _isBatchInsp = (typeof _inspectorOwner !== 'undefined' && _inspectorOwner === 'batch');
+  const _hdrTitle = _isBatchInsp ? (APP.settings.title || 'Untitled') : 'Quiz settings';
+  const _hdrEyebrow = _isBatchInsp ? '<div class="dh-eyebrow">Quiz settings</div>' : '';
+  const _hdrCollapse = _isBatchInsp ? '<button type="button" class="r-insp-collapse" onclick="toggleBatchInspector()" aria-label="Collapse panel" title="Collapse panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 18 19 12 13 6"/></svg></button>' : '';
   insp.innerHTML =
-    '<div class="r-insp-hd"><div><span class="t">Quiz settings</span></div></div>'
+    '<div class="r-insp-hd"><div style="min-width:0;flex:1">' + _hdrEyebrow + '<span class="t">' + escH(_hdrTitle) + '</span></div>' + _hdrCollapse + '</div>'
     + '<div class="r-insp-scroll">'
     +   '<div class="r-preset"><div class="r-row"><button class="r-pdrop" onclick="rTogglePresetMenu(this)">' + R_ICO.flag + '<span>' + escH(presetName) + '</span><span class="cv">▾</span></button><button class="r-save" onclick="rToggleSavePresetPopover(this)">Save as…</button></div></div>'
     +   '<div class="r-sum-wrap"><div class="r-sum-lbl">At a glance</div><div class="r-summary" id="r-summary"></div></div>'
@@ -7302,6 +7427,21 @@ function loadPreset(id) {
   Object.assign(APP.settings, preset.settings);
   readSettingsToForm();
   document.getElementById('presets-dropdown').classList.remove('open');
+  // If we're inspecting a batch item, mirror the new settings back to it and
+  // refresh the row's chip strip — readSettingsToForm doesn't run saveSettings.
+  if (typeof _inspectorOwner !== 'undefined' && _inspectorOwner === 'batch' && _inspectorBatchId) {
+    const _bi = BATCH.find(b => b.id === _inspectorBatchId);
+    if (_bi) {
+      _bi.settings = APP.settings;
+      if (typeof _refreshBatchRowChips === 'function') _refreshBatchRowChips(_inspectorBatchId);
+    }
+  } else if (typeof _activeBatchId !== 'undefined' && _activeBatchId) {
+    const _bi = BATCH.find(b => b.id === _activeBatchId);
+    if (_bi) {
+      _bi.settings = Object.assign({}, APP.settings);
+      if (typeof _refreshBatchRowChips === 'function') _refreshBatchRowChips(_activeBatchId);
+    }
+  }
   toast('Loaded "' + preset.name + '"', 'ok');
 }
 
@@ -8369,6 +8509,25 @@ function saveSettings() {
     manifestIdentifier: APP.settings.manifestIdentifier || '',
     preserveIdentifier: (document.getElementById('tog-preserve-id') && document.getElementById('tog-preserve-id').checked) || false
   };
+  // If the inspector is currently editing a batch item, mirror APP.settings
+  // back to that item so the row chips, downloads, and re-renders all see it.
+  if (typeof _inspectorOwner !== 'undefined' && _inspectorOwner === 'batch' && _inspectorBatchId) {
+    const _bi = BATCH.find(b => b.id === _inspectorBatchId);
+    if (_bi) {
+      _bi.settings = APP.settings;
+      if (typeof _refreshBatchRowChips === 'function') _refreshBatchRowChips(_inspectorBatchId);
+    }
+  }
+  // If the Quiz Builder is editing a quiz that came from the batch (no inspector
+  // swap), also mirror the edits back to that batch item so they survive when
+  // the user switches between items via the bp-panel.
+  else if (typeof _activeBatchId !== 'undefined' && _activeBatchId) {
+    const _bi = BATCH.find(b => b.id === _activeBatchId);
+    if (_bi) {
+      _bi.settings = Object.assign({}, APP.settings);
+      if (typeof _refreshBatchRowChips === 'function') _refreshBatchRowChips(_activeBatchId);
+    }
+  }
   updateBadges();
 }
 
@@ -9492,6 +9651,10 @@ var _activeBatchId = null;
 
 function syncToBatch() {
   if (!_activeBatchId) return;
+  // Don't sync APP.questions back when we're aliased into a batch item's
+  // settings (would be writing the loaded-quiz's questions into an item that
+  // is only being inspected, not actually loaded).
+  if (_inspectorOwner === 'batch') return;
   const item = BATCH.find(b => b.id === _activeBatchId);
   if (!item) return;
   item.questions = JSON.parse(JSON.stringify(APP.questions));
@@ -9500,35 +9663,182 @@ function syncToBatch() {
   if (tooltip) tooltip.innerHTML = item.questions.length + ' questions<br>' + escH(item.filename);
 }
 
+// item.settings is the per-quiz source of truth; the right-side inspector
+// writes to it directly via batchUpdateSetting, so any download / test /
+// load-to-editor here just reads from settings.
 function batchSettings(item) {
-  const id = item.id;
-  const g = (eid) => document.getElementById(eid) || {};
-  const randomizeEl = document.getElementById('bt-randomize-' + id);
+  const s = item.settings || {};
   return {
-    title:               g('bt-title-' + id).value || item.settings.title,
-    quizType:            g('bt-type-' + id).value || item.settings.quizType,
-    maxAttempts:         parseInt(g('bt-attempts-' + id).value) || 0,
-    cooldownDays:        parseInt(g('bt-cooldown-' + id).value) || 0,
-    passingPercentage:   parseInt(g('bt-passing-' + id).value) || 70,
-    timeLimitMinutes:    parseInt(g('bt-timelimit-' + id).value) || 0,
-    questionsPerAttempt: parseInt(g('bt-qcount-' + id).value) || 0,
-    randomizeQuestions:  randomizeEl ? randomizeEl.checked : item.settings.randomizeQuestions !== false,
-    randomizeOptions:    !!item.settings.randomizeOptions,
-    allowBlankAnswers:   item.settings.allowBlankAnswers !== false,
-    warnOnBlankAnswers:  item.settings.warnOnBlankAnswers !== false,
-    confirmBeforeSubmit: item.settings.confirmBeforeSubmit !== false,
-    passMessage:         item.settings.passMessage || '',
-    failMessage:         item.settings.failMessage || '',
-    passExitMessage:     item.settings.passExitMessage || '',
-    failExitMessage:     item.settings.failExitMessage || '',
-    showAnswerReview:    item.settings.showAnswerReview || false,
-    showCorrectAnswers:  item.settings.showCorrectAnswers || false,
-    showCertificateLink: item.settings.showCertificateLink || false,
-    certificateUrl:      item.settings.certificateUrl || 'https://www.nvidia.com/en-us/training/academy/certificates/',
-    certificateLinkText: item.settings.certificateLinkText || '',
-    customQuizTypeName:  item.settings.customQuizTypeName || '',
-    customQuizMode:      item.settings.customQuizMode === 'exam' ? 'exam' : 'quiz'
+    title:               s.title,
+    quizType:            s.quizType,
+    maxAttempts:         parseInt(s.maxAttempts) || 0,
+    cooldownDays:        parseInt(s.cooldownDays) || 0,
+    passingPercentage:   parseInt(s.passingPercentage) || 70,
+    timeLimitMinutes:    parseInt(s.timeLimitMinutes) || 0,
+    questionsPerAttempt: parseInt(s.questionsPerAttempt) || 0,
+    randomizeQuestions:  s.randomizeQuestions !== false,
+    randomizeOptions:    !!s.randomizeOptions,
+    allowBlankAnswers:   s.allowBlankAnswers !== false,
+    warnOnBlankAnswers:  s.warnOnBlankAnswers !== false,
+    confirmBeforeSubmit: s.confirmBeforeSubmit !== false,
+    passMessage:         s.passMessage || '',
+    failMessage:         s.failMessage || '',
+    passExitMessage:     s.passExitMessage || '',
+    failExitMessage:     s.failExitMessage || '',
+    showAnswerReview:    s.showAnswerReview || false,
+    showCorrectAnswers:  s.showCorrectAnswers || false,
+    showCertificateLink: s.showCertificateLink || false,
+    certificateUrl:      s.certificateUrl || 'https://www.nvidia.com/en-us/training/academy/certificates/',
+    certificateLinkText: s.certificateLinkText || '',
+    customQuizTypeName:  s.customQuizTypeName || '',
+    customQuizMode:      s.customQuizMode === 'exam' ? 'exam' : 'quiz'
   };
+}
+
+// ── Batch ⇄ shared Quiz Inspector mount system ──
+// The Quiz Builder's #r-inspector element is moved into the Batch tab's slot
+// when a batch row is selected. We alias APP.settings to that item's settings
+// so all the existing mirror-input wiring writes into the item directly. When
+// we leave the Batch tab (or it goes idle), the inspector returns to the Quiz
+// Builder and APP.settings is restored to the editor's quiz settings.
+var _inspectorBatchId = null;     // batch item currently target of the inspector
+var _inspectorOwner = 'quiz';     // 'quiz' or 'batch'
+var _savedAppSettings = null;     // original APP.settings reference (Quiz Builder's)
+
+function _mountInspectorToBatch(itemId) {
+  const item = BATCH.find(b => b.id === itemId);
+  if (!item) return;
+  if (_inspectorOwner !== 'batch') _savedAppSettings = APP.settings;
+  APP.settings = item.settings;
+  _inspectorOwner = 'batch';
+  _inspectorBatchId = itemId;
+  const insp = document.getElementById('r-inspector');
+  const slot = document.getElementById('batch-inspector-slot');
+  const empty = document.getElementById('batch-insp-empty');
+  if (slot && insp && insp.parentElement !== slot) slot.appendChild(insp);
+  if (empty) empty.style.display = 'none';
+  // Selecting an item auto-expands the inspector
+  const split = document.querySelector('#tab-batch .r-batch-split');
+  if (split) split.classList.remove('insp-collapsed');
+  if (typeof readSettingsToForm === 'function') readSettingsToForm();
+  if (typeof renderInspector === 'function') renderInspector();
+}
+
+// Manual collapse/expand of the batch inspector panel.
+function toggleBatchInspector() {
+  const split = document.querySelector('#tab-batch .r-batch-split');
+  if (split) split.classList.toggle('insp-collapsed');
+}
+
+function _restoreInspectorToQuiz() {
+  if (_inspectorOwner !== 'batch') return;
+  if (_savedAppSettings) APP.settings = _savedAppSettings;
+  _savedAppSettings = null;
+  _inspectorOwner = 'quiz';
+  // Keep _inspectorBatchId so re-entering the Batch tab restores selection.
+  const insp = document.getElementById('r-inspector');
+  const home = document.querySelector('#tab-questions .r-split');
+  if (home && insp && insp.parentElement !== home) home.appendChild(insp);
+  const empty = document.getElementById('batch-insp-empty');
+  if (empty) empty.style.display = '';
+  if (typeof readSettingsToForm === 'function') readSettingsToForm();
+  if (typeof renderInspector === 'function') renderInspector();
+}
+
+// Clicking a batch row points the (shared) inspector at that item's settings.
+function selectBatchRow(id) {
+  if (id === _inspectorBatchId && _inspectorOwner === 'batch') return;
+  document.querySelectorAll('#batch-list .brow').forEach(el => {
+    el.classList.toggle('on', el.id === 'bi-' + id);
+  });
+  _mountInspectorToBatch(id);
+}
+
+// Re-renders one row's chip strip so live inspector edits show on the list
+// without a full re-render (which would reset focus / scroll).
+function _refreshBatchRowChips(id) {
+  const item = BATCH.find(b => b.id === id);
+  const row  = document.getElementById('bi-' + id);
+  if (!item || !row) return;
+  const chipsEl = row.querySelector('.bchips');
+  if (!chipsEl) return;
+  const s   = item.settings;
+  const qt  = s.quizType || 'course_completion';
+  const tag = BATCH_TYPE_CHIP[qt] || BATCH_TYPE_CHIP.custom;
+  const passing = (s.passingPercentage ?? 70) + '%';
+  const att     = s.maxAttempts ?? 2;
+  const attChip = att ? (att + (att === 1 ? ' attempt' : ' attempts')) : 'Unlimited tries';
+  const timing  = (s.timeLimitMinutes ?? 0) ? (s.timeLimitMinutes + ' min limit') : 'No time limit';
+  const qcount  = (s.questionsPerAttempt ?? s.totalQuestions) || 0;
+  const qChip   = (qcount || item.questions.length) + ' Q · per attempt';
+  chipsEl.innerHTML = ''
+    + '<span class="minichip ' + tag[0] + '">' + escH(tag[1]) + '</span>'
+    + '<span class="minichip">' + escH(qChip) + '</span>'
+    + '<span class="minichip">' + escH(passing + ' to pass') + '</span>'
+    + '<span class="minichip">' + escH(attChip) + '</span>'
+    + '<span class="minichip">' + escH(timing) + '</span>';
+  // Also update the row's title input if it isn't focused
+  const ti = row.querySelector('.bname input');
+  if (ti && document.activeElement !== ti) ti.value = s.title || '';
+}
+
+// Renders the left rail inside the Quiz Builder when a quiz was loaded from
+// the batch — lets the user jump between batch items without going back to
+// the Batch tab. Hidden whenever no batch quiz is loaded.
+var _batchPanelCollapsed = false;
+function renderBatchPanel() {
+  const panel = document.getElementById('batch-panel');
+  if (!panel) return;
+  if (!_activeBatchId || !BATCH.length) { panel.style.display = 'none'; panel.innerHTML = ''; return; }
+  const ICO_CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>';
+  const ICO_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>';
+  const items = BATCH.map((b, i) => {
+    const name = b.settings.title || '(untitled)';
+    const qcount = (b.questions && b.questions.length) || 0;
+    const tag = BATCH_TYPE_CHIP[b.settings.quizType] || BATCH_TYPE_CHIP.custom;
+    const active = b.id === _activeBatchId ? ' active' : '';
+    return '<button class="bp-item' + active + '" data-bp="' + escH(b.id) + '" title="' + escH(name) + '">'
+      + '<span class="bp-num">' + (i + 1) + '</span>'
+      + '<span class="bp-body">'
+      +   '<span class="bp-name">' + escH(name) + '</span>'
+      +   '<span class="bp-meta">' + qcount + ' Qs · ' + escH(tag[1]) + '</span>'
+      + '</span>'
+      + '</button>';
+  }).join('');
+  panel.style.display = '';
+  panel.classList.toggle('collapsed', _batchPanelCollapsed);
+  panel.innerHTML = ''
+    + '<div class="bp-hd">'
+    +   '<div><div class="bp-title">Batch</div><div class="bp-sub">' + BATCH.length + ' quiz' + (BATCH.length === 1 ? '' : 'zes') + ' loaded</div></div>'
+    +   '<button type="button" class="bp-collapse" onclick="toggleBatchPanel()" title="Hide batch list">' + ICO_CHEV + '</button>'
+    + '</div>'
+    + '<div class="bp-list">' + items + '</div>'
+    + '<div class="bp-ft"><button type="button" class="bp-back" onclick="switchTab(\'batch\')">' + ICO_BACK + ' Back to batch</button></div>'
+    + '<button type="button" class="bp-expand" onclick="toggleBatchPanel()" title="Show batch list"><span class="bp-exico">' + ICO_CHEV + '</span><span class="bp-vlabel">Batch · ' + BATCH.length + '</span></button>';
+  panel.querySelectorAll('[data-bp]').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.bp;
+      if (id !== _activeBatchId) loadBatchToEditor(id);
+    };
+  });
+}
+function toggleBatchPanel() {
+  _batchPanelCollapsed = !_batchPanelCollapsed;
+  const panel = document.getElementById('batch-panel');
+  if (panel) panel.classList.toggle('collapsed', _batchPanelCollapsed);
+}
+
+// Row title input writes directly to the item's settings, and (when the
+// inspector is mounted on this item) syncs the legacy s-title / q-title
+// mirrors so saveSettings won't overwrite our value on its next read.
+function batchUpdateTitle(id, value) {
+  const item = BATCH.find(b => b.id === id);
+  if (!item) return;
+  item.settings.title = value;
+  if (_inspectorOwner === 'batch' && _inspectorBatchId === id) {
+    const st = document.getElementById('s-title'); if (st) st.value = value;
+    const qt = document.getElementById('q-title'); if (qt) qt.value = value;
+  }
 }
 
 let _batchSidebarHidden = false;
@@ -9559,7 +9869,7 @@ function renderBatchSidebar() {
   if (tab) tab.classList.toggle('show', _batchSidebarHidden);
   document.getElementById('batch-sidebar-list').innerHTML = BATCH.map((item, i) => {
     const title = batchSettings(item).title || '(untitled)';
-    const isActive = item.id === _activeBatchId;
+    const isActive = item.id === _inspectorBatchId || item.id === _activeBatchId;
     return '<div class="batch-sidebar-item' + (isActive ? ' active' : '') + '" onclick="loadBatchToEditor(\'' + item.id + '\')" title="' + escH(title) + '">'
       + '<span class="batch-sidebar-num">' + (i+1) + '</span>'
       + '<span class="batch-sidebar-name">' + escH(title) + '</span>'
@@ -9568,80 +9878,98 @@ function renderBatchSidebar() {
   }).join('');
 }
 
+// Maps the internal quiz-type key to a (chip-class, display label) tuple used
+// in the row's type pill.
+const BATCH_TYPE_CHIP = {
+  course_completion:     ['tag-completion', 'Completion'],
+  topic_quiz:            ['tag-knowledge',  'Knowledge'],
+  course_final_exam:     ['tag-final',      'Final exam'],
+  gpu_genius_fast_track: ['tag-genius',     'Fast track'],
+  custom:                ['tag-custom',     'Custom'],
+};
+
 function renderBatch() {
-  const list = document.getElementById('batch-list');
-  const bar  = document.getElementById('batch-bar');
-  const topClear = document.getElementById('btn-clear-batch');
+  const list     = document.getElementById('batch-list');
+  const counter  = document.getElementById('batch-counter');
+  const clearBtn = document.getElementById('btn-clear-batch');
+  const dlBtn    = document.getElementById('batch-dl-btn');
+  const dlLabel  = document.getElementById('batch-dl-label');
+  const bcBadge  = document.getElementById('bc-badge');
+  if (!list) return;
   if (!BATCH.length) {
-    list.innerHTML = '<div class="batch-empty"><div style="font-size:32px;margin-bottom:10px">&#128193;</div><p>No quizzes loaded yet.<br>Drop SCORM .zip files above to get started.</p></div>';
-    bar.style.display = 'none';
-    if (topClear) topClear.style.display = 'none';
-    document.getElementById('bc-badge').textContent = '';
+    list.innerHTML = '<div class="b-empty">No quizzes loaded yet.</div>';
+    if (counter) counter.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (dlBtn) dlBtn.style.display = 'none';
+    if (bcBadge) bcBadge.textContent = '';
     return;
   }
-  if (topClear) topClear.style.display = '';
-  bar.style.display = 'flex';
-  document.getElementById('bc-badge').textContent = '(' + BATCH.length + ')';
-  document.getElementById('batch-count-label').textContent = BATCH.length + ' quiz' + (BATCH.length !== 1 ? 'zes' : '');
-  list.innerHTML = BATCH.map((item, i) => {
-    const s = item.settings;
-    const qt = s.quizType || 'course_completion';
-    return '<div class="batch-item' + (item.error ? ' has-error' : '') + '" id="bi-' + item.id + '">'
-      + '<div class="batch-item-head">'
-      + '<span class="batch-item-num">' + (i+1) + '</span>'
-      + '<div class="batch-item-title"><input type="text" id="bt-title-' + item.id + '" value="' + escH(s.title || '') + '" placeholder="Quiz Title"></div>'
-      + '<button class="batch-info-btn" tabindex="0">i<span class="batch-tooltip">' + item.questions.length + ' questions<br>' + escH(item.filename) + '</span></button>'
-      + '<div class="btn-group" style="flex-shrink:0">'
-      + '<button class="btn btn-sm" onclick="toggleBatchSettings(\'' + item.id + '\')" id="bt-stg-btn-' + item.id + '">&#9881; Settings</button>'
-      + '<button class="btn btn-sm btn-outline-dark" onclick="batchTestItem(\'' + item.id + '\')">' + ICON.play + ' Test</button>'
-      + '<button class="btn btn-sm btn-primary" onclick="batchDownloadOne(\'' + item.id + '\')">' + ICON.download + ' Download</button>'
-      + '<button class="btn btn-sm btn-outline" onclick="loadBatchToEditor(\'' + item.id + '\')" title="Load questions into the Questions tab">Load to Editor</button>'
-      + '<button class="btn btn-sm btn-danger" onclick="removeBatchItem(\'' + item.id + '\')" title="Remove">' + ICON.trash + '</button>'
+  if (clearBtn) clearBtn.style.display = '';
+  if (dlBtn) dlBtn.style.display = '';
+  if (dlLabel) dlLabel.textContent = 'Download all (' + BATCH.length + ')';
+  if (bcBadge) bcBadge.textContent = '(' + BATCH.length + ')';
+  if (counter) {
+    counter.style.display = '';
+    counter.textContent = BATCH.length + ' quiz' + (BATCH.length === 1 ? '' : 'zes') + ' loaded';
+  }
+  const ICO_PKG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>';
+  const ICO_DL   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+  const ICO_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+  const ICO_TR   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+  list.innerHTML = BATCH.map((item) => {
+    const s   = item.settings;
+    const qt  = s.quizType || 'course_completion';
+    const tag = BATCH_TYPE_CHIP[qt] || BATCH_TYPE_CHIP.custom;
+    const isActive = item.id === _inspectorBatchId || item.id === _activeBatchId;
+    const passing = (s.passingPercentage ?? 70) + '%';
+    const att     = s.maxAttempts ?? 2;
+    const attChip = att ? (att + (att === 1 ? ' attempt' : ' attempts')) : 'Unlimited tries';
+    const timing  = (s.timeLimitMinutes ?? 0) ? (s.timeLimitMinutes + ' min limit') : 'No time limit';
+    const qcount  = (s.questionsPerAttempt ?? s.totalQuestions) || 0;
+    const qChip   = (qcount || item.questions.length) + ' Q · per attempt';
+    return ''
+      + '<div class="brow' + (isActive ? ' on' : '') + (item.error ? ' has-error' : '') + '" id="bi-' + item.id + '" title="' + escH(item.filename || '') + '" onclick="selectBatchRow(\'' + item.id + '\')">'
+      +   '<div class="bnum">' + ICO_PKG + '</div>'
+      +   '<div class="bmain">'
+      +     '<div class="bname"><input type="text" id="bt-title-' + item.id + '" value="' + escH(s.title || '') + '" placeholder="Quiz title" onclick="event.stopPropagation()" oninput="batchUpdateTitle(\'' + item.id + '\',this.value)"></div>'
+      +     '<div class="bchips">'
+      +       '<span class="minichip ' + tag[0] + '">' + escH(tag[1]) + '</span>'
+      +       '<span class="minichip">' + escH(qChip) + '</span>'
+      +       '<span class="minichip">' + escH(passing + ' to pass') + '</span>'
+      +       '<span class="minichip">' + escH(attChip) + '</span>'
+      +       '<span class="minichip">' + escH(timing) + '</span>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div class="bacts">'
+      +     '<button type="button" class="bx" title="Load to editor" onclick="event.stopPropagation();loadBatchToEditor(\'' + item.id + '\')">' + ICO_EDIT + '</button>'
+      +     '<button type="button" class="bx" title="Download" onclick="event.stopPropagation();batchDownloadOne(\'' + item.id + '\')">' + ICO_DL + '</button>'
+      +     '<button type="button" class="bx danger" title="Remove" onclick="event.stopPropagation();removeBatchItem(\'' + item.id + '\')">' + ICO_TR + '</button>'
+      +   '</div>'
       + '</div>'
-      + '</div>'
-      + (item.error ? '<div style="color:var(--danger);font-size:12px;margin:4px 0 8px">&#9888; ' + escH(item.error) + '</div>' : '')
-      + '<div id="bt-stg-' + item.id + '" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #eee">'
-      + '<div class="batch-item-grid">'
-      + '<div class="batch-field"><div class="batch-label">Quiz Type</div>'
-      + '<select id="bt-type-' + item.id + '" style="padding:6px 8px;border:1px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;color:var(--text);width:100%;border-radius:var(--radius-sm)">'
-      + '<option value="course_completion"' + (qt === 'course_completion' ? ' selected' : '') + '>Course Completion</option>'
-      + '<option value="topic_quiz"' + (qt === 'topic_quiz' ? ' selected' : '') + '>Knowledge Check</option>'
-      + '<option value="course_final_exam"' + (qt === 'course_final_exam' ? ' selected' : '') + '>Course Final Exam</option>'
-      + '<option value="gpu_genius_fast_track"' + (qt === 'gpu_genius_fast_track' ? ' selected' : '') + '>GPU Genius Fast Track Exam</option>'
-      + '<option value="custom"' + (qt === 'custom' ? ' selected' : '') + '>Custom</option>'
-      + '</select></div>'
-      + '<div class="batch-field"><div class="batch-label">Max Attempts <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#aaa">(0=∞)</span></div><input type="number" id="bt-attempts-' + item.id + '" value="' + (s.maxAttempts ?? 2) + '" min="0" max="99"></div>'
-      + '<div class="batch-field"><div class="batch-label">Cooldown Days</div><input type="number" id="bt-cooldown-' + item.id + '" value="' + (s.cooldownDays ?? 7) + '" min="0" max="365"></div>'
-      + '<div class="batch-field"><div class="batch-label">Passing Score %</div><input type="number" id="bt-passing-' + item.id + '" value="' + (s.passingPercentage ?? 70) + '" min="1" max="100"></div>'
-      + '<div class="batch-field"><div class="batch-label">Time Limit (min) <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#aaa">(0=none)</span></div><input type="number" id="bt-timelimit-' + item.id + '" value="' + (s.timeLimitMinutes ?? 0) + '" min="0" max="999"></div>'
-      + '<div class="batch-field"><div class="batch-label">Questions per attempt <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#aaa">(0=all)</span></div><input type="number" id="bt-qcount-' + item.id + '" value="' + ((s.questionsPerAttempt ?? s.totalQuestions) ?? 0) + '" min="0" max="999"></div>'
-      + '<div class="batch-field" style="justify-content:flex-end"><label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;cursor:pointer;padding:6px 0"><input type="checkbox" id="bt-randomize-' + item.id + '"' + (s.randomizeQuestions !== false ? ' checked' : '') + ' style="accent-color:var(--green)"> Randomize order</label></div>'
-      + '</div>'
-      + '</div>'
-      + '</div>';
+      + (item.error ? '<div class="berr">&#9888; ' + escH(item.error) + '</div>' : '');
   }).join('');
   renderBatchSidebar();
 }
 
-function toggleBatchSettings(id) {
-  const panel = document.getElementById('bt-stg-' + id);
-  const btn   = document.getElementById('bt-stg-btn-' + id);
-  if (!panel) return;
-  const open = panel.style.display === 'none';
-  panel.style.display = open ? 'block' : 'none';
-  btn.textContent = open ? '&#9881; Settings \u25B2' : '&#9881; Settings';
-  btn.innerHTML   = open ? '&#9881; Settings &#9650;' : '&#9881; Settings';
-}
-
 function removeBatchItem(id) {
+  // If the inspector is currently pointed at this item, restore to quiz first
+  // so APP.settings/the inspector don't keep a reference to a deleted item.
+  if (_inspectorOwner === 'batch' && _inspectorBatchId === id) _restoreInspectorToQuiz();
   const idx = BATCH.findIndex(b => b.id === id);
   if (idx !== -1) BATCH.splice(idx, 1);
+  if (_activeBatchId === id) _activeBatchId = null;
+  if (_inspectorBatchId === id) _inspectorBatchId = null;
   renderBatch();
+  if (typeof renderBatchPanel === 'function') renderBatchPanel();
 }
 
 function clearBatch() {
+  if (_inspectorOwner === 'batch') _restoreInspectorToQuiz();
   BATCH.length = 0;
+  _activeBatchId = null;
+  _inspectorBatchId = null;
   renderBatch();
+  if (typeof renderBatchPanel === 'function') renderBatchPanel();
 }
 
 function batchTestItem(id) {
@@ -9654,22 +9982,25 @@ function batchTestItem(id) {
 async function loadBatchToEditor(id) {
   const item = BATCH.find(b => b.id === id);
   if (!item) return;
+  // Snapshot the item's settings BEFORE we restore — once restored, APP.settings
+  // flips back to the Quiz Builder's settings and we lose the alias.
+  const snapshot = JSON.parse(JSON.stringify(item.settings));
+  if (_inspectorOwner === 'batch') _restoreInspectorToQuiz();
   pushQHistory();
   resetTestSim();
-  const settings = batchSettings(item);
   APP.questions = JSON.parse(JSON.stringify(item.questions));
-  Object.assign(APP.settings, settings);
+  Object.assign(APP.settings, snapshot);
   _activeBatchId = id;
-  // Update batch list: clear previous active indicator, set new one
-  document.querySelectorAll('.batch-item').forEach(el => el.classList.remove('batch-item-active'));
+  document.querySelectorAll('#batch-list .brow').forEach(el => el.classList.remove('on'));
   const activeEl = document.getElementById('bi-' + id);
-  if (activeEl) activeEl.classList.add('batch-item-active');
+  if (activeEl) activeEl.classList.add('on');
   readSettingsToForm();
   renderQuestions();
   updateBadges();
   renderBatchSidebar();
-  toast('Loaded "' + settings.title + '"', 'ok');
+  toast('Loaded "' + (snapshot.title || 'quiz') + '"', 'ok');
   document.querySelector('.tab-btn[data-tab="questions"]').click();
+  renderBatchPanel();
 }
 
 async function batchDownloadOne(id) {
