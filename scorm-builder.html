@@ -487,8 +487,8 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
    their centered max-width via the rule below. */
 .r-work .main{flex:1;min-height:0;max-width:none;padding:0;margin:0;display:flex;flex-direction:column;overflow:hidden}
 .r-work .main > .tab-panel{flex:1;min-height:0}
-.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank):not(#tab-batch){overflow-y:auto;padding:28px 24px;display:block}
-.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank):not(#tab-batch) > *{max-width:1100px;margin-left:auto;margin-right:auto}
+.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank):not(#tab-batch):not(#tab-history){overflow-y:auto;padding:28px 24px;display:block}
+.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank):not(#tab-batch):not(#tab-history) > *{max-width:1100px;margin-left:auto;margin-right:auto}
 
 @media(max-width:980px){
   .r-rail{width:62px}
@@ -743,13 +743,26 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-bank #bank-q-list .qc.drag-over-bottom{box-shadow:0 3px 0 var(--green) inset, 0 3px 0 var(--green)}
 .r-bank #bank-q-list .qc.dragging{opacity:.4}
 .r-bank .fitem.drag-over{background:var(--green-lt) !important;outline:2px dashed var(--green);outline-offset:-2px}
+.r-bank .fitem.dragging{opacity:.4}
+/* Vertical resizer between the folder rail and the question pane */
+.r-bank .r-bank-resizer{width:5px;flex:none;cursor:col-resize;background:transparent;align-self:stretch;transition:background .12s}
+.r-bank .r-bank-resizer:hover,.r-bank .r-bank-resizer.dragging{background:rgba(118,185,0,.25)}
 .r-bank .bankq-empty{padding:18px 12px;font-size:13px;color:var(--muted);font-style:italic;text-align:center}
 /* Reuse the .qc card from Quiz Builder — already styled there */
 .r-bank .bankq-list .qc{margin-bottom:8px;cursor:default}
+/* Bank folder empty-state — three primary-outlined buttons spread horizontally */
+.r-bank .bk-empty-state{padding:40px 22px 28px;text-align:center}
+.r-bank .bk-empty-hero{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.2px;line-height:1.4;margin-bottom:18px}
+.r-bank .bk-empty-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:840px;margin:0 auto}
+.r-bank .bk-empty-btn{flex:1;min-width:180px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 16px;border:1.5px solid var(--green);background:#fff;color:var(--green-600);font-size:13.5px;font-weight:600;border-radius:10px;box-shadow:0 1px 2px rgba(118,185,0,.12);cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s,box-shadow .12s}
+.r-bank .bk-empty-btn:hover{background:var(--green-lt);border-color:var(--green-600);box-shadow:0 2px 8px rgba(118,185,0,.18)}
+.r-bank .bk-empty-btn svg{width:16px;height:16px;flex:none}
 
 /* Batch builder (Phase 3) — page-header + drop zone + compact rows + right inspector */
 /* Hide the Quiz-Builder top bar (title + Test in Browser + Download SCORM) on the Batch tab */
-body.batch-tab-active .r-topbar{display:none}
+body.batch-tab-active .r-topbar,
+body.history-tab-active .r-topbar,
+body.bank-tab-active .r-topbar{display:none}
 /* Batch panel rail — only shown inside Quiz Builder when a quiz was loaded from a batch */
 #tab-questions .bp-panel{width:240px;flex:none;background:#fbfbfc;border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0;transition:width .2s cubic-bezier(.4,0,.2,1);overflow:hidden}
 #tab-questions .bp-panel .bp-hd{flex:none;display:flex;align-items:center;gap:10px;padding:15px 14px 13px;border-bottom:1px solid var(--border)}
@@ -758,6 +771,11 @@ body.batch-tab-active .r-topbar{display:none}
 #tab-questions .bp-panel .bp-collapse{margin-left:auto;width:28px;height:28px;border:1px solid var(--g100);border-radius:7px;background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;padding:0}
 #tab-questions .bp-panel .bp-collapse svg{width:15px;height:15px;transform:rotate(180deg)}
 #tab-questions .bp-panel .bp-collapse:hover{background:#f3f4f6;color:var(--text)}
+#tab-questions .bp-panel .bp-sort{margin-left:auto;width:28px;height:28px;border:1px solid var(--g100);border-radius:7px;background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;padding:0;font-family:inherit}
+#tab-questions .bp-panel .bp-sort+.bp-collapse{margin-left:0}
+#tab-questions .bp-panel .bp-sort svg{width:14px;height:14px}
+#tab-questions .bp-panel .bp-sort:hover{background:#f3f4f6;color:var(--text)}
+#tab-questions .bp-panel .bp-sort.on{border-color:var(--green);background:var(--green-lt);color:var(--green-600)}
 #tab-questions .bp-panel .bp-list{flex:1;min-height:0;overflow-y:auto;padding:8px}
 #tab-questions .bp-panel .bp-item{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;padding:10px;border:1px solid transparent;border-radius:9px;background:none;cursor:pointer;transition:background .12s,border-color .12s;font-family:inherit}
 #tab-questions .bp-panel .bp-item+.bp-item{margin-top:2px}
@@ -805,7 +823,11 @@ body.batch-tab-active .r-topbar{display:none}
 #tab-batch .b-dz .dt{font-size:14.5px;font-weight:700;color:var(--text)}
 #tab-batch .b-dz .ds{font-size:12.5px;margin-top:3px}
 #tab-batch .b-dz input[type=file]{display:none}
-#tab-batch .b-counter{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a3a8b2;margin-top:4px}
+#tab-batch .b-counter{display:flex;align-items:center;gap:14px;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a3a8b2;margin-top:4px}
+#tab-batch .b-sort-btn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--g100);border-radius:7px;padding:6px 10px;font:inherit;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:none;color:var(--g600);cursor:pointer;font-family:inherit}
+#tab-batch .b-sort-btn:hover{border-color:var(--g200);color:var(--text)}
+#tab-batch .b-sort-btn.on{border-color:var(--green);background:var(--green-lt);color:var(--green-600)}
+#tab-batch .b-sort-btn svg{width:13px;height:13px}
 #tab-batch .brow{background:#fff;border:1px solid var(--g100);border-radius:11px;box-shadow:var(--sh-card);padding:14px 16px;display:flex;align-items:center;gap:14px;transition:border-color .12s,box-shadow .12s,background .12s}
 #tab-batch .brow:hover{border-color:#cfd4dc;box-shadow:0 2px 8px rgba(16,24,40,.08)}
 #tab-batch .brow.on{border-color:var(--green);box-shadow:inset 3px 0 0 var(--green),0 1px 3px rgba(16,24,40,.07)}
@@ -824,12 +846,12 @@ body.batch-tab-active .r-topbar{display:none}
 #tab-batch .brow .bx.danger:hover{background:#fdeaea;color:#c4302b}
 #tab-batch .brow .bx.on{background:var(--green-lt);color:var(--green-600)}
 #tab-batch .brow .bx svg{width:16px;height:16px}
-#tab-batch .minichip{display:inline-flex;align-items:center;gap:5px;background:#f8f9fa;border:1px solid var(--g100);border-radius:20px;padding:3px 9px;font-size:11.5px;font-weight:600;color:#6b7280}
-#tab-batch .minichip.tag-completion{background:#eaf3ff;border-color:#cfe1ff;color:#1d4ed8}
-#tab-batch .minichip.tag-knowledge{background:#eef9e7;border-color:#cce5ba;color:#3f7d20}
-#tab-batch .minichip.tag-final{background:#fdecec;border-color:#f5cccc;color:#b73838}
-#tab-batch .minichip.tag-genius{background:linear-gradient(135deg,rgba(168,85,247,.10),rgba(118,185,0,.10));border-color:rgba(168,85,247,.30);color:#7c3aed}
-#tab-batch .minichip.tag-custom{background:#f3f4f6;border-color:#e5e7eb;color:#4b5563}
+.r-shell .minichip{display:inline-flex;align-items:center;gap:5px;background:#f8f9fa;border:1px solid var(--g100);border-radius:20px;padding:3px 9px;font-size:11.5px;font-weight:600;color:#6b7280}
+.r-shell .minichip.tag-completion{background:#eaf3ff;border-color:#cfe1ff;color:#1d4ed8}
+.r-shell .minichip.tag-knowledge{background:#eef9e7;border-color:#cce5ba;color:#3f7d20}
+.r-shell .minichip.tag-final{background:#fdecec;border-color:#f5cccc;color:#b73838}
+.r-shell .minichip.tag-genius{background:linear-gradient(135deg,rgba(168,85,247,.10),rgba(118,185,0,.10));border-color:rgba(168,85,247,.30);color:#7c3aed}
+.r-shell .minichip.tag-custom{background:#f3f4f6;border-color:#e5e7eb;color:#4b5563}
 #tab-batch .berr{color:var(--danger);font-size:12px;margin:0 0 8px;padding:0 18px}
 #tab-batch .bsettings{background:#fbfbfc;border:1px solid var(--g100);border-radius:11px;padding:14px 16px;margin-top:-6px}
 #tab-batch .bsettings .bs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
@@ -843,6 +865,57 @@ body.batch-tab-active .r-topbar{display:none}
 @media(max-width:900px){#tab-batch .bsettings .bs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){#tab-batch .bsettings .bs-grid{grid-template-columns:1fr}}
 #tab-batch .b-empty{padding:16px 8px 0;text-align:center;color:var(--muted);font-size:13px}
+
+/* Send-to-bank modal — cleaner design-system styling */
+.qtb-modal{max-width:520px}
+.qtb-body{display:flex;flex-direction:column;gap:16px;padding-top:8px}
+.qtb-summary{font-size:13.5px;color:var(--g600);line-height:1.45}
+.qtb-summary strong{color:var(--text);font-weight:700}
+.qtb-fld{display:flex;flex-direction:column;gap:8px}
+.qtb-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7e8794}
+.qtb-input{font:inherit;font-size:13.5px;color:var(--text);background:#fff;border:1px solid var(--g100);border-radius:8px;padding:9px 12px;outline:none;width:100%;font-family:inherit}
+.qtb-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.14)}
+.qtb-select{cursor:pointer}
+.qtb-sub{display:flex;flex-direction:column;gap:6px;margin-left:0}
+.qtb-sublbl{font-size:11.5px;color:var(--muted);font-weight:500}
+.qtb-divider{display:flex;align-items:center;gap:10px;color:#aab0ba;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.qtb-divider::before,.qtb-divider::after{content:"";flex:1;height:1px;background:var(--g100)}
+
+/* History (Phase 4) — r-vhead + compact table */
+#tab-history.tab-panel.active{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;flex:1}
+#tab-history .r-history{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#tab-history .r-history-body{flex:1;min-height:0;overflow-y:auto;padding:22px 26px}
+#tab-history .r-history-body-inner{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+#tab-history .h-sel-row{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--g600)}
+#tab-history .h-sel-row label{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:var(--g700)}
+#tab-history .h-sel-row label input{accent-color:var(--green);width:16px;height:16px}
+#tab-history .h-sel-row .selinfo{color:var(--green-600);font-weight:700}
+#tab-history .h-sel-row .bulk{display:none;gap:8px;margin-left:auto}
+#tab-history .h-sel-row .bulk.on{display:flex}
+#tab-history .h-sel-row .h-search{margin-left:auto;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--g100);border-radius:7px;padding:7px 10px;color:var(--muted);width:240px}
+#tab-history .h-sel-row .bulk.on ~ .h-search{margin-left:0}
+#tab-history .h-sel-row .h-search svg{width:14px;height:14px;flex:none}
+#tab-history .h-sel-row .h-search input{border:none;outline:none;font:inherit;font-size:13px;width:100%;background:none;color:var(--text)}
+#tab-history .htable{background:#fff;border:1px solid var(--g100);border-radius:12px;box-shadow:var(--sh-card);overflow:hidden}
+#tab-history .hrow{display:flex;align-items:center;gap:14px;padding:13px 16px;border-top:1px solid #f1f2f4}
+#tab-history .hrow.head{border-top:none;background:#fbfbfc;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9aa0aa;padding:11px 16px}
+#tab-history .hrow:hover:not(.head){background:#fafbfc}
+#tab-history .hrow.sel{background:var(--green-lt) !important}
+#tab-history .hrow .hck{width:16px;height:16px;accent-color:var(--green);flex:none;cursor:pointer}
+#tab-history .hrow .hname{flex:1;min-width:0;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+#tab-history .hrow.head .hname{font-size:11px;font-weight:700;color:#9aa0aa;letter-spacing:.06em;text-transform:uppercase}
+#tab-history .hrow .hcol{flex:none;font-size:12.5px;color:var(--g600)}
+#tab-history .hrow .c-type{width:130px}
+#tab-history .hrow .c-q{width:80px}
+#tab-history .hrow .c-date{width:140px}
+#tab-history .hrow .c-act{width:152px;display:flex;gap:4px;justify-content:flex-end;flex:none}
+#tab-history .hrow .hx{width:30px;height:30px;border:1px solid var(--g100);border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;color:#7a818c;cursor:pointer;padding:0;font-family:inherit}
+#tab-history .hrow .hx:hover{background:#f0f1f4;color:var(--text)}
+#tab-history .hrow .hx.danger:hover{background:#fdeaea;color:#c4302b}
+#tab-history .hrow .hx:disabled{opacity:.4;cursor:not-allowed}
+#tab-history .hrow .hx svg{width:15px;height:15px}
+#tab-history .hempty{background:#fff;border:1px dashed var(--g150);border-radius:12px;padding:48px 22px;text-align:center;color:var(--muted);font-size:13px}
+@media(max-width:760px){#tab-history .hrow .c-type,#tab-history .hrow .c-q{display:none}}
 #tab-batch .brow{margin:0;cursor:pointer}
 #tab-batch .berr{margin:-4px 0 0;padding:0}
 .r-topbar .qtitle-wrap{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
@@ -1129,6 +1202,9 @@ body.batch-tab-active .r-topbar{display:none}
     <div class="sel-row">
       <label><input type="checkbox" id="r-sel-all" onchange="toggleSelectAllQuestions(this.checked)"> Select all</label>
       <span class="selinfo" id="r-sel-info"></span>
+      <div class="bulk-all" id="r-send-all-wrap" style="display:none;margin-left:auto;align-items:center;gap:8px">
+        <button class="btn btn-sm" onclick="openSendToBank({all:true})"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Send all to bank</button>
+      </div>
       <div class="bulk" id="r-sel-bulk" style="display:none">
         <button class="btn btn-sm btn-outline-green" onclick="openSendToBank()"><img class="btn-icon" src="assets/svg/upload.svg" alt=""> Send to Bank</button>
         <button class="btn btn-sm" onclick="clearQuestionSelection()">Clear selected</button>
@@ -1486,23 +1562,34 @@ body.batch-tab-active .r-topbar{display:none}
 
 <!-- HISTORY TAB -->
 <div id="tab-history" class="tab-panel">
-  <div class="pg-hdr">
-    <div><div class="pg-title">Generation History</div><div class="pg-sub">All generated packages — test or re-download at any time</div></div>
-    <button class="btn btn-sm btn-danger" onclick="clearHistory()">Clear History</button>
-  </div>
-  <div class="hist-toolbar">
-    <input class="form-input" id="hist-search" type="text" placeholder="Search by name…" oninput="renderHistory()">
-    <span class="hist-bulk-count" id="hist-total-count"></span>
-    <div class="hist-bulk" id="hist-bulk" style="visibility:hidden">
-      <span class="hist-bulk-count" id="hist-sel-count">0 selected</span>
-      <button class="btn btn-sm btn-primary" onclick="downloadSelected()" id="btn-dl-selected"><img class="btn-icon" src="assets/svg/download.svg" alt=""> Download</button>
-      <button class="btn btn-sm btn-danger" onclick="deleteSelected()" id="btn-del-selected"><img class="btn-icon" src="assets/svg/trash.svg" alt=""> Delete</button>
+  <div class="r-history">
+    <header class="r-vhead">
+      <div>
+        <div class="r-vt">History</div>
+        <div class="r-vs">Every generated package — test or re-download any of them at any time.</div>
+      </div>
+      <div class="r-va">
+        <button class="btn btn-sm" id="btn-clear-history" onclick="clearHistory()" style="display:none"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Clear history</button>
+      </div>
+    </header>
+    <div class="r-history-body">
+      <div class="r-history-body-inner">
+        <div class="h-sel-row" id="hist-sel-row" style="display:none">
+          <label><input type="checkbox" id="hist-select-all" onchange="toggleSelectAll(this.checked)"> Select all</label>
+          <span class="selinfo" id="hist-total-count"></span>
+          <div class="bulk" id="hist-bulk">
+            <button class="btn btn-sm btn-primary" onclick="downloadSelected()" id="btn-dl-selected"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download (<span id="hist-sel-count">0</span>)</button>
+            <button class="btn btn-sm" onclick="deleteSelected()" id="btn-del-selected"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>
+          </div>
+          <div class="h-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+            <input id="hist-search" type="text" placeholder="Search packages…" oninput="renderHistory()">
+          </div>
+        </div>
+        <div id="hist-list"></div>
+      </div>
     </div>
   </div>
-  <div class="hist-select-all-row" id="hist-select-all-row" style="display:none">
-    <label><input type="checkbox" id="hist-select-all" onchange="toggleSelectAll(this.checked)"> Select all</label>
-  </div>
-  <div id="hist-list"></div>
 </div>
 
 <!-- BATCH TAB -->
@@ -1570,6 +1657,7 @@ body.batch-tab-active .r-topbar{display:none}
       <div id="bank-folder-tree" class="ftree"><div class="bankq-empty">Loading…</div></div>
       <button class="ffadd" onclick="bankNewFolder(null)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New folder</button>
     </aside>
+    <div class="r-bank-resizer" id="bank-folders-resizer" title="Drag to resize the folder list"></div>
 
     <!-- RIGHT: question list -->
     <section class="bankq" id="bank-questions">
@@ -1983,27 +2071,30 @@ body.batch-tab-active .r-topbar{display:none}
 
 <!-- SEND TO QUESTION BANK MODAL -->
 <div class="m-overlay" id="modal-q-to-bank">
-  <div class="modal" style="max-width:520px">
-    <div class="m-hdr"><span class="m-title">Send to Question Bank</span><button class="m-close" onclick="closeModal('modal-q-to-bank')">&#x2715;</button></div>
-    <div class="m-body">
-      <p style="font-size:14px;color:#333;line-height:1.6;margin:0 0 16px 0">Sending <strong id="qtb-count">0</strong> question(s). A fresh ID is minted for each copy so the originals in this quiz are not affected.</p>
-      <div class="form-field">
-        <label class="form-label">Pick an existing folder</label>
-        <select class="form-input" id="qtb-folder-select"></select>
-      </div>
-      <div style="text-align:center;margin:14px 0;color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em">— or —</div>
-      <div class="form-field">
-        <label class="form-label">Create a new folder</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input class="form-input" id="qtb-new-folder-name" type="text" placeholder="New folder name" style="flex:1;min-width:160px">
-          <select class="form-input" id="qtb-new-folder-parent" style="max-width:200px"></select>
+  <div class="modal qtb-modal">
+    <div class="m-hdr">
+      <span class="m-title">Send to question bank</span>
+      <button class="m-close" onclick="closeModal('modal-q-to-bank')">&#x2715;</button>
+    </div>
+    <div class="m-body qtb-body">
+      <div class="qtb-summary">Sending <strong id="qtb-count">0</strong> question<span class="qtb-count-plural">s</span> to the bank.</div>
+      <div class="qtb-fld">
+        <label class="qtb-label" for="qtb-new-folder-name">New folder</label>
+        <input class="qtb-input" id="qtb-new-folder-name" type="text" placeholder="New folder name">
+        <div class="qtb-sub">
+          <label class="qtb-sublbl" for="qtb-new-folder-parent">Place inside</label>
+          <select class="qtb-input qtb-select" id="qtb-new-folder-parent"></select>
         </div>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px">Optionally pick a parent folder so this becomes a subfolder.</div>
+      </div>
+      <div class="qtb-divider"><span>or</span></div>
+      <div class="qtb-fld">
+        <label class="qtb-label" for="qtb-folder-select">Send to an existing folder</label>
+        <select class="qtb-input qtb-select" id="qtb-folder-select"></select>
       </div>
     </div>
     <div class="m-footer">
-      <button class="btn" onclick="closeModal('modal-q-to-bank')">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmSendToBank()">Send to Bank</button>
+      <button class="btn btn-sm" onclick="closeModal('modal-q-to-bank')">Cancel</button>
+      <button class="btn btn-sm btn-primary" onclick="confirmSendToBank()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Send to bank</button>
     </div>
   </div>
 </div>
@@ -3937,6 +4028,8 @@ function switchTab(tabName) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabName));
   document.querySelectorAll('.r-nav[data-tab]').forEach(b => b.classList.toggle('r-nav-on', b.dataset.tab === tabName));
   document.body.classList.toggle('batch-tab-active', tabName === 'batch');
+  document.body.classList.toggle('history-tab-active', tabName === 'history');
+  document.body.classList.toggle('bank-tab-active', tabName === 'bank');
   if (tabName === 'questions') { renderQuestions(); if (typeof renderBatchPanel === 'function') renderBatchPanel(); }
   if (tabName === 'history') {
     document.getElementById('hist-list').innerHTML = '<div class="hist-loading"><div class="hist-spinner"></div><span>Loading history…</span></div>';
@@ -5112,6 +5205,35 @@ function _wireDropZone(dzId, fiId, opts) {
 _wireDropZone('dz-auto', 'file-auto');
 _wireDropZone('dz-import-more', 'file-import-more', { forceAppend: true, closeModal: 'modal-import-more' });
 _wireDropZone('dz-bank-import-more', 'file-bank-import-more', { bankFolderId: () => BANK.selectedFolderId, closeModal: 'modal-bank-import-more' });
+
+// Drag-resize for the Bank folder rail. Width is constrained to a sensible
+// range; we don't persist it across reloads (keep this lightweight for now).
+(function wireBankFoldersResizer() {
+  const resizer = document.getElementById('bank-folders-resizer');
+  const folders = document.getElementById('bank-folders');
+  if (!resizer || !folders) return;
+  let startX = 0, startW = 0;
+  const onMove = e => {
+    const w = Math.max(200, Math.min(560, startW + (e.clientX - startX)));
+    folders.style.width = w + 'px';
+  };
+  const onUp = () => {
+    resizer.classList.remove('dragging');
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  };
+  resizer.addEventListener('mousedown', e => {
+    startX = e.clientX;
+    startW = folders.getBoundingClientRect().width;
+    resizer.classList.add('dragging');
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'col-resize';
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+})();
 
 function bankOpenImportMore() {
   if (!BANK.selectedFolderId) { toast('Select a folder first', 'err'); return; }
@@ -7007,6 +7129,9 @@ function _updateQuestionSelectionBar() {
   if (rSelAll) { rSelAll.checked = allChecked; rSelAll.indeterminate = partial; }
   if (rSelInfo) rSelInfo.textContent = n ? n + ' selected' : '';
   if (rSelBulk) rSelBulk.style.display = n ? 'flex' : 'none';
+  // "Send all to bank" is the inverse — visible only when nothing is selected
+  const rSendAll = document.getElementById('r-send-all-wrap');
+  if (rSendAll) rSendAll.style.display = (n === 0 && APP.questions.length > 0) ? 'flex' : 'none';
 
   // Legacy hidden DOM kept in sync
   const bar = document.getElementById('q-sel-bar');
@@ -7019,19 +7144,29 @@ function _updateQuestionSelectionBar() {
   if (selAll) selAll.checked = allChecked;
 }
 
-async function openSendToBank() {
-  if (!APP.selectedQids.size) { toast('Select at least one question', 'err'); return; }
-  // Refresh bank state so the folder list reflects anything created elsewhere
+var _sendToBankAll = false;
+async function openSendToBank(opts) {
+  _sendToBankAll = !!(opts && opts.all);
+  if (_sendToBankAll) {
+    if (!APP.questions.length) { toast('No questions to send', 'err'); return; }
+  } else {
+    if (!APP.selectedQids.size) { toast('Select at least one question', 'err'); return; }
+  }
   await fetchBank();
-  document.getElementById('qtb-count').textContent = String(APP.selectedQids.size);
+  const count = _sendToBankAll ? APP.questions.length : APP.selectedQids.size;
+  document.getElementById('qtb-count').textContent = String(count);
+  const plural = document.querySelector('.qtb-count-plural');
+  if (plural) plural.style.display = count === 1 ? 'none' : '';
   // Populate both folder dropdowns with full paths so users can identify nested folders
-  const opts = ['<option value="">— select an existing folder —</option>']
+  const folderOpts = ['<option value="">— select an existing folder —</option>']
     .concat(BANK.folders.map(f => '<option value="' + f.id + '">' + escH(_bankFolderPath(f.id).join(' / ')) + '</option>'));
-  document.getElementById('qtb-folder-select').innerHTML = opts.join('');
+  document.getElementById('qtb-folder-select').innerHTML = folderOpts.join('');
   const parentOpts = ['<option value="">(at root)</option>']
     .concat(BANK.folders.map(f => '<option value="' + f.id + '">' + escH(_bankFolderPath(f.id).join(' / ')) + '</option>'));
   document.getElementById('qtb-new-folder-parent').innerHTML = parentOpts.join('');
-  document.getElementById('qtb-new-folder-name').value = '';
+  // Pre-fill the new-folder field with the current quiz title as a suggested name
+  const suggested = (APP.settings && APP.settings.title) ? APP.settings.title.trim() : '';
+  document.getElementById('qtb-new-folder-name').value = suggested;
   document.getElementById('qtb-folder-select').value = '';
   document.getElementById('qtb-new-folder-parent').value = '';
   showModal('modal-q-to-bank');
@@ -7054,7 +7189,7 @@ async function confirmSendToBank() {
     toast('Pick a folder or type a new folder name', 'err');
     return;
   }
-  const ids = Array.from(APP.selectedQids);
+  const ids = _sendToBankAll ? APP.questions.map(q => q.id) : Array.from(APP.selectedQids);
   let ok = 0, fail = 0;
   for (const qid_ of ids) {
     const src = APP.questions.find(q => q.id === qid_);
@@ -7066,9 +7201,19 @@ async function confirmSendToBank() {
   }
   await fetchBank();
   closeModal('modal-q-to-bank');
-  clearQuestionSelection();
+  if (!_sendToBankAll) clearQuestionSelection();
+  _sendToBankAll = false;
   if (fail) toast('Sent ' + ok + ' to bank, ' + fail + ' failed', 'err');
   else toast('Sent ' + ok + ' question' + (ok !== 1 ? 's' : '') + ' to bank', 'ok');
+  // Jump to the Bank tab and open the destination folder so the user lands
+  // exactly where the questions ended up.
+  if (ok && targetFolderId) {
+    BANK.selectedFolderId = targetFolderId;
+    // Expand any ancestor folders so the target is visible in the tree
+    let cur = BANK.folders.find(f => f.id === targetFolderId);
+    while (cur && cur.parentId) { BANK.expanded.add(cur.parentId); cur = BANK.folders.find(f => f.id === cur.parentId); }
+    switchTab('bank');
+  }
 }
 
 // ── ADD FROM BANK PICKER ──────────────────────────────────
@@ -7713,7 +7858,7 @@ function _bankFoldersHtml(parentId, visibleSet) {
     const chev = hasKids
       ? '<span class="fchev' + (isOpen ? ' open' : '') + '" onclick="event.stopPropagation();bankToggleFolder(\'' + f.id + '\')" role="button" tabindex="0" aria-label="Toggle">' + ICO_CHEV + '</span>'
       : '<span class="fchev spacer">' + ICO_CHEV + '</span>';
-    return '<div class="fitem' + (isSelected ? ' on' : '') + '" data-folder-id="' + f.id + '" role="button" tabindex="0" onclick="bankSelectFolder(\'' + f.id + '\')" oncontextmenu="bankFolderMenu(event,\'' + f.id + '\');return false">'
+    return '<div class="fitem' + (isSelected ? ' on' : '') + '" data-folder-id="' + f.id + '" draggable="true" role="button" tabindex="0" onclick="bankSelectFolder(\'' + f.id + '\')" oncontextmenu="bankFolderMenu(event,\'' + f.id + '\');return false">'
       + chev + ICO_FOLDER
       + '<span class="fname">' + escH(f.name) + '</span>'
       + (count ? '<span class="fc">' + count + '</span>' : '')
@@ -7899,21 +8044,21 @@ function renderBankQuestionList() {
   if (selBar) selBar.style.display = all.length ? '' : 'none';
   const list = document.getElementById('bank-q-list');
   if (!all.length) {
-    list.innerHTML = '<div class="drop-zone" id="dz-bank-folder" style="padding:30px 22px">'
-      +   '<div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:36px;height:36px"></div>'
-      +   '<div style="font-size:15px;font-weight:600;margin:6px 0 4px">Drop a file here, or click to browse</div>'
-      +   '<div style="display:flex;justify-content:center;align-items:flex-start;gap:14px;flex-wrap:wrap;margin:14px 0 6px">'
-      +     '<div class="ft-chip"><span class="ft-tag" style="border-color:#9ca3af;color:#4b5563">TXT</span><span class="ft-sub">AIKEN</span></div>'
-      +     '<div class="ft-chip"><span class="ft-tag" style="border-color:#f59e0b;color:#b45309">XML</span><span class="ft-sub">Moodle</span></div>'
-      +     '<div class="ft-chip"><span class="ft-tag" style="border-color:#eab308;color:#854d0e">ZIP</span><span class="ft-sub">SCORM</span></div>'
-      +     '<div class="ft-chip"><span class="ft-tag" style="border-color:#2563eb;color:#1e40af">DOCX</span><span class="ft-sub">Word</span></div>'
-      +     '<div class="ft-chip"><span class="ft-tag" style="border-color:#dc2626;color:#991b1b">PPTX</span><span class="ft-sub">PowerPoint</span></div>'
+    const ICO_PEN  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+    const ICO_UP   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
+    const ICO_PULL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
+    list.innerHTML = '<div class="bk-empty-state">'
+      +   '<div class="bk-empty-hero">' + escH(folder ? folder.name : 'This folder') + ' is empty — how would you like to add questions?</div>'
+      +   '<div class="bk-empty-row">'
+      +     '<button class="bk-empty-btn" onclick="bankAddQuestion()">' + ICO_PEN + '<span>Write a question</span></button>'
+      +     '<button class="bk-empty-btn" onclick="bankOpenImportMore()">' + ICO_UP + '<span>Import from file</span></button>'
+      +     '<button class="bk-empty-btn" onclick="bankPullFromQuiz()">' + ICO_PULL + '<span>Pull from Quiz Builder</span></button>'
       +   '</div>'
-      +   '<div style="font-size:12px;color:var(--muted);margin-top:4px">Imported questions will be added to <strong>' + escH(folder ? folder.name : '') + '</strong>.</div>'
-      +   '<input type="file" id="file-bank-folder" accept=".txt,.xml,.zip,.docx,.pptx,.md">'
       + '</div>';
-    _wireDropZone('dz-bank-folder', 'file-bank-folder', { bankFolderId: () => BANK.selectedFolderId });
-    renderBankAddRow();
+    // The three empty-state buttons cover the add-question path, so hide the
+    // bottom add-row in this state.
+    const row = document.getElementById('bank-q-addrow');
+    if (row) row.innerHTML = '';
     return;
   }
   if (!qs.length) {
@@ -8031,6 +8176,25 @@ function bankAddQuestion() {
   openEditor(null, 'bank');
 }
 
+// Copy every question currently in the Quiz Builder into the selected bank
+// folder. Each copy gets a fresh id + the destination folderId; APP.questions
+// is untouched.
+async function bankPullFromQuiz() {
+  const folderId = BANK.selectedFolderId;
+  if (!folderId) { toast('Select a folder first', 'err'); return; }
+  if (!APP.questions || !APP.questions.length) { toast('No questions in the quiz builder', 'err'); return; }
+  let ok = 0, fail = 0;
+  for (const src of APP.questions) {
+    const copy = Object.assign({}, src, { id: qid(), folderId });
+    const res = await API.post('/api/bank/questions', copy);
+    if (res) ok++; else fail++;
+  }
+  await fetchBank();
+  renderBankQuestions();
+  if (fail) toast('Pulled ' + ok + ' question' + (ok !== 1 ? 's' : '') + ', ' + fail + ' failed', 'err');
+  else toast('Pulled ' + ok + ' question' + (ok !== 1 ? 's' : '') + ' from quiz builder', 'ok');
+}
+
 function bankEditQuestion(id) {
   if (!BANK.questions.some(x => x.id === id)) return;
   openEditor(id, 'bank');
@@ -8124,11 +8288,47 @@ function _bankAttachQuestionDnD() {
   });
 }
 
+// Deepest descendant depth of the subtree rooted at folderId (folderId itself = 1).
+function _bankFolderSubtreeDepth(rootId) {
+  let max = 1;
+  (function walk(id, depth) {
+    if (depth > max) max = depth;
+    BANK.folders.filter(f => f.parentId === id).forEach(c => walk(c.id, depth + 1));
+  })(rootId, 1);
+  return max;
+}
+
+// Folder ids descended from rootId (rootId excluded).
+function _bankFolderDescendants(rootId) {
+  const out = new Set();
+  (function walk(id) {
+    BANK.folders.filter(f => f.parentId === id).forEach(c => { out.add(c.id); walk(c.id); });
+  })(rootId);
+  return out;
+}
+
+let _bankDraggedFolderId = null;
+
 function _bankAttachFolderDnD() {
   document.querySelectorAll('#bank-folder-tree .fitem').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      e.stopPropagation();
+      _bankDraggedFolderId = el.dataset.folderId;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', 'f:' + el.dataset.folderId);
+      el.classList.add('dragging');
+    });
+    el.addEventListener('dragend', () => {
+      _bankDraggedFolderId = null;
+      el.classList.remove('dragging');
+      document.querySelectorAll('#bank-folder-tree .fitem').forEach(x => x.classList.remove('drag-over'));
+    });
     el.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
+      const targetId = el.dataset.folderId;
+      // Don't highlight when hovering over the dragged folder or one of its descendants
+      if (_bankDraggedFolderId && (targetId === _bankDraggedFolderId || _bankFolderDescendants(_bankDraggedFolderId).has(targetId))) return;
       el.classList.add('drag-over');
     });
     el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
@@ -8138,16 +8338,40 @@ function _bankAttachFolderDnD() {
       el.classList.remove('drag-over');
       const data = e.dataTransfer.getData('text/plain') || '';
       const targetFolderId = el.dataset.folderId;
-      if (!data.startsWith('q:')) return;
-      const qId = data.slice(2);
-      const q = BANK.questions.find(x => x.id === qId);
-      if (!q || q.folderId === targetFolderId) return;
-      const oldFolderId = q.folderId;
-      const ok = await API.patch('/api/bank/questions/' + qId, { folderId: targetFolderId });
-      if (!ok) { toast('Move failed', 'err'); return; }
-      bankPushUndo({ kind: 'move', id: qId, from: oldFolderId, to: targetFolderId });
-      await fetchBank();
-      renderBank();
+      // Question dropped onto a folder → move question into that folder
+      if (data.startsWith('q:')) {
+        const qId = data.slice(2);
+        const q = BANK.questions.find(x => x.id === qId);
+        if (!q || q.folderId === targetFolderId) return;
+        const oldFolderId = q.folderId;
+        const ok = await API.patch('/api/bank/questions/' + qId, { folderId: targetFolderId });
+        if (!ok) { toast('Move failed', 'err'); return; }
+        bankPushUndo({ kind: 'move', id: qId, from: oldFolderId, to: targetFolderId });
+        await fetchBank();
+        renderBank();
+        return;
+      }
+      // Folder dropped onto a folder → make it a subfolder, with cycle + depth guards
+      if (data.startsWith('f:')) {
+        const fId = data.slice(2);
+        if (fId === targetFolderId) return;
+        if (_bankFolderDescendants(fId).has(targetFolderId)) {
+          toast('Cannot move a folder into one of its subfolders', 'err'); return;
+        }
+        const folder = BANK.folders.find(f => f.id === fId);
+        if (!folder || folder.parentId === targetFolderId) return;
+        const targetDepth = _bankFolderPath(targetFolderId).length;
+        const subtreeDepth = _bankFolderSubtreeDepth(fId);
+        if (targetDepth + subtreeDepth > BANK_MAX_DEPTH) {
+          toast('Folders can only nest three levels deep', 'err'); return;
+        }
+        const ok = await API.patch('/api/bank/folders/' + fId, { parentId: targetFolderId });
+        if (!ok) { toast('Could not move folder', 'err'); return; }
+        BANK.expanded.add(targetFolderId);
+        await fetchBank();
+        renderBank();
+        return;
+      }
     });
   });
 }
@@ -9433,8 +9657,8 @@ function updateHistBulkBar() {
   const count = histSelected.size;
   const bulk = document.getElementById('hist-bulk');
   const countEl = document.getElementById('hist-sel-count');
-  if (bulk) bulk.style.visibility = count > 0 ? 'visible' : 'hidden';
-  if (countEl) countEl.textContent = count + ' selected';
+  if (bulk) bulk.classList.toggle('on', count > 0);
+  if (countEl) countEl.textContent = String(count);
   const selAllCb = document.getElementById('hist-select-all');
   if (selAllCb) {
     const visible = getFilteredHistory();
@@ -9443,53 +9667,95 @@ function updateHistBulkBar() {
   }
 }
 
+// Compact, design-system icons used inside .htable rows.
+const HIST_ICO = {
+  play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  dl:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  tr:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+};
+
+// Reused from Batch — same color-coded chip mapping.
+function _histTypeChip(quizType, customMode) {
+  if (!quizType) return ['tag-completion', 'Completion'];
+  if (quizType === 'custom') return ['tag-custom', customMode === 'exam' ? 'Custom exam' : 'Custom'];
+  return (typeof BATCH_TYPE_CHIP !== 'undefined' && BATCH_TYPE_CHIP[quizType]) || ['tag-custom', 'Custom'];
+}
+
+// Friendly relative-ish date — falls back to a locale date for older entries.
+function _histDateLabel(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const opts = { year: 'numeric', month: 'short', day: '2-digit' };
+  return d.toLocaleDateString(undefined, opts);
+}
+
 function renderHistory() {
   const hist = APP.history;
-  const selectAllRow = document.getElementById('hist-select-all-row');
-  if (selectAllRow) selectAllRow.style.display = hist.length ? '' : 'none';
   const list = document.getElementById('hist-list');
+  const selRow  = document.getElementById('hist-sel-row');
+  const clearBtn= document.getElementById('btn-clear-history');
   const filtered = getFilteredHistory();
-  const countEl = document.getElementById('hist-total-count');
+  const countEl  = document.getElementById('hist-total-count');
+
+  if (clearBtn) clearBtn.style.display = hist.length ? '' : 'none';
+  if (selRow) selRow.style.display = hist.length ? 'flex' : 'none';
   if (countEl) {
     if (!hist.length) countEl.textContent = '';
     else if (filtered.length === hist.length) countEl.textContent = hist.length + ' package' + (hist.length !== 1 ? 's' : '');
     else countEl.textContent = filtered.length + ' of ' + hist.length + ' package' + (hist.length !== 1 ? 's' : '');
   }
+
+  if (!list) return;
   if (!hist.length) {
-    list.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--muted)"><div style="font-size:32px;margin-bottom:10px">&#128194;</div><p>No packages generated yet.<br>Use the Questions tab to download your first SCORM package.</p></div>';
+    list.innerHTML = '<div class="hempty">No packages generated yet.<br>Use the Quiz Builder to download your first SCORM package.</div>';
     updateHistBulkBar();
     return;
   }
   if (!filtered.length) {
-    list.innerHTML = '<div style="text-align:center;padding:32px 20px;color:var(--muted)">No results match your search.</div>';
+    list.innerHTML = '<div class="hempty">No results match your search.</div>';
     updateHistBulkBar();
     return;
   }
-  list.innerHTML = filtered.map((h, i) => {
-    const d = new Date(h.date).toLocaleString();
+
+  const headRow = ''
+    + '<div class="hrow head">'
+    +   '<span style="width:16px"></span>'
+    +   '<div class="hname">Package</div>'
+    +   '<div class="hcol c-type">Type</div>'
+    +   '<div class="hcol c-q">Questions</div>'
+    +   '<div class="hcol c-date">Generated</div>'
+    +   '<div class="c-act"></div>'
+    + '</div>';
+
+  const dataRows = filtered.map(h => {
     const canDl = !!h.zipB64;
     const checked = histSelected.has(h.id);
-    return '<div class="hist-card' + (checked ? ' hist-checked' : '') + '" id="hcard-' + h.id + '">'
-      + '<input type="checkbox" class="hist-cb" ' + (checked ? 'checked' : '') + ' onchange="toggleHistItem(\'' + h.id + '\',this.checked)" onclick="event.stopPropagation()">'
-      + '<span class="hist-num">' + (i+1) + '</span>'
-      + '<div class="hist-info">'
-      + '<div class="hist-title">' + escH(h.title) + '</div>'
-      + '<div class="hist-meta">' + d + ' &nbsp;&middot;&nbsp; ' + h.questionCount + ' questions &nbsp;&middot;&nbsp; Pass: ' + h.passingPct + '%</div>'
-      + '</div>'
-      + '<div class="hist-actions">'
-      + '<button class="btn btn-sm btn-outline-dark" onclick="testInBrowser(loadHistEntry(\'' + h.id + '\'))">' + ICON.play + ' Test</button>'
-      + '<button class="btn btn-sm btn-primary" onclick="dlHistEntry(\'' + h.id + '\')"' + (canDl ? '' : ' disabled title="Zip data unavailable"') + '>' + ICON.download + ' Download</button>'
-      + '<button class="btn btn-sm" onclick="loadHistEntryToEditor(\'' + h.id + '\')">Load to Editor</button>'
-      + '<button class="btn btn-sm btn-danger" onclick="deleteHistEntry(\'' + h.id + '\')" title="Delete">' + ICON.trash + '</button>'
-      + '</div></div>';
+    const tag = _histTypeChip(h.settings && h.settings.quizType, h.settings && h.settings.customQuizMode);
+    const fname = (h.title || 'quiz').replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '.zip';
+    return '<div class="hrow' + (checked ? ' sel' : '') + '" id="hcard-' + h.id + '">'
+      +   '<input type="checkbox" class="hck"' + (checked ? ' checked' : '') + ' onchange="toggleHistItem(\'' + h.id + '\',this.checked)" onclick="event.stopPropagation()" aria-label="Select package">'
+      +   '<div class="hname" title="' + escH(h.title) + '">' + escH(h.title) + ' <span style="color:#9aa0aa;font-weight:500">·</span> <span style="color:#9aa0aa;font-weight:500;font-size:12px">' + escH(fname) + '</span></div>'
+      +   '<div class="hcol c-type"><span class="minichip ' + tag[0] + '">' + escH(tag[1]) + '</span></div>'
+      +   '<div class="hcol c-q">' + h.questionCount + ' Q' + (h.questionCount === 1 ? '' : 's') + '</div>'
+      +   '<div class="hcol c-date">' + _histDateLabel(h.date) + '</div>'
+      +   '<div class="c-act">'
+      +     '<button class="hx" title="Test in browser" onclick="testInBrowser(loadHistEntry(\'' + h.id + '\'))">' + HIST_ICO.play + '</button>'
+      +     '<button class="hx" title="Load to editor" onclick="loadHistEntryToEditor(\'' + h.id + '\')">' + HIST_ICO.edit + '</button>'
+      +     '<button class="hx" title="Download"' + (canDl ? '' : ' disabled') + ' onclick="dlHistEntry(\'' + h.id + '\')">' + HIST_ICO.dl + '</button>'
+      +     '<button class="hx danger" title="Delete" onclick="deleteHistEntry(\'' + h.id + '\')">' + HIST_ICO.tr + '</button>'
+      +   '</div>'
+      + '</div>';
   }).join('');
+
+  list.innerHTML = '<div class="htable">' + headRow + dataRows + '</div>';
   updateHistBulkBar();
 }
 
 function toggleHistItem(id, checked) {
   if (checked) histSelected.add(id); else histSelected.delete(id);
-  const card = document.getElementById('hcard-' + id);
-  if (card) card.classList.toggle('hist-checked', checked);
+  const row = document.getElementById('hcard-' + id);
+  if (row) row.classList.toggle('sel', checked);
   updateHistBulkBar();
 }
 
@@ -9792,7 +10058,8 @@ function renderBatchPanel() {
   if (!_activeBatchId || !BATCH.length) { panel.style.display = 'none'; panel.innerHTML = ''; return; }
   const ICO_CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>';
   const ICO_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>';
-  const items = BATCH.map((b, i) => {
+  const ICO_SORT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h13"/><path d="M3 12h9"/><path d="M3 18h5"/><path d="M17 8v12"/><polyline points="13 16 17 20 21 16"/></svg>';
+  const items = _batchSorted().map((b, i) => {
     const name = b.settings.title || '(untitled)';
     const qcount = (b.questions && b.questions.length) || 0;
     const tag = BATCH_TYPE_CHIP[b.settings.quizType] || BATCH_TYPE_CHIP.custom;
@@ -9810,6 +10077,7 @@ function renderBatchPanel() {
   panel.innerHTML = ''
     + '<div class="bp-hd">'
     +   '<div><div class="bp-title">Batch</div><div class="bp-sub">' + BATCH.length + ' quiz' + (BATCH.length === 1 ? '' : 'zes') + ' loaded</div></div>'
+    +   '<button type="button" class="bp-sort' + (_batchSort === 'name' ? ' on' : '') + '" onclick="toggleBatchSort()" title="' + (_batchSort === 'name' ? 'Sorted A→Z — click for original order' : 'Sort by name') + '" aria-label="Sort by name">' + ICO_SORT + '</button>'
     +   '<button type="button" class="bp-collapse" onclick="toggleBatchPanel()" title="Hide batch list">' + ICO_CHEV + '</button>'
     + '</div>'
     + '<div class="bp-list">' + items + '</div>'
@@ -9842,6 +10110,18 @@ function batchUpdateTitle(id, value) {
 }
 
 let _batchSidebarHidden = false;
+// Sort order shared between the Batch tab list and the Quiz Builder bp-panel.
+// 'order' = insertion order (default); 'name' = A→Z by title.
+let _batchSort = 'order';
+function _batchSorted() {
+  if (_batchSort !== 'name') return BATCH;
+  return BATCH.slice().sort((a, b) => (a.settings.title || '').localeCompare(b.settings.title || '', undefined, { numeric: true, sensitivity: 'base' }));
+}
+function toggleBatchSort() {
+  _batchSort = (_batchSort === 'name') ? 'order' : 'name';
+  renderBatch();
+  if (typeof renderBatchPanel === 'function') renderBatchPanel();
+}
 
 function toggleBatchSidebar(show) {
   _batchSidebarHidden = !show;
@@ -9910,13 +10190,20 @@ function renderBatch() {
   if (bcBadge) bcBadge.textContent = '(' + BATCH.length + ')';
   if (counter) {
     counter.style.display = '';
-    counter.textContent = BATCH.length + ' quiz' + (BATCH.length === 1 ? '' : 'zes') + ' loaded';
+    const sortLabel = _batchSort === 'name' ? 'Sorted A→Z' : 'Sort by name';
+    const sortIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h13"/><path d="M3 12h9"/><path d="M3 18h5"/><path d="M17 8v12"/><polyline points="13 16 17 20 21 16"/></svg>';
+    counter.innerHTML = ''
+      + '<span>' + BATCH.length + ' quiz' + (BATCH.length === 1 ? '' : 'zes') + ' loaded</span>'
+      + '<button type="button" class="b-sort-btn' + (_batchSort === 'name' ? ' on' : '') + '" onclick="toggleBatchSort()" title="Toggle sort by name">'
+      +   sortIcon
+      +   '<span>' + sortLabel + '</span>'
+      + '</button>';
   }
   const ICO_PKG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>';
   const ICO_DL   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
   const ICO_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
   const ICO_TR   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
-  list.innerHTML = BATCH.map((item) => {
+  list.innerHTML = _batchSorted().map((item) => {
     const s   = item.settings;
     const qt  = s.quizType || 'course_completion';
     const tag = BATCH_TYPE_CHIP[qt] || BATCH_TYPE_CHIP.custom;
