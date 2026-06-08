@@ -60,7 +60,7 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .q-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
 .q-count{font-size:13px;color:var(--muted);font-weight:500}
 .q-section-group{margin-bottom:14px}
-.q-section-group.drag-section-over{outline:2px dashed var(--green);outline-offset:4px;border-radius:6px}
+.q-section-group.drag-section-over,.r-canvas .qsection.drag-section-over{outline:2px dashed var(--green);outline-offset:4px;border-radius:8px}
 .q-section-header{display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:6px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:var(--radius-sm);cursor:pointer;user-select:none;transition:background .12s}
 .q-section-header:hover{background:#e7e9ec}
 .q-section-chevron{display:inline-block;font-size:10px;color:var(--muted);transition:transform .15s;flex-shrink:0}
@@ -690,6 +690,7 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 
 /* Left rail: folders */
 .r-bank .folders{width:415px;flex:none;border-right:1px solid var(--border);background:#fbfbfc;display:flex;flex-direction:column;padding:14px 12px;overflow-y:auto}
+@media(max-width:1500px){.r-bank .folders:not([style*="width"]){width:330px}}
 .r-bank .fsearch-row{display:flex;align-items:stretch;gap:6px;margin-bottom:10px}
 .r-bank .fsearch{flex:1;min-width:0;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--g100);border-radius:7px;padding:7px 10px;color:var(--muted)}
 .r-bank .fsearch svg{width:14px;height:14px;flex:none}
@@ -962,6 +963,32 @@ body.bank-tab-active .r-topbar{display:none}
 #modal-editor .section-combo-menu button.is-new svg{width:14px;height:14px;color:var(--green-600);flex:none}
 #modal-editor .section-combo-menu .section-combo-empty{padding:10px;color:var(--muted);font-size:12.5px;text-align:center}
 
+/* Advanced settings modal — grouped sections + label/desc/control rows */
+.adv-modal{max-width:680px}
+.adv-body{display:flex;flex-direction:column;gap:6px;padding-top:4px}
+.adv-section{padding:14px 0 8px;border-top:1px solid #eef0f3}
+.adv-section:first-child{border-top:none;padding-top:6px}
+.adv-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#9aa0aa;margin-bottom:12px}
+.adv-row{display:flex;align-items:center;gap:18px;padding:10px 0}
+.adv-row+.adv-row{border-top:1px solid #f3f4f6}
+.adv-row .adv-row-text{flex:1;min-width:0}
+.adv-row-label{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.3}
+.adv-row-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.45}
+.adv-row .adv-row-ctrl{flex:none;display:flex;align-items:center;justify-content:flex-end;min-width:170px}
+.adv-row .adv-row-ctrl-wide{min-width:280px}
+.adv-row-stack{align-items:flex-start}
+.adv-row-stack .adv-row-ctrl{padding-top:2px}
+.adv-input{font:inherit;font-size:13.5px;color:var(--text);background:#fff;border:1px solid var(--g100);border-radius:8px;padding:8px 11px;outline:none;font-family:inherit;width:100%;max-width:280px}
+.adv-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.14)}
+.adv-input[disabled]{background:#f8f9fa;color:var(--muted);cursor:not-allowed}
+.adv-textarea{resize:vertical;line-height:1.5}
+/* Pill toggle (matches inspector .r-tog look) */
+.adv-tog{position:relative;width:42px;height:24px;border-radius:13px;background:#d1d5db;border:none;cursor:pointer;padding:0;transition:background .15s;flex:none}
+.adv-tog::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.28)}
+.adv-tog.on{background:var(--green)}
+.adv-tog.on::after{left:20px}
+.adv-footer{border-radius:0 0 14px 14px}
+
 /* Send-to-bank modal — cleaner design-system styling */
 .qtb-modal{max-width:520px}
 .qtb-body{display:flex;flex-direction:column;gap:16px;padding-top:8px}
@@ -1113,7 +1140,6 @@ body.bank-tab-active .r-topbar{display:none}
       <button class="r-nav" data-tab="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span>History</span></button>
     </div>
     <div class="r-rail-sp"></div>
-    <button class="r-nav" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Builder settings</span></button>
     <div class="r-rail-user"><div class="r-av">U</div><div><div class="r-nm">SCORM Quizzer</div><div class="r-rl">Local</div></div></div>
   </aside>
 
@@ -1135,8 +1161,8 @@ body.bank-tab-active .r-topbar{display:none}
       <button class="btn btn-sm btn-primary split-main" id="btn-dl" onclick="generateAndDownload()"><img class="btn-icon" src="assets/svg/download.svg" alt=""> Download SCORM</button>
       <button class="btn btn-sm btn-primary split-arrow" onclick="toggleDlDropdown(event)" aria-label="More download options">&#9660;</button>
       <div class="split-dropdown" id="hdr-dl-dropdown">
-        <button onclick="downloadWordDoc();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/ms word.svg" alt=""> Download as Word Doc</button>
-        <button onclick="downloadQuestionBank();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/txt.svg" alt=""> Download as AIKEN</button>
+        <button onclick="downloadWordDoc();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/ms word.svg" alt=""> As Word Doc</button>
+        <button onclick="downloadQuestionBank();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/txt.svg" alt=""> As AIKEN</button>
       </div>
     </div>
   </div>
@@ -1153,8 +1179,8 @@ body.bank-tab-active .r-topbar{display:none}
       <button class="btn btn-sm btn-primary split-main" onclick="generateAndDownload()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download SCORM</button>
       <button class="btn btn-sm btn-primary split-arrow" onclick="toggleDlDropdown(event)" aria-label="More download options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="split-dropdown" id="r-dl-dropdown">
-        <button onclick="downloadWordDoc();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/ms word.svg" alt=""> Download as Word Doc</button>
-        <button onclick="downloadQuestionBank();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/txt.svg" alt=""> Download as AIKEN</button>
+        <button onclick="downloadWordDoc();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/ms word.svg" alt=""> As Word Doc</button>
+        <button onclick="downloadQuestionBank();closeDlDropdown()"><img class="btn-icon-raw" src="assets/svg/txt.svg" alt=""> As AIKEN</button>
       </div>
     </div>
   </div>
@@ -2174,6 +2200,109 @@ body.bank-tab-active .r-topbar{display:none}
   </div>
 </div>
 
+<!-- ADVANCED SETTINGS MODAL -->
+<div class="m-overlay" id="modal-advanced">
+  <div class="modal adv-modal">
+    <div class="m-hdr">
+      <span class="m-title">Advanced settings</span>
+      <button class="m-close" onclick="closeModal('modal-advanced')">&#x2715;</button>
+    </div>
+    <div class="m-body adv-body">
+
+      <section class="adv-section">
+        <div class="adv-eyebrow">Packaging &amp; standard</div>
+        <div class="adv-row">
+          <div class="adv-row-text">
+            <div class="adv-row-label">SCORM version</div>
+            <div class="adv-row-desc">The eLearning standard this package targets</div>
+          </div>
+          <div class="adv-row-ctrl">
+            <select class="adv-input" id="adv-scorm-version" disabled title="Locked — Adobe ALM target">
+              <option value="scorm12" selected>SCORM 1.2</option>
+            </select>
+          </div>
+        </div>
+        <div class="adv-row">
+          <div class="adv-row-text">
+            <div class="adv-row-label">Package identifier</div>
+            <div class="adv-row-desc">Unique ID written to the SCORM manifest</div>
+          </div>
+          <div class="adv-row-ctrl">
+            <input type="text" class="adv-input" id="adv-manifest-id" placeholder="(auto)" oninput="advSyncManifestId(this.value)">
+          </div>
+        </div>
+        <div class="adv-row">
+          <div class="adv-row-text">
+            <div class="adv-row-label">Preserve identifier on re-upload</div>
+            <div class="adv-row-desc">Reuse the existing package ID when re-importing</div>
+          </div>
+          <div class="adv-row-ctrl">
+            <button type="button" class="adv-tog" id="adv-tog-preserve-id" onclick="advToggle('adv-tog-preserve-id','tog-preserve-id')"></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="adv-section">
+        <div class="adv-eyebrow">Player behavior</div>
+        <div class="adv-row">
+          <div class="adv-row-text">
+            <div class="adv-row-label">Use remote-loaded player</div>
+            <div class="adv-row-desc">Have the player fetch its code from a CDN at runtime — smaller SCORM zip, needs network</div>
+          </div>
+          <div class="adv-row-ctrl">
+            <button type="button" class="adv-tog" id="adv-tog-remote-player" onclick="advToggleRemotePlayer()"></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="adv-section">
+        <div class="adv-eyebrow">Custom messages</div>
+        <div class="adv-row adv-row-stack">
+          <div class="adv-row-text">
+            <div class="adv-row-label">Pass screen title</div>
+            <div class="adv-row-desc">Shown at the top of the pass screen</div>
+          </div>
+          <div class="adv-row-ctrl adv-row-ctrl-wide">
+            <input type="text" class="adv-input" id="adv-pass-title" placeholder="You passed!" oninput="advSyncText('adv-pass-title','s-pass-title')">
+          </div>
+        </div>
+        <div class="adv-row adv-row-stack">
+          <div class="adv-row-text">
+            <div class="adv-row-label">Pass exit message</div>
+            <div class="adv-row-desc">Closing message shown after passing</div>
+          </div>
+          <div class="adv-row-ctrl adv-row-ctrl-wide">
+            <textarea class="adv-input adv-textarea" id="adv-pass-exit" rows="2" placeholder="Congratulations, you have passed the quiz." oninput="advSyncText('adv-pass-exit','s-pass-exit')"></textarea>
+          </div>
+        </div>
+        <div class="adv-row adv-row-stack">
+          <div class="adv-row-text">
+            <div class="adv-row-label">Fail screen title</div>
+            <div class="adv-row-desc">Shown at the top of the fail screen</div>
+          </div>
+          <div class="adv-row-ctrl adv-row-ctrl-wide">
+            <input type="text" class="adv-input" id="adv-fail-title" placeholder="Not Quite There" oninput="advSyncText('adv-fail-title','s-fail-title')">
+          </div>
+        </div>
+        <div class="adv-row adv-row-stack">
+          <div class="adv-row-text">
+            <div class="adv-row-label">Fail exit message</div>
+            <div class="adv-row-desc">Closing message shown after failing</div>
+          </div>
+          <div class="adv-row-ctrl adv-row-ctrl-wide">
+            <textarea class="adv-input adv-textarea" id="adv-fail-exit" rows="2" placeholder="Please try again." oninput="advSyncText('adv-fail-exit','s-fail-exit')"></textarea>
+          </div>
+        </div>
+      </section>
+
+    </div>
+    <div class="m-footer adv-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-advanced')">Cancel</button>
+      <button class="btn btn-sm btn-primary" onclick="closeModal('modal-advanced')"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Done</button>
+    </div>
+  </div>
+</div>
+
 <!-- SEND TO QUESTION BANK MODAL -->
 <div class="m-overlay" id="modal-q-to-bank">
   <div class="modal qtb-modal">
@@ -2251,11 +2380,22 @@ body.bank-tab-active .r-topbar{display:none}
     <div class="m-hdr"><span class="m-title">Import questions to folder</span><button class="m-close" onclick="closeModal('modal-bank-import-more')">&#x2715;</button></div>
     <div class="m-body">
       <p style="font-size:14px;color:#333;line-height:1.65;margin-bottom:16px">Questions from your file will be added to <strong id="bank-import-folder-label">the selected folder</strong> in the Question Bank.</p>
-      <div class="drop-zone" id="dz-bank-import-more" style="padding:32px 20px">
-        <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:36px;height:36px"></div>
-        <div style="font-size:15px;font-weight:600;margin:8px 0 4px">Drop your file here, or click to browse</div>
-        <div class="dz-label">Accepts .txt (AIKEN) &nbsp;·&nbsp; .xml (Moodle XML) &nbsp;·&nbsp; .zip (SCORM or question bank) &nbsp;·&nbsp; .docx (Word doc)</div>
-        <input type="file" id="file-bank-import-more" accept=".txt,.xml,.zip,.docx,.pptx">
+      <div class="drop-zone" id="dz-bank-import-more" style="padding:34px 24px 28px;position:relative">
+        <button class="btn btn-sm" onclick="event.stopPropagation();showModal('modal-aiken')" style="position:absolute;top:12px;right:12px;z-index:2">View AIKEN Example</button>
+        <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:38px;height:38px"></div>
+        <div style="font-size:16px;font-weight:600;margin:8px 0 2px">Drop your file here, or click to browse</div>
+        <div style="display:flex;justify-content:center;align-items:flex-start;gap:14px;flex-wrap:wrap;margin:16px 0 8px">
+          <div class="ft-chip"><span class="ft-tag" style="border-color:#9ca3af;color:#4b5563">TXT</span><span class="ft-sub">AIKEN</span></div>
+          <div class="ft-chip"><span class="ft-tag" style="border-color:#f59e0b;color:#b45309">XML</span><span class="ft-sub">Moodle</span></div>
+          <div class="ft-chip"><span class="ft-tag" style="border-color:#eab308;color:#854d0e">ZIP</span><span class="ft-sub">SCORM</span></div>
+          <div class="ft-chip"><span class="ft-tag" style="border-color:#2563eb;color:#1e40af">DOCX</span><span class="ft-sub">Word</span></div>
+          <div class="ft-chip"><span class="ft-tag" style="border-color:#dc2626;color:#991b1b">PPTX</span><span class="ft-sub">PowerPoint</span></div>
+        </div>
+        <button type="button" onclick="event.stopPropagation();closeModal('modal-bank-import-more');openAIConvertModal()" style="margin-top:10px;display:inline-flex;align-items:center;gap:7px;padding:7px 14px;background:linear-gradient(135deg,rgba(118,185,0,.12),rgba(168,85,247,.10));border:1px solid rgba(118,185,0,.30);border-radius:22px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit;transition:background .15s,box-shadow .15s,transform .1s" onmouseover="this.style.background='linear-gradient(135deg,rgba(118,185,0,.20),rgba(168,85,247,.18))';this.style.boxShadow='0 2px 10px rgba(118,185,0,.18)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(118,185,0,.12),rgba(168,85,247,.10))';this.style.boxShadow='none'">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 3 L13.8 9.2 L20 11 L13.8 12.8 L12 19 L10.2 12.8 L4 11 L10.2 9.2 Z"/></svg>
+          If needed, your file will be converted using AI
+        </button>
+        <input type="file" id="file-bank-import-more" accept=".txt,.xml,.zip,.docx,.pptx,.md">
       </div>
     </div>
   </div>
@@ -6857,7 +6997,7 @@ function renderInspector() {
     +   _rGroupHtml('after', 'After submitting', rowsAfter)
     +   _rGroupHtml('cert', 'Certificate', rowsCert)
     + '</div>'
-    + '<div class="r-insp-ft"><div class="r-pv"><button class="r-lnk" onclick="testInBrowser(null)">' + R_ICO.eye + ' Start</button><button class="r-lnk" onclick="previewScreen(\'pass\')">Pass</button><button class="r-lnk" onclick="previewScreen(\'fail\')">Fail</button></div><button class="r-lnk r-adv" onclick="switchTab(\'settings\')">Advanced…</button></div>';
+    + '<div class="r-insp-ft"><div class="r-pv"><button class="r-lnk" onclick="testInBrowser(null)">' + R_ICO.eye + ' Start</button><button class="r-lnk" onclick="previewScreen(\'pass\')">Pass</button><button class="r-lnk" onclick="previewScreen(\'fail\')">Fail</button></div><button class="r-lnk r-adv" onclick="openAdvancedSettings()">Advanced…</button></div>';
 
   // Populate the cert URL/text inputs (their values can't be in the HTML string above)
   const certUrl = document.getElementById('s-cert-url');
@@ -6970,6 +7110,76 @@ function rToggleSavePresetPopover(anchor) {
     document.addEventListener('click', closer);
     document.addEventListener('keydown', escer);
   }, 0);
+}
+
+// ── Advanced settings modal ──────────────────────────────────
+// Opens the modal and copies values from the legacy settings inputs into the
+// modal's own inputs/toggles. Changes flow the other way via the adv* helpers,
+// which write to the legacy mirror inputs + dispatch change/save so the rest
+// of the pipeline (saveSettings, SCORM build, etc.) keeps working unchanged.
+function openAdvancedSettings() {
+  // Text inputs
+  const pull = (advId, legacyId) => {
+    const adv = document.getElementById(advId);
+    const lg  = document.getElementById(legacyId);
+    if (adv && lg) adv.value = lg.value || '';
+  };
+  pull('adv-pass-title', 's-pass-title');
+  pull('adv-fail-title', 's-fail-title');
+  pull('adv-pass-exit',  's-pass-exit');
+  pull('adv-fail-exit',  's-fail-exit');
+  // Manifest identifier — pre-fill from APP state if present
+  const advMan = document.getElementById('adv-manifest-id');
+  if (advMan) advMan.value = (APP.settings && APP.settings.manifestIdentifier) || '';
+  // Toggles
+  const pullTog = (advId, legacyId) => {
+    const adv = document.getElementById(advId);
+    const lg  = document.getElementById(legacyId);
+    if (adv) adv.classList.toggle('on', !!(lg && lg.checked));
+  };
+  pullTog('adv-tog-preserve-id', 'tog-preserve-id');
+  pullTog('adv-tog-remote-player', 'tog-remote-player');
+  showModal('modal-advanced');
+}
+
+// Sync a modal text input back to its legacy mirror and save.
+function advSyncText(advId, legacyId) {
+  const adv = document.getElementById(advId);
+  const lg  = document.getElementById(legacyId);
+  if (adv && lg) {
+    lg.value = adv.value;
+    if (typeof saveSettings === 'function') saveSettings();
+  }
+}
+
+// Manifest identifier is stored in APP.settings directly (no legacy DOM input).
+function advSyncManifestId(value) {
+  if (!APP.settings) APP.settings = {};
+  APP.settings.manifestIdentifier = (value || '').trim();
+  if (typeof saveSettings === 'function') saveSettings();
+}
+
+// Generic toggle: flip the legacy checkbox, dispatch its change event so any
+// wired logic (e.g. toggleSettingInput) runs, then update the visual pill.
+function advToggle(advId, legacyId) {
+  const adv = document.getElementById(advId);
+  const lg  = document.getElementById(legacyId);
+  if (!adv || !lg) return;
+  lg.checked = !lg.checked;
+  lg.dispatchEvent(new Event('change'));
+  adv.classList.toggle('on', lg.checked);
+  if (typeof saveSettings === 'function') saveSettings();
+}
+
+// Remote player has its own onRemotePlayerToggle handler; route through it.
+function advToggleRemotePlayer() {
+  const adv = document.getElementById('adv-tog-remote-player');
+  const lg  = document.getElementById('tog-remote-player');
+  if (!adv || !lg) return;
+  lg.checked = !lg.checked;
+  if (typeof onRemotePlayerToggle === 'function') onRemotePlayerToggle(lg);
+  adv.classList.toggle('on', lg.checked);
+  if (typeof saveSettings === 'function') saveSettings();
 }
 
 function _rWireInspector() {
@@ -7320,10 +7530,14 @@ async function deleteSection(name) {
 // Drops onto a section header or onto an empty section body reassign the
 // question's section field and append it at the end of that section.
 function _attachSectionGroupDnD() {
-  document.querySelectorAll('#q-list .q-section-group').forEach(group => {
+  // New canvas renders <section class="qsection"> with .sband (header) and
+  // .sqs (body). Legacy renderer used .q-section-group / -header / -cards.
+  // We attach the drop handlers on the whole section element so any drop
+  // outside a card (header, padding, the dashed empty placeholder) is caught.
+  // Card-level drops stop propagation, so this only fires on non-card drops.
+  const groups = document.querySelectorAll('#q-list .qsection, #q-list .q-section-group');
+  groups.forEach(group => {
     const sectionKey = group.dataset.sectionKey;
-    const header = group.querySelector('.q-section-header');
-    const body   = group.querySelector('.q-section-cards');
     const handleDragOver = e => {
       if (_dragSrcIdx === null) return;
       e.preventDefault();
@@ -7331,13 +7545,10 @@ function _attachSectionGroupDnD() {
       group.classList.add('drag-section-over');
     };
     const handleDrop = e => {
+      if (_dragSrcIdx === null) return;
       e.preventDefault();
       e.stopPropagation();
       group.classList.remove('drag-section-over');
-      if (_dragSrcIdx === null) return;
-      // If the drop landed on a specific card inside the section, the card's own
-      // handler already ran and consumed the drop. This handler only fires for
-      // drops on the header or the empty area.
       const newSection = sectionKey === '__unsectioned__' ? '' : sectionKey;
       pushQHistory();
       const item = APP.questions.splice(_dragSrcIdx, 1)[0];
@@ -7352,15 +7563,12 @@ function _attachSectionGroupDnD() {
       updateBadges();
       syncToBatch();
     };
-    if (header) {
-      header.addEventListener('dragover', handleDragOver);
-      header.addEventListener('drop', handleDrop);
-    }
-    if (body) {
-      body.addEventListener('dragover', handleDragOver);
-      body.addEventListener('drop', handleDrop);
-    }
-    group.addEventListener('dragleave', () => group.classList.remove('drag-section-over'));
+    group.addEventListener('dragover', handleDragOver);
+    group.addEventListener('drop', handleDrop);
+    group.addEventListener('dragleave', e => {
+      // Only clear when leaving the section itself, not when crossing into a child
+      if (!group.contains(e.relatedTarget)) group.classList.remove('drag-section-over');
+    });
   });
 }
 
@@ -7879,6 +8087,16 @@ async function _promptKnowledgeCheckPreset() {
     cancelText: 'Keep current'
   });
   if (ok) loadPreset('builtin-kc');
+}
+
+async function _promptCompletionPreset() {
+  const ok = await cdlg({
+    title: 'Switch to Completion quiz settings?',
+    msg: '',
+    confirmText: 'Switch settings',
+    cancelText: 'Keep current'
+  });
+  if (ok) loadPreset('builtin-completion');
 }
 
 async function deletePreset(id) {
@@ -8881,8 +9099,9 @@ function syncQuizInfo(field, value) {
     renderSegmentedType();
     // Re-render the inspector so the cert toggle and chip summary reflect the new type
     setTimeout(() => { if (typeof renderInspector === 'function') renderInspector(); }, 0);
-    // If the user just switched to Knowledge Check, offer to apply the KC preset.
+    // If the user just switched to Knowledge Check / Completion, offer the preset.
     if (value === 'topic_quiz' && prevType !== 'topic_quiz') _promptKnowledgeCheckPreset();
+    else if (value === 'course_completion' && prevType !== 'course_completion') _promptCompletionPreset();
   } else if (field === 'customQuizTypeName') {
     APP.settings.customQuizTypeName = value;
     const qInp = document.getElementById('q-custom-name'); if (qInp && qInp.value !== value) qInp.value = value;
@@ -10052,7 +10271,6 @@ function renderHistory() {
       +   '<div class="hcol c-q">' + h.questionCount + ' Q' + (h.questionCount === 1 ? '' : 's') + '</div>'
       +   '<div class="hcol c-date">' + _histDateLabel(h.date) + '</div>'
       +   '<div class="c-act">'
-      +     '<button class="hx" title="Test in browser" onclick="testInBrowser(loadHistEntry(\'' + h.id + '\'))">' + HIST_ICO.play + '</button>'
       +     '<button class="hx" title="Load to editor" onclick="loadHistEntryToEditor(\'' + h.id + '\')">' + HIST_ICO.edit + '</button>'
       +     '<button class="hx" title="Download"' + (canDl ? '' : ' disabled') + ' onclick="dlHistEntry(\'' + h.id + '\')">' + HIST_ICO.dl + '</button>'
       +     '<button class="hx danger" title="Delete" onclick="deleteHistEntry(\'' + h.id + '\')">' + HIST_ICO.tr + '</button>'
@@ -11057,6 +11275,14 @@ function downloadWordDoc() {
 (async () => {
   await Promise.all([fetchHistory(), fetchDefaultSettings(), fetchPresets()]);
   if (APP.defaultSettings) Object.assign(APP.settings, APP.defaultSettings);
+  // Fresh-landing default: when no quiz has been loaded, start on Course
+  // completion with the matching preset applied. Once the user imports a quiz
+  // or changes settings during this session, that takes precedence as usual.
+  if (!APP.questions.length && typeof BUILTIN_PRESETS !== 'undefined') {
+    const _cp = BUILTIN_PRESETS.find(p => p.id === 'builtin-completion');
+    if (_cp) Object.assign(APP.settings, _cp.settings);
+    APP.settings.quizType = 'course_completion';
+  }
   readSettingsToForm();
   updateBadges();
   renderQuestions();
