@@ -504,8 +504,16 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
    their centered max-width via the rule below. */
 .r-work .main{flex:1;min-height:0;max-width:none;padding:0;margin:0;display:flex;flex-direction:column;overflow:hidden}
 .r-work .main > .tab-panel{flex:1;min-height:0}
-.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank):not(#tab-batch):not(#tab-history){overflow-y:auto;padding:28px 24px;display:block}
-.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank):not(#tab-batch):not(#tab-history) > *{max-width:1100px;margin-left:auto;margin-right:auto}
+.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank):not(#tab-batch):not(#tab-history):not(#tab-test-scorm){overflow-y:auto;padding:28px 24px;display:block}
+.r-work .main > .tab-panel.active:not(#tab-questions):not(#tab-bank):not(#tab-batch):not(#tab-history):not(#tab-test-scorm) > *{max-width:1100px;margin-left:auto;margin-right:auto}
+#tab-test-scorm.tab-panel.active{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;flex:1}
+#tab-test-scorm .ts-body{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px}
+#tab-test-scorm .ts-drop{max-width:600px;width:100%}
+#tab-test-scorm .ts-loaded{display:none;flex-direction:column;height:100%;min-height:0;flex:1;width:100%}
+#tab-test-scorm .ts-toolbar{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);flex:none;flex-wrap:wrap}
+#tab-test-scorm .ts-toolbar .ts-title{font-weight:700;font-size:15px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-test-scorm .ts-iframe-wrap{flex:1;min-height:0;display:flex}
+#tab-test-scorm .ts-ifr{border:none;flex:1;width:100%;height:100%}
 
 @media(max-width:980px){
   .r-rail{width:62px}
@@ -1285,8 +1293,20 @@ body.bank-tab-active .r-topbar{display:none}
 .r-insp-ft .r-adv{margin-left:auto;border-color:transparent;background:none;color:var(--blue,#0074df)}
 .r-insp-ft .r-adv:hover{text-decoration:underline;background:none}
 </style>
+<style>
+#app-loader{position:fixed;inset:0;background:#f0f2f5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;z-index:99999;transition:opacity .3s ease}
+#app-loader.fade-out{opacity:0;pointer-events:none}
+.app-loader-logo{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:800;color:#76B900;letter-spacing:-.3px}
+.app-loader-logo img{width:36px;height:36px}
+.app-loader-spinner{width:32px;height:32px;border:3px solid #e4e8ed;border-top-color:#76B900;border-radius:50%;animation:loader-spin .7s linear infinite}
+@keyframes loader-spin{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
+<div id="app-loader">
+  <div class="app-loader-logo"><img src="assets/favicon_io/android-chrome-192x192.png" alt=""><span>SCORM Quizzer</span></div>
+  <div class="app-loader-spinner"></div>
+</div>
 
 <div class="r-shell">
   <!-- ── LEFT RAIL NAV ── -->
@@ -1298,6 +1318,7 @@ body.bank-tab-active .r-topbar{display:none}
       <button class="r-nav" data-tab="bank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>Question bank</span></button>
       <button class="r-nav" data-tab="batch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg><span>Batch builder</span></button>
       <button class="r-nav" data-tab="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span>History</span></button>
+      <button class="r-nav" data-tab="test-scorm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/></svg><span>Test SCORM</span></button>
     </div>
     <div class="r-rail-sp"></div>
     <button class="r-whatsnew" onclick="openWelcome()" title="What's new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span>What's new</span></button>
@@ -1315,6 +1336,7 @@ body.bank-tab-active .r-topbar{display:none}
     <button class="tab-btn" data-tab="history">History</button>
     <button class="tab-btn" data-tab="batch">Batch <span id="bc-badge" style="color:var(--green)"></span></button>
     <button class="tab-btn" data-tab="bank">Question Bank</button>
+    <button class="tab-btn" data-tab="test-scorm">Test SCORM</button>
   </nav>
   <div class="btn-group" style="margin-left:auto;flex-shrink:0">
     <button class="btn btn-sm btn-outline-dark" onclick="testInBrowser(null)"><img class="btn-icon" src="assets/svg/play.svg" alt=""> Test in Browser</button>
@@ -1408,7 +1430,7 @@ body.bank-tab-active .r-topbar{display:none}
     </div>
   </div>
   <div id="q-empty-state" style="display:none;margin-top:8px">
-    <div class="drop-zone" id="dz-auto" style="padding:34px 24px 28px;position:relative">
+    <div class="drop-zone" id="dz-auto" style="padding:52px 22px;position:relative">
       <button class="btn btn-sm" onclick="event.stopPropagation();showModal('modal-aiken')" style="position:absolute;top:12px;right:12px;z-index:2">View AIKEN Example</button>
       <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:38px;height:38px"></div>
       <div style="font-size:16px;font-weight:600;margin:8px 0 2px">Drop your file here, or click to browse</div>
@@ -1966,6 +1988,7 @@ body.bank-tab-active .r-topbar{display:none}
             <div class="ba" id="bank-q-hd-actions">
               <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg><input id="bank-q-search" type="text" placeholder="Search questions…" oninput="bankFilterQuestions(this.value)"></div>
               <label class="exp-tog" onclick="bankToggleExpandAll()"><span>Expand all</span><span class="tog" id="bank-expand-tog"></span></label>
+              <button title="Download folder as AIKEN" onclick="downloadBankFolderAsAiken()" style="width:30px;height:30px;border:1px solid var(--g100);border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;color:#7a818c;cursor:pointer;padding:0;flex:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
             </div>
           </div>
         </div>
@@ -1987,6 +2010,42 @@ body.bank-tab-active .r-topbar{display:none}
         </div>
       </div>
     </section>
+  </div>
+</div>
+
+<div id="tab-test-scorm" class="tab-panel">
+  <header class="r-vhead">
+    <div>
+      <div class="r-vt">Test SCORM</div>
+      <div class="r-vs">Drop any SCORM package to run it directly in the browser — no LMS needed.</div>
+    </div>
+  </header>
+  <!-- Drop zone state -->
+  <div class="ts-body" id="ts-dropzone-state">
+    <div class="ts-drop">
+      <div class="drop-zone" id="dz-test-scorm" style="padding:52px 22px">
+        <div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:38px;height:38px"></div>
+        <div style="font-size:16px;font-weight:600;margin:8px 0 4px">Drop a SCORM package here</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:16px">or click to browse</div>
+        <div style="display:flex;justify-content:center;gap:14px">
+          <div class="ft-chip"><span class="ft-tag" style="border-color:#eab308;color:#854d0e">ZIP</span><span class="ft-sub">SCORM</span></div>
+        </div>
+        <input type="file" id="file-test-scorm" accept=".zip">
+      </div>
+    </div>
+  </div>
+  <!-- Loaded state (iframe + toolbar) -->
+  <div class="ts-loaded" id="ts-loaded-state">
+    <div class="ts-toolbar">
+      <span class="ts-title" id="ts-quiz-title">Quiz</span>
+      <button class="btn btn-sm btn-outline" onclick="tsSimulateReload()">&#8635; Simulate Reload</button>
+      <button class="btn btn-sm btn-outline" onclick="tsResetState()">&#9866; Reset State</button>
+      <label class="btn btn-sm btn-outline" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;user-select:none"><input type="checkbox" id="ts-show-answers" onchange="tsToggleAnswerHints(this.checked)" style="accent-color:var(--green);cursor:pointer"> Show Answers</label>
+      <button class="btn btn-sm btn-outline" onclick="tsClose()">&#x2715; Close</button>
+    </div>
+    <div class="ts-iframe-wrap">
+      <iframe id="ts-ifr" class="ts-ifr"></iframe>
+    </div>
   </div>
 </div>
 
@@ -4926,6 +4985,7 @@ function switchTab(tabName) {
   document.body.classList.toggle('batch-tab-active', tabName === 'batch');
   document.body.classList.toggle('history-tab-active', tabName === 'history');
   document.body.classList.toggle('bank-tab-active', tabName === 'bank');
+  document.body.classList.toggle('test-scorm-tab-active', tabName === 'test-scorm');
   if (tabName === 'questions') { renderQuestions(); if (typeof renderBatchPanel === 'function') renderBatchPanel(); }
   if (tabName === 'history') {
     document.getElementById('hist-list').innerHTML = '<div class="hist-loading"><div class="hist-spinner"></div><span>Loading history…</span></div>';
@@ -5007,9 +5067,14 @@ function extractAikenTitle(text) {
 function parseAiken(text, imageMap) {
   imageMap = imageMap || {};
   const questions = [];
+  let currentSection = null;
   const blocks = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split(/\n\s*\n/).filter(b => b.trim());
   for (const block of blocks) {
     const lines = block.trim().split('\n').map(l => l.trim()).filter(l => l);
+    if (lines.length === 1 && /^SECTION:\s*/i.test(lines[0])) {
+      currentSection = lines[0].replace(/^SECTION:\s*/i, '').trim() || null;
+      continue;
+    }
     if (lines.length < 2) continue;
 
     // ── Interactive types (MATCHING / SEQUENCING / HOTSPOT) ──
@@ -5031,6 +5096,7 @@ function parseAiken(text, imageMap) {
         const q = { id: qid(), question: textLines.join(' ').trim(), questionType: 'matching', pairs };
         const imgs = imgLines.map(l => { const n = l.replace(/^IMAGE:\s*/i,'').trim(); const data = imageMap[n] || imageMap[n.toLowerCase()] || null; return data ? { data, name: n } : null; }).filter(Boolean);
         if (imgs.length) { q.images = imgs; q.imagePosition = 'above'; }
+        if (currentSection) q.section = currentSection;
         questions.push(q);
       } else if (typeVal === 'sequencing') {
         const stepLines = rest.filter(l => /^STEP:\s*/i.test(l));
@@ -5038,7 +5104,9 @@ function parseAiken(text, imageMap) {
         if (!stepLines.length || !textLines.length) continue;
         const steps = stepLines.map(l => l.replace(/^STEP:\s*/i, '').trim()).filter(Boolean);
         if (steps.length < 2) continue;
-        questions.push({ id: qid(), question: textLines.join(' ').trim(), questionType: 'sequencing', steps });
+        const sq = { id: qid(), question: textLines.join(' ').trim(), questionType: 'sequencing', steps };
+        if (currentSection) sq.section = currentSection;
+        questions.push(sq);
       } else if (typeVal === 'hotspot') {
         const hsLines    = rest.filter(l => /^HOTSPOT:\s*/i.test(l));
         const imgLines   = rest.filter(l => /^IMAGE:\s*/i.test(l));
@@ -5072,6 +5140,7 @@ function parseAiken(text, imageMap) {
           const imgData = imageMap[imgName] || imageMap[imgName.toLowerCase()] || null;
           if (imgData) { q.images = [{ data: imgData, name: imgName }]; q.hotspotImageFilename = imgName; }
         }
+        if (currentSection) q.section = currentSection;
         questions.push(q);
       }
       continue;
@@ -5133,6 +5202,7 @@ function parseAiken(text, imageMap) {
       const resolved = imageNames.map(n => { const data = imageMap[n] || imageMap[n.toLowerCase()] || null; return data ? { data, name: n } : null; }).filter(Boolean);
       if (resolved.length) { q.images = resolved; q.imagePosition = imagePosition; }
     }
+    if (currentSection) q.section = currentSection;
     questions.push(q);
   }
   return questions;
@@ -5186,6 +5256,18 @@ async function loadScormPackage(file) {
   if (raw.totalQuestions && !raw.questionsPerAttempt) {
     raw.questionsPerAttempt = raw.totalQuestions;
   }
+  // If quizType is missing from quiz-settings.json, try to read it from the
+  // embedded QUIZ_CONFIG in index.html (older packages may not have the field)
+  if (!raw.quizType) {
+    const htmlF = zip.file('index.html');
+    if (htmlF) {
+      try {
+        const htmlT = await htmlF.async('string');
+        const m = htmlT.match(/"quizType"\s*:\s*"([^"]+)"/);
+        if (m && m[1]) raw.quizType = m[1];
+      } catch(e) {}
+    }
+  }
   // Merge onto zero/disabled defaults so missing fields don't inherit stale APP.settings values
   const settings = Object.assign({
     title: '', quizType: 'course_completion',
@@ -5208,6 +5290,9 @@ async function loadScormPackage(file) {
       if (idMatch && idMatch[1].trim()) settings.manifestIdentifier = idMatch[1].trim();
     } catch(e) {}
   }
+  // Normalize quizType: if unrecognized, default to course_completion
+  const _validQT = new Set(['course_completion','topic_quiz','course_final_exam','gpu_genius_fast_track','custom']);
+  if (!_validQT.has(settings.quizType)) settings.quizType = 'course_completion';
   // Fall back to filename if title still missing
   if (!settings.title) {
     settings.title = file.name.replace(/\.zip$/i, '').replace(/[-_][a-f0-9]{8}$/i, '').replace(/[-_]\d{4}-[A-Za-z]+-\d{2}$/, '').replace(/[-_]+/g, ' ').trim();
@@ -6118,6 +6203,25 @@ function _wireDropZone(dzId, fiId, opts) {
 _wireDropZone('dz-auto', 'file-auto');
 _wireDropZone('dz-import-more', 'file-import-more', { forceAppend: true, closeModal: 'modal-import-more' });
 _wireDropZone('dz-bank-import-more', 'file-bank-import-more', { bankFolderId: () => BANK.selectedFolderId, closeModal: 'modal-bank-import-more', bankBatch: true });
+
+(function wireTestScormDrop() {
+  const dz = document.getElementById('dz-test-scorm');
+  const fi = document.getElementById('file-test-scorm');
+  if (!dz || !fi) return;
+  dz.addEventListener('click', () => fi.click());
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f && f.name.toLowerCase().endsWith('.zip')) testScormFromFile(f);
+    else toast('Please drop a .zip SCORM file', 'err');
+  });
+  fi.addEventListener('change', () => {
+    if (fi.files[0]) testScormFromFile(fi.files[0]);
+    fi.value = '';
+  });
+})();
 
 // Drag-resize for the Bank folder rail. Width is constrained to a sensible
 // range; we don't persist it across reloads (keep this lightweight for now).
@@ -7202,17 +7306,18 @@ function duplicateQuestion(id) {
 }
 
 async function clearAll() {
-  if (!APP.questions.length) return;
-  const ok = await cdlg({ icon: 'assets/svg/attention.svg', title: 'Clear All Questions', msg: 'Delete all ' + APP.questions.length + ' questions? This cannot be undone.', confirmText: 'Delete All', cancelText: 'Cancel' });
+  if (!APP.questions.length && !(APP.settings.sections && APP.settings.sections.length)) return;
+  const ok = await cdlg({ icon: 'assets/svg/attention.svg', title: 'Clear All Questions', msg: 'Delete all ' + APP.questions.length + ' questions and sections? This cannot be undone.', confirmText: 'Delete All', cancelText: 'Cancel' });
   if (!ok) return;
   pushQHistory();
   APP.questions = [];
+  APP.settings.sections = [];
   APP.settings.title = '';
   const titleEl = document.getElementById('q-title'); if (titleEl) titleEl.value = '';
   renderQuestions();
   updateBadges();
   resetTestSim();
-  toast('All questions cleared');
+  toast('All questions and sections cleared');
 }
 
 // ── EDITOR LIVE PREVIEW ───────────────────────────────────
@@ -7531,7 +7636,7 @@ function renderAddRow() {
     row.classList.add('r-empty-state');
     row.innerHTML = ''
       + '<div class="r-empty-hero">Let’s build a quiz — how would you like to start?</div>'
-      + '<div class="drop-zone r-empty-dz" id="dz-quiz-empty">'
+      + '<div class="drop-zone r-empty-dz" id="dz-quiz-empty" style="padding:52px 22px">'
       +   '<div class="dz-icon"><img src="assets/svg/upload.svg" alt="" style="width:36px;height:36px"></div>'
       +   '<div style="font-size:15px;font-weight:600;margin:6px 0 4px">Drop your file here, or click to browse</div>'
       +   '<div style="display:flex;justify-content:center;align-items:flex-start;gap:14px;flex-wrap:wrap;margin:14px 0 6px">'
@@ -7750,7 +7855,7 @@ function _rCtlRow(togLegacyId, label, desc, val) {
 // Wrap a group of rows in a card
 function _rGroupHtml(key, title, bodyHtml) {
   const a = R_ACC[key];
-  return '<div class="r-grp" data-grp="' + key + '">'
+  return '<div class="r-grp closed" data-grp="' + key + '">'
     + '<div class="r-grp-hd" data-ghd="' + key + '"><span class="gi" style="background:' + a.bg + ';color:' + a.c + '">' + R_ICO[key] + '</span><span class="gt">' + escH(title) + '</span><span class="chev">' + R_ICO.chev + '</span></div>'
     + '<div class="r-grp-bd">' + bodyHtml + '</div></div>';
 }
@@ -8133,8 +8238,7 @@ function _rRenderSectionSplit() {
   //     so per-section quotas don't apply), OR
   //   - there's only one effective bucket (no sections / all questions in one
   //     bucket — identical to the existing single-number control).
-  const qcountOn = typeof _rIsOn === 'function' ? _rIsOn('tog-qcount') : true;
-  if (buckets.length < 2 || !qcountOn) {
+  if (buckets.length < 2) {
     host.innerHTML = '';
     host.style.display = 'none';
     return;
@@ -8282,7 +8386,9 @@ function _rRefreshChips() {
   if (s.questionsPerAttempt && n) chips.push(_rChipHtml('pool', s.questionsPerAttempt + ' of ' + n + ' Qs', true));
   else if (n) chips.push(_rChipHtml('pool', 'All ' + n + ' Qs', true));
   chips.push(_rChipHtml('pool', s.randomizeQuestions !== false ? 'Shuffled' : 'In order', s.randomizeQuestions !== false));
-  chips.push(_rChipHtml('after', s.showAnswerReview ? 'Review on' : 'No review', !!s.showAnswerReview));
+  chips.push(_rChipHtml('after', s.showAnswerReview ? 'Review on' : 'No review on fail', !!s.showAnswerReview));
+  const _secCount = (APP.settings.sections || []).length;
+  if (_secCount) chips.push(_rChipHtml('breakdown', _secCount + (_secCount === 1 ? ' section' : ' sections'), true));
   sm.innerHTML = chips.join('');
   // Rebind clicks on the new chip elements
   document.querySelectorAll('.r-chip[data-chip]').forEach(el => {
@@ -11977,6 +12083,75 @@ function _applyAnswerHintsIfOn() {
   }
 }
 
+// ── TEST SCORM TAB ────────────────────────────────────────
+
+var _tsCurrentSettings = null;
+var _tsCurrentQuestions = null;
+
+async function testScormFromFile(file) {
+  try {
+    const { questions, settings } = await loadScormPackage(file);
+    _tsCurrentSettings = settings;
+    _tsCurrentQuestions = questions;
+    _simulateReloadStore = {};
+    const html = buildQuizHTML(settings, questions, true);
+    document.getElementById('ts-quiz-title').textContent = settings.title || 'Quiz';
+    document.getElementById('ts-dropzone-state').style.display = 'none';
+    const ls = document.getElementById('ts-loaded-state');
+    ls.style.display = 'flex';
+    const ifr = document.getElementById('ts-ifr');
+    setTimeout(() => { ifr.srcdoc = html; }, 30);
+    const cb = document.getElementById('ts-show-answers');
+    if (cb) cb.checked = false;
+    toast('SCORM loaded: ' + (settings.title || file.name), 'ok');
+  } catch(e) {
+    toast('Could not load SCORM: ' + (e.message || e), 'err');
+  }
+}
+
+async function tsSimulateReload() {
+  if (!_tsCurrentSettings || !_tsCurrentQuestions) return;
+  const ifr = document.getElementById('ts-ifr');
+  ifr.srcdoc = '';
+  await new Promise(r => setTimeout(r, 120));
+  const html = buildQuizHTML(_tsCurrentSettings, _tsCurrentQuestions, true);
+  ifr.srcdoc = html;
+  toast('Page reloaded — quiz resumes from saved state', 'ok');
+}
+
+async function tsResetState() {
+  if (!_tsCurrentSettings || !_tsCurrentQuestions) return;
+  const ok = await cdlg({ icon: 'assets/svg/attention.svg', title: 'Reset Test State', msg: 'This will clear all saved attempt data so the quiz starts completely fresh. Are you sure?', confirmText: 'Reset', cancelText: 'Cancel' });
+  if (!ok) return;
+  _simulateReloadStore = {};
+  const ifr = document.getElementById('ts-ifr');
+  ifr.srcdoc = '';
+  await new Promise(r => setTimeout(r, 120));
+  const html = buildQuizHTML(_tsCurrentSettings, _tsCurrentQuestions, true);
+  ifr.srcdoc = html;
+  toast('Test state reset — quiz starts fresh', 'ok');
+}
+
+function tsClose() {
+  document.getElementById('ts-loaded-state').style.display = 'none';
+  document.getElementById('ts-dropzone-state').style.display = '';
+  const ifr = document.getElementById('ts-ifr');
+  ifr.srcdoc = '';
+  ifr.removeAttribute('srcdoc');
+  _tsCurrentSettings = null;
+  _tsCurrentQuestions = null;
+  const fi = document.getElementById('file-test-scorm');
+  if (fi) fi.value = '';
+}
+
+function tsToggleAnswerHints(on) {
+  var ifr = document.getElementById('ts-ifr');
+  try {
+    var body = ifr.contentDocument && ifr.contentDocument.body;
+    if (body) body.classList.toggle('show-answers', !!on);
+  } catch(e) {}
+}
+
 // ── SCORM LOG ─────────────────────────────────────────────
 
 var _scormLog = [];
@@ -13307,7 +13482,7 @@ async function doDownloadZipBundle() {
   const zip       = new JSZip();
   const imgFolder = zip.folder('images');
   const usedNames = {};
-  const blocks    = APP.questions.map((q, qi) => {
+  function _zipBlock(q, qi) {
     const { text, images } = _buildAikenBlock(q, qi);
     let finalText = text;
     for (const img of images) {
@@ -13316,10 +13491,25 @@ async function doDownloadZipBundle() {
       imgFolder.file(unique, img.data.split(',')[1], { base64: true });
     }
     return finalText;
-  });
+  }
+  const sections    = (APP.settings.sections || []).slice();
+  const hasSections = sections.length > 0 || APP.questions.some(q => q.section);
+  let parts;
+  if (hasSections) {
+    parts = [];
+    sections.forEach(sec => {
+      const secQs = APP.questions.filter(q => q.section === sec);
+      if (!secQs.length) return;
+      parts.push('SECTION: ' + sec);
+      secQs.forEach(q => parts.push(_zipBlock(q, APP.questions.indexOf(q))));
+    });
+    APP.questions.filter(q => !q.section).forEach(q => parts.push(_zipBlock(q, APP.questions.indexOf(q))));
+  } else {
+    parts = APP.questions.map((q, qi) => _zipBlock(q, qi));
+  }
   const base      = _quizFileBase();
   const titleLine = APP.settings.title ? 'TITLE: ' + APP.settings.title + '\n\n' : '';
-  zip.file(base + '.txt', titleLine + blocks.join('\n\n'));
+  zip.file(base + '.txt', titleLine + parts.join('\n\n'));
   const blob = await zip.generateAsync({ type: 'blob' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -13329,11 +13519,49 @@ async function doDownloadZipBundle() {
 
 function doDownloadAikenBank() {
   const titleLine = APP.settings.title ? 'TITLE: ' + APP.settings.title + '\n\n' : '';
-  const blocks    = APP.questions.map((q, qi) => _buildAikenBlock(q, qi).text);
-  const base      = _quizFileBase();
+  const sections  = (APP.settings.sections || []).slice();
+  const hasSections = sections.length > 0 || APP.questions.some(q => q.section);
+  let parts;
+  if (hasSections) {
+    parts = [];
+    sections.forEach(sec => {
+      const secQs = APP.questions.filter(q => q.section === sec);
+      if (!secQs.length) return;
+      parts.push('SECTION: ' + sec);
+      secQs.forEach(q => parts.push(_buildAikenBlock(q, APP.questions.indexOf(q)).text));
+    });
+    APP.questions.filter(q => !q.section).forEach(q => parts.push(_buildAikenBlock(q, APP.questions.indexOf(q)).text));
+  } else {
+    parts = APP.questions.map((q, qi) => _buildAikenBlock(q, qi).text);
+  }
+  const base = _quizFileBase();
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([titleLine + blocks.join('\n\n')], { type: 'text/plain' }));
+  a.href = URL.createObjectURL(new Blob([titleLine + parts.join('\n\n')], { type: 'text/plain' }));
   a.download = base + '.txt';
+  a.click();
+}
+
+function downloadBankFolderAsAiken() {
+  const folder = BANK.folders.find(f => f.id === BANK.selectedFolderId);
+  if (!folder) { toast('No folder selected', 'err'); return; }
+  const qs = BANK.questions.filter(q => q.folderId === BANK.selectedFolderId);
+  if (!qs.length) { toast('No questions in this folder', 'err'); return; }
+  const sections = [...new Set(qs.map(q => q.section).filter(Boolean))];
+  let parts = [];
+  if (sections.length) {
+    sections.forEach(sec => {
+      const secQs = qs.filter(q => q.section === sec);
+      parts.push('SECTION: ' + sec);
+      secQs.forEach(q => parts.push(_buildAikenBlock(q, qs.indexOf(q)).text));
+    });
+    qs.filter(q => !q.section).forEach(q => parts.push(_buildAikenBlock(q, qs.indexOf(q)).text));
+  } else {
+    parts = qs.map((q, qi) => _buildAikenBlock(q, qi).text);
+  }
+  const fname = (folder.name || 'bank-folder').replace(/[^a-z0-9]+/gi, '-').toLowerCase().replace(/^-+|-+$/g, '');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['TITLE: ' + folder.name + '\n\n' + parts.join('\n\n')], { type: 'text/plain' }));
+  a.download = fname + '.txt';
   a.click();
 }
 
@@ -13514,6 +13742,11 @@ function closeWelcome() {
     // localStorage may be unavailable (e.g. private mode); fall back to
     // always opening — that's still useful and not destructive.
     openWelcome();
+  }
+  const _loader = document.getElementById('app-loader');
+  if (_loader) {
+    _loader.classList.add('fade-out');
+    setTimeout(() => { if (_loader.parentNode) _loader.parentNode.removeChild(_loader); }, 350);
   }
 })();
 </script>
