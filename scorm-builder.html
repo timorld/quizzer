@@ -3982,10 +3982,20 @@ function showSection(sectionId) {
       byKey[key].total++;
       if (_isQuestionCorrect(q)) byKey[key].correct++;
     });
+    // Primary order: first-appearance in questionBank (the unshuffled original question
+    // array). This reflects the actual quiz structure regardless of how CONFIG.sectionsOrder
+    // was saved. CONFIG.sectionsOrder is used only for sections not present in questionBank.
+    var bankOrder = [];
+    questionBank.forEach(function(q) {
+      var k = q.section || '__unsectioned__';
+      if (k !== '__unsectioned__' && bankOrder.indexOf(k) === -1) bankOrder.push(k);
+    });
     var out = [];
+    bankOrder.forEach(function(s) { if (byKey[s]) out.push(byKey[s]); });
+    // Any sections in sectionsOrder but not in questionBank (edge case)
+    order.forEach(function(s) { if (byKey[s] && bankOrder.indexOf(s) === -1) out.push(byKey[s]); });
+    // Ungrouped last
     if (byKey.__unsectioned__) out.push(byKey.__unsectioned__);
-    order.forEach(function(s) { if (byKey[s]) out.push(byKey[s]); });
-    Object.keys(byKey).forEach(function(k) { if (k !== '__unsectioned__' && order.indexOf(k) === -1) out.push(byKey[k]); });
     out.forEach(function(b) { b.pct = b.total ? Math.round((b.correct / b.total) * 100) : 0; });
     return out;
   }
@@ -8388,7 +8398,11 @@ function _rRefreshChips() {
   chips.push(_rChipHtml('pool', s.randomizeQuestions !== false ? 'Shuffled' : 'In order', s.randomizeQuestions !== false));
   chips.push(_rChipHtml('after', s.showAnswerReview ? 'Review on' : 'No review on fail', !!s.showAnswerReview));
   const _secCount = (APP.settings.sections || []).length;
-  if (_secCount) chips.push(_rChipHtml('breakdown', _secCount + (_secCount === 1 ? ' section' : ' sections'), true));
+  if (_secCount) {
+    const _brkOn = !!s.sectionBreakdownOnResult;
+    const _brkLabel = _secCount + (_secCount === 1 ? ' section' : ' sections') + (_brkOn ? ' breakdown' : '');
+    chips.push(_rChipHtml('breakdown', _brkLabel, _brkOn));
+  }
   sm.innerHTML = chips.join('');
   // Rebind clicks on the new chip elements
   document.querySelectorAll('.r-chip[data-chip]').forEach(el => {
@@ -9246,24 +9260,19 @@ function _afbUpdateFooter() {
 
 // Push the section names used by a selection of bank questions onto
 // APP.settings.sections in the source folder's canonical order (folder.sections
-// first, then folder name fallback, then anything else). Keeps the quiz's
-// section list matching the bank's visible order after a pull.
+// first, then anything else used). Keeps the quiz's section list matching the
+// bank's visible order after a pull.
 function _pushSectionsToQuizInOrder(folderId, usedSet) {
   if (!usedSet || !usedSet.size) return;
   const folder = BANK.folders.find(f => f.id === folderId);
   const order  = (folder && Array.isArray(folder.sections)) ? folder.sections : [];
-  const fname  = folder ? folder.name : '';
   // Declared folder sections first
   order.forEach(s => {
     if (usedSet.has(s) && !APP.settings.sections.includes(s)) APP.settings.sections.push(s);
   });
-  // Folder name used as a fallback section label for unsectioned questions
-  if (fname && usedSet.has(fname) && !order.includes(fname) && !APP.settings.sections.includes(fname)) {
-    APP.settings.sections.push(fname);
-  }
   // Anything else used but not declared
   usedSet.forEach(s => {
-    if (s !== fname && order.indexOf(s) === -1 && !APP.settings.sections.includes(s)) APP.settings.sections.push(s);
+    if (order.indexOf(s) === -1 && !APP.settings.sections.includes(s)) APP.settings.sections.push(s);
   });
 }
 
@@ -9279,8 +9288,7 @@ function confirmAddFromBank() {
     const src = BANK.questions.find(q => q.id === bid);
     if (!src) return;
     if (!byFolder.has(src.folderId)) byFolder.set(src.folderId, new Set());
-    const folder = BANK.folders.find(f => f.id === src.folderId);
-    const name = src.section || (folder ? folder.name : '');
+    const name = src.section || '';
     if (name) byFolder.get(src.folderId).add(name);
   });
   byFolder.forEach((usedSet, folderId) => _pushSectionsToQuizInOrder(folderId, usedSet));
@@ -9288,8 +9296,7 @@ function confirmAddFromBank() {
   ids.forEach(bid => {
     const src = BANK.questions.find(q => q.id === bid);
     if (!src) return;
-    const folder = BANK.folders.find(f => f.id === src.folderId);
-    const sectionName = src.section || (folder ? folder.name : '');
+    const sectionName = src.section || '';
     const copy = Object.assign({}, src, { id: qid(), section: sectionName });
     if (!sectionName) delete copy.section;
     delete copy.folderId;
@@ -11137,7 +11144,7 @@ function addBankSelectionToQuiz() {
   ids.forEach(bid => {
     const src = BANK.questions.find(q => q.id === bid);
     if (!src) return;
-    const name = src.section || (folder ? folder.name : '');
+    const name = src.section || '';
     if (name) _usedSet.add(name);
   });
   _pushSectionsToQuizInOrder(BANK.selectedFolderId, _usedSet);
@@ -11145,7 +11152,7 @@ function addBankSelectionToQuiz() {
   ids.forEach(bid => {
     const src = BANK.questions.find(q => q.id === bid);
     if (!src) return;
-    const sectionName = src.section || (folder ? folder.name : '');
+    const sectionName = src.section || '';
     const copy = Object.assign({}, src, { id: qid(), section: sectionName });
     if (!sectionName) delete copy.section;
     delete copy.folderId;
@@ -11469,7 +11476,8 @@ function saveSettings() {
     customQuizMode: (document.querySelector('input[name="s-custom-mode"]:checked') || {}).value || 'quiz',
     manifestIdentifier: APP.settings.manifestIdentifier || '',
     preserveIdentifier: (document.getElementById('tog-preserve-id') && document.getElementById('tog-preserve-id').checked) || false,
-    scormVersion: (document.getElementById('adv-scorm-version') && document.getElementById('adv-scorm-version').value) || 'scorm12'
+    scormVersion: (document.getElementById('adv-scorm-version') && document.getElementById('adv-scorm-version').value) || 'scorm12',
+    sections: APP.settings.sections || []
   };
   // If the inspector is currently editing a batch item, mirror APP.settings
   // back to that item so the row chips, downloads, and re-renders all see it.
