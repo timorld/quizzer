@@ -41,11 +41,17 @@ function writePresets(data) {
   fs.writeFileSync(PRESETS_FILE, JSON.stringify(data, null, 2));
 }
 
+// Folder scopes ("tabs"). Existing folders without a scope are treated as 'academy'.
+const BANK_SCOPES = ['academy', 'gpuGenius'];
+function _normalizeScope(s) { return BANK_SCOPES.indexOf(s) >= 0 ? s : 'academy'; }
 function readBank() {
   try {
     const raw = JSON.parse(fs.readFileSync(BANK_FILE, 'utf8'));
+    const folders = Array.isArray(raw.folders) ? raw.folders : [];
+    // Backfill scope so old folders default to 'academy' the first time they're read.
+    folders.forEach(f => { f.scope = _normalizeScope(f.scope); });
     return {
-      folders: Array.isArray(raw.folders) ? raw.folders : [],
+      folders,
       questions: Array.isArray(raw.questions) ? raw.questions : []
     };
   } catch { return { folders: [], questions: [] }; }
@@ -53,6 +59,28 @@ function readBank() {
 function writeBank(data) {
   fs.writeFileSync(BANK_FILE, JSON.stringify(data, null, 2));
 }
+
+// One-time migration: persist the scope backfill to disk on startup so the
+// data file reflects the new schema, not just the in-memory view. Idempotent —
+// running again is a no-op once every folder already has a scope.
+function _migrateBankScopeOnDisk() {
+  try {
+    if (!fs.existsSync(BANK_FILE)) return;
+    const raw = JSON.parse(fs.readFileSync(BANK_FILE, 'utf8'));
+    const folders = Array.isArray(raw.folders) ? raw.folders : [];
+    let changed = false;
+    folders.forEach(f => {
+      if (BANK_SCOPES.indexOf(f.scope) < 0) { f.scope = 'academy'; changed = true; }
+    });
+    if (changed) {
+      writeBank({ folders, questions: Array.isArray(raw.questions) ? raw.questions : [] });
+      console.log('[bank] migrated ' + folders.length + ' folder(s) to default scope "academy"');
+    }
+  } catch (e) {
+    console.warn('[bank] scope migration skipped:', e && e.message);
+  }
+}
+_migrateBankScopeOnDisk();
 
 // ── MIDDLEWARE ────────────────────────────────────────────
 app.use(express.json({ limit: '100mb' }));
@@ -119,11 +147,22 @@ app.delete('/api/presets/:id', (req, res) => {
 app.get('/api/bank', (req, res) => res.json(readBank()));
 
 app.post('/api/bank/folders', (req, res) => {
-  const { id, name, parentId } = req.body || {};
+  const { id, name, parentId, sections, scope } = req.body || {};
   if (!id || !name) return res.status(400).json({ error: 'Missing id or name' });
   const bank = readBank();
   if (bank.folders.some(f => f.id === id)) return res.status(409).json({ error: 'Folder id already exists' });
-  bank.folders.push({ id, name: String(name), parentId: parentId || null, sortOrder: bank.folders.length });
+  // Inherit scope from parent when nesting, otherwise honor the client's scope.
+  // Scope cannot change after creation — keeps each tab's tree self-contained.
+  let folderScope = _normalizeScope(scope);
+  if (parentId) {
+    const parent = bank.folders.find(f => f.id === parentId);
+    if (!parent) return res.status(404).json({ error: 'parentId does not exist' });
+    folderScope = parent.scope;
+  }
+  const now = Date.now();
+  const entry = { id, name: String(name), parentId: parentId || null, sortOrder: bank.folders.length, updatedAt: now, scope: folderScope };
+  if (Array.isArray(sections)) entry.sections = sections.map(String).filter(Boolean);
+  bank.folders.push(entry);
   writeBank(bank);
   res.json({ ok: true });
 });
@@ -132,16 +171,25 @@ app.patch('/api/bank/folders/:id', (req, res) => {
   const bank = readBank();
   const f = bank.folders.find(f => f.id === req.params.id);
   if (!f) return res.status(404).json({ error: 'Folder not found' });
-  const { name, parentId, sortOrder } = req.body || {};
+  const { name, parentId, sortOrder, sections } = req.body || {};
   if (typeof name === 'string' && name.trim()) f.name = name.trim();
   if (parentId !== undefined) {
     if (parentId === f.id) return res.status(400).json({ error: 'Folder cannot be its own parent' });
-    // Prevent moving a folder into its own descendant
     const descendantIds = _collectDescendantFolderIds(bank.folders, f.id);
     if (parentId && descendantIds.has(parentId)) return res.status(400).json({ error: 'Cannot move folder into its own descendant' });
+    // Cross-scope moves are not allowed — folders stay in their tab.
+    if (parentId) {
+      const newParent = bank.folders.find(x => x.id === parentId);
+      if (!newParent) return res.status(404).json({ error: 'parentId does not exist' });
+      if ((newParent.scope || 'academy') !== (f.scope || 'academy')) {
+        return res.status(400).json({ error: 'Cannot move folder across tabs' });
+      }
+    }
     f.parentId = parentId || null;
   }
   if (typeof sortOrder === 'number') f.sortOrder = sortOrder;
+  if (Array.isArray(sections)) f.sections = sections.map(String).filter(Boolean);
+  f.updatedAt = Date.now();
   writeBank(bank);
   res.json({ ok: true });
 });
@@ -149,15 +197,24 @@ app.patch('/api/bank/folders/:id', (req, res) => {
 app.delete('/api/bank/folders/:id', (req, res) => {
   const bank = readBank();
   const id = req.params.id;
-  const childFolders = bank.folders.filter(f => f.parentId === id);
-  const childQuestions = bank.questions.filter(q => q.folderId === id);
-  if (childFolders.length || childQuestions.length) {
-    return res.status(409).json({ error: 'Folder is not empty', childFolders: childFolders.length, childQuestions: childQuestions.length });
+  const cascade = req.query.cascade === '1' || req.query.cascade === 'true';
+  const descendants = _collectDescendantFolderIds(bank.folders, id);
+  const allFolderIds = new Set([id, ...descendants]);
+  const childQuestions = bank.questions.filter(q => allFolderIds.has(q.folderId));
+  if (!cascade && (descendants.size || childQuestions.length)) {
+    return res.status(409).json({ error: 'Folder is not empty', childFolders: descendants.size, childQuestions: childQuestions.length });
   }
-  bank.folders = bank.folders.filter(f => f.id !== id);
+  bank.folders = bank.folders.filter(f => !allFolderIds.has(f.id));
+  bank.questions = bank.questions.filter(q => !allFolderIds.has(q.folderId));
   writeBank(bank);
-  res.json({ ok: true });
+  res.json({ ok: true, deletedFolders: allFolderIds.size, deletedQuestions: childQuestions.length });
 });
+
+function _bumpFolder(bank, folderId) {
+  if (!folderId) return;
+  const f = bank.folders.find(x => x.id === folderId);
+  if (f) f.updatedAt = Date.now();
+}
 
 app.post('/api/bank/questions', (req, res) => {
   const q = req.body;
@@ -165,8 +222,14 @@ app.post('/api/bank/questions', (req, res) => {
   if (!q.folderId) return res.status(400).json({ error: 'Missing folderId' });
   const bank = readBank();
   if (!bank.folders.some(f => f.id === q.folderId)) return res.status(404).json({ error: 'folderId does not exist' });
-  bank.questions = bank.questions.filter(x => x.id !== q.id);
-  bank.questions.push(q);
+  const existingIdx = bank.questions.findIndex(x => x.id === q.id);
+  if (existingIdx >= 0) {
+    // Update in place so editing a question doesn't reorder it to the bottom
+    bank.questions[existingIdx] = q;
+  } else {
+    bank.questions.push(q);
+  }
+  _bumpFolder(bank, q.folderId);
   writeBank(bank);
   res.json({ ok: true });
 });
@@ -179,14 +242,27 @@ app.patch('/api/bank/questions/:id', (req, res) => {
   if (patch.folderId && !bank.folders.some(f => f.id === patch.folderId)) {
     return res.status(404).json({ error: 'folderId does not exist' });
   }
+  // Block cross-scope question moves — questions stay in their tab.
+  if (patch.folderId) {
+    const oldF = bank.folders.find(f => f.id === bank.questions[idx].folderId);
+    const newF = bank.folders.find(f => f.id === patch.folderId);
+    if (oldF && newF && (oldF.scope || 'academy') !== (newF.scope || 'academy')) {
+      return res.status(400).json({ error: 'Cannot move questions across tabs' });
+    }
+  }
+  const oldFolder = bank.questions[idx].folderId;
   bank.questions[idx] = Object.assign({}, bank.questions[idx], patch, { id: bank.questions[idx].id });
+  _bumpFolder(bank, bank.questions[idx].folderId);
+  if (patch.folderId && oldFolder && oldFolder !== patch.folderId) _bumpFolder(bank, oldFolder);
   writeBank(bank);
   res.json({ ok: true });
 });
 
 app.delete('/api/bank/questions/:id', (req, res) => {
   const bank = readBank();
-  bank.questions = bank.questions.filter(q => q.id !== req.params.id);
+  const q = bank.questions.find(x => x.id === req.params.id);
+  bank.questions = bank.questions.filter(x => x.id !== req.params.id);
+  if (q) _bumpFolder(bank, q.folderId);
   writeBank(bank);
   res.json({ ok: true });
 });
