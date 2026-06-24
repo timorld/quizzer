@@ -1224,6 +1224,10 @@ body.bank-tab-active .r-topbar{display:none}
 .r-preset .r-save{border:1px solid var(--g150);background:#fff;border-radius:7px;padding:8px 11px;font-size:12.5px;font-weight:600;color:var(--g700);cursor:pointer;font-family:inherit}
 .r-preset .r-save:hover{background:#f3f4f6}
 .r-sum-wrap{background:#fff;border:1px solid var(--g100);border-radius:11px;box-shadow:var(--sh-card);padding:12px 13px}
+.r-sum-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;gap:10px}
+.r-sum-hd .r-sum-lbl{margin-bottom:0}
+.r-sum-hd .r-sum-expand{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;user-select:none;background:none;border:none;padding:0;font-family:inherit}
+.r-sum-hd .r-sum-expand:hover{color:var(--text)}
 .r-sum-lbl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a3a8b2;margin-bottom:9px}
 .r-summary{display:flex;flex-wrap:wrap;gap:6px}
 .r-chip{display:inline-flex;align-items:center;gap:6px;background:var(--g025);border:1px solid var(--g100);border-radius:20px;padding:4px 10px 4px 8px;font-size:12px;font-weight:600;color:var(--g700);transition:.12s;cursor:pointer;font-family:inherit}
@@ -3982,18 +3986,17 @@ function showSection(sectionId) {
       byKey[key].total++;
       if (_isQuestionCorrect(q)) byKey[key].correct++;
     });
-    // Primary order: first-appearance in questionBank (the unshuffled original question
-    // array). This reflects the actual quiz structure regardless of how CONFIG.sectionsOrder
-    // was saved. CONFIG.sectionsOrder is used only for sections not present in questionBank.
-    var bankOrder = [];
+    // Primary order: CONFIG.sectionsOrder — the quiz-builder's declared section
+    // order, which matches how sections are arranged in the canvas. Fallback to
+    // first-appearance in questionBank for any sections present in questions but
+    // missing from sectionsOrder (older quizzes built before sections were declared).
+    var out = [];
+    order.forEach(function(s) { if (byKey[s]) out.push(byKey[s]); });
     questionBank.forEach(function(q) {
       var k = q.section || '__unsectioned__';
-      if (k !== '__unsectioned__' && bankOrder.indexOf(k) === -1) bankOrder.push(k);
+      if (k === '__unsectioned__') return;
+      if (byKey[k] && order.indexOf(k) === -1 && out.indexOf(byKey[k]) === -1) out.push(byKey[k]);
     });
-    var out = [];
-    bankOrder.forEach(function(s) { if (byKey[s]) out.push(byKey[s]); });
-    // Any sections in sectionsOrder but not in questionBank (edge case)
-    order.forEach(function(s) { if (byKey[s] && bankOrder.indexOf(s) === -1) out.push(byKey[s]); });
     // Ungrouped last
     if (byKey.__unsectioned__) out.push(byKey.__unsectioned__);
     out.forEach(function(b) { b.pct = b.total ? Math.round((b.correct / b.total) * 100) : 0; });
@@ -7936,7 +7939,7 @@ function renderInspector() {
     '<div class="r-insp-hd"><div style="min-width:0;flex:1">' + _hdrEyebrow + '<span class="t">' + escH(_hdrTitle) + '</span></div>' + _hdrCollapse + '</div>'
     + '<div class="r-insp-scroll">'
     +   '<div class="r-preset"><div class="r-row"><button class="r-pdrop" onclick="rTogglePresetMenu(this)">' + R_ICO.flag + '<span>' + escH(presetName) + '</span><span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button><button class="r-save" onclick="rToggleSavePresetPopover(this)">Save as…</button></div></div>'
-    +   '<div class="r-sum-wrap"><div class="r-sum-lbl">At a glance</div><div class="r-summary" id="r-summary"></div></div>'
+    +   '<div class="r-sum-wrap"><div class="r-sum-hd"><div class="r-sum-lbl">At a glance</div><label class="r-sum-expand" title="Expand or collapse every settings card"><span id="r-sum-expand-label">Expand all</span><button type="button" class="r-tog" id="r-sum-expand-tog" role="switch" aria-label="Expand all settings cards"></button></label></div><div class="r-summary" id="r-summary"></div></div>'
     +   _rGroupHtml('scoring', 'Scoring', rowsScoring)
     +   _rGroupHtml('attempts', 'Attempts', rowsAttempts)
     +   _rGroupHtml('timing', 'Timing', rowsTiming)
@@ -8160,8 +8163,23 @@ function _rWireInspector() {
     h.onclick = e => {
       if (e.target.closest('.r-tog, .r-stepper, button')) return;
       h.parentElement.classList.toggle('closed');
+      _rSyncExpandAllTog();
     };
   });
+  // "At a glance" → Expand-all toggle (flips every settings card open or closed)
+  const expTog = document.getElementById('r-sum-expand-tog');
+  if (expTog) {
+    expTog.onclick = e => {
+      e.stopPropagation();
+      const anyClosed = !!document.querySelector('.r-inspector .r-grp.closed');
+      // If any are closed, expand them all. Otherwise collapse them all.
+      document.querySelectorAll('.r-inspector .r-grp').forEach(g => {
+        g.classList.toggle('closed', !anyClosed);
+      });
+      _rSyncExpandAllTog();
+    };
+    _rSyncExpandAllTog();
+  }
   // toggles → flip the legacy checkbox + fire its change + saveSettings
   document.querySelectorAll('.r-tog[data-mirror]').forEach(t => {
     t.onclick = e => {
@@ -8361,6 +8379,19 @@ function _rRenderSectionSplit() {
 }
 
 // Hide sub-rows when their parent toggle is off
+// Reflect the current expanded/collapsed state of the settings cards on the
+// "Expand all" toggle in the At-a-glance card. The toggle is "on" only when
+// every card is open; flipping it open/closes every card together.
+function _rSyncExpandAllTog() {
+  const tog = document.getElementById('r-sum-expand-tog');
+  const lbl = document.getElementById('r-sum-expand-label');
+  if (!tog) return;
+  const allOpen = !document.querySelector('.r-inspector .r-grp.closed');
+  tog.classList.toggle('on', allOpen);
+  tog.setAttribute('aria-checked', allOpen ? 'true' : 'false');
+  if (lbl) lbl.textContent = allOpen ? 'Collapse all' : 'Expand all';
+}
+
 // Resync every visible .r-tog mirror with its legacy checkbox. Called after
 // any bulk write to APP.settings (preset load, batch swap, etc.) so the
 // pill toggles in the inspector reflect the new state without needing a full
