@@ -4241,6 +4241,10 @@ function showSection(sectionId) {
     // When it's on, use the showCorrectAnswers setting as-is.
     var origShowCorrect = CONFIG.showCorrectAnswers;
     CONFIG.showCorrectAnswers = origShowCorrect || (hasPassed && !CONFIG.bestScoreTracking);
+    // The "Correct answer revealed" legend swatch only applies when the blue
+    // reveal color is actually used — hide it otherwise.
+    var revealItem = document.querySelector('#review-legend .rl-reveal-item');
+    if (revealItem) revealItem.style.display = CONFIG.showCorrectAnswers ? '' : 'none';
     // When section grouping is on, wrap items in per-section bands. We still
     // render items in their original index order (`idx`) so the question-number
     // chips inside review items stay consistent with the attempt order.
@@ -4751,6 +4755,12 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .review-card { background: #ffffff; border: 1px solid #c5c5c5; padding: 24px 32px 32px; }
 .review-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #e5e5e5; }
 .review-title { font-size: 18px; font-weight: 700; color: #1a1a1a; }
+.review-legend { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 8px 12px; margin: -12px 0 18px; background: #fafbfc; border: 1px solid #eef0f3; border-radius: 7px; font-size: 12px; color: #555; }
+.review-legend .rl-item { display: inline-flex; align-items: center; gap: 7px; }
+.review-legend .rl-sw { width: 14px; height: 10px; border-radius: 3px; flex: none; border: 1px solid; }
+.review-legend .rl-correct { background: #f2fbe4; border-color: #76B900; }
+.review-legend .rl-wrong   { background: #fff0f7; border-color: #890C58; }
+.review-legend .rl-reveal  { background: #f0f7ff; border-color: #3b82f6; }
 .review-item { border: 1px solid #e5e5e5; border-radius: 4px; padding: 16px 20px; margin-bottom: 12px; }
 .review-item.review-correct { border-left: 4px solid #76B900; }
 .review-item.review-incorrect { border-left: 4px solid #890C58; }
@@ -11701,6 +11711,7 @@ function buildQuizHTML(settings, questions, isTest, useRemote) {
     + '    <div id="review-screen" class="review-screen hidden">\n'
     + '      <div class="review-card">\n'
     + '        <div class="review-header"><button type="button" class="secondary nav-btn btn-previous" id="review-back-btn">&#8592; Back to Results</button><h2 class="review-title">Answer Review</h2></div>\n'
+    + '        <div class="review-legend" id="review-legend"><span class="rl-item"><span class="rl-sw rl-correct"></span>Your correct answer</span><span class="rl-item"><span class="rl-sw rl-wrong"></span>Your incorrect answer</span><span class="rl-item rl-reveal-item"><span class="rl-sw rl-reveal"></span>Correct answer revealed</span></div>\n'
     + '        <div id="review-list"></div>\n'
     + '      </div>\n'
     + '    </div>\n'
