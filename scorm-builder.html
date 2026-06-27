@@ -1043,15 +1043,17 @@ body.bank-tab-active .r-topbar{display:none}
 .welcome-modal .wel-video .vph:hover .play{transform:scale(1.06)}
 .welcome-modal .wel-video.live .vph{display:none}
 .welcome-modal .wel-feats{display:grid;grid-template-columns:1fr 1fr;gap:13px 16px;margin-top:20px}
-.welcome-modal .wel-bug-callout{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;margin-top:18px;background:var(--green-lt,#e8f5c8);border:1px solid #b3d97a;border-radius:9px}
-.welcome-modal .wel-bug-callout .wbc-icon{width:30px;height:30px;border-radius:8px;background:#fff;color:var(--green-600,#3f8500);display:flex;align-items:center;justify-content:center;flex:none;border:1px solid #b3d97a}
-.welcome-modal .wel-bug-callout .wbc-icon svg{width:16px;height:16px}
-.welcome-modal .wel-bug-callout .wbc-text{font-size:13px;line-height:1.5;color:#365314}
+.welcome-modal .wel-bug-callout{display:flex;gap:12px;align-items:center;padding:8px 14px;margin-top:18px;background:var(--green-lt,#e8f5c8);border:1px solid #b3d97a;border-radius:9px}
+.welcome-modal .wel-bug-callout .wbc-icon{width:28px;height:28px;border-radius:8px;background:#fff;color:var(--green-600,#3f8500);display:flex;align-items:center;justify-content:center;flex:none;border:1px solid #b3d97a}
+.welcome-modal .wel-bug-callout .wbc-icon svg{width:15px;height:15px}
+.welcome-modal .wel-bug-callout .wbc-text{font-size:13px;line-height:1.4;color:#365314}
 .welcome-modal .wel-bug-callout .wbc-text strong{color:#1a2e05;font-size:13px}
 .welcome-modal .wel-bug-callout a{color:var(--green-600,#3f8500);font-weight:700;text-decoration:underline;text-underline-offset:2px}
 .welcome-modal .wel-bug-callout a:hover{opacity:.8}
-.welcome-modal .wel-feat{display:flex;gap:11px;align-items:flex-start}
-.welcome-modal .wel-feat .fi{width:32px;height:32px;border-radius:8px;background:var(--green-lt);color:var(--green-600);display:flex;align-items:center;justify-content:center;flex:none}
+.welcome-modal .wel-feat{display:flex;gap:11px;align-items:flex-start;text-align:left;background:none;border:1px solid transparent;border-radius:8px;padding:7px 9px;cursor:pointer;font-family:inherit;color:inherit;transition:background .12s, border-color .12s}
+.welcome-modal .wel-feat:hover{background:#fafbfc;border-color:var(--g100)}
+.welcome-modal .wel-feat:hover .fi{background:var(--green);color:#fff}
+.welcome-modal .wel-feat .fi{width:32px;height:32px;border-radius:8px;background:var(--green-lt);color:var(--green-600);display:flex;align-items:center;justify-content:center;flex:none;transition:background .12s, color .12s}
 .welcome-modal .wel-feat .fi svg{width:17px;height:17px}
 .welcome-modal .wel-feat .ft{font-size:13px;font-weight:700;letter-spacing:-.1px;color:var(--text)}
 .welcome-modal .wel-feat .fd{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
@@ -2462,26 +2464,26 @@ body.bank-tab-active .r-topbar{display:none}
       <div class="wel-video" id="wel-video" data-vimeo="1204838612">
         <div class="vph" onclick="playWelcomeVideo()">
           <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="7 5 20 12 7 19 7 5"/></svg></div>
-          <div class="pl">Watch the tour</div>
+          <div class="pl">Watch this Guide</div>
         </div>
       </div>
       <div class="wel-feats">
-        <div class="wel-feat">
+        <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(2)" title="Jump to this chapter in the tour">
           <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></span>
-          <div><div class="ft">New design</div><div class="fd">A cleaner, faster, refreshed interface.</div></div>
-        </div>
-        <div class="wel-feat">
-          <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><rect x="4" y="9" width="16" height="11" rx="2"/></svg></span>
-          <div><div class="ft">Quiz sections</div><div class="fd">Group questions into collapsible sections.</div></div>
-        </div>
-        <div class="wel-feat">
+          <div><div class="ft">New design</div><div class="fd">Refreshed interface with all quiz settings in a sidebar panel.</div></div>
+        </button>
+        <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(46)" title="Jump to this chapter in the tour">
           <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M9 6l3 3 3-3"/><path d="M5 14h14"/><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg></span>
           <div><div class="ft">Question bank</div><div class="fd">Reuse questions from a shared library.</div></div>
-        </div>
-        <div class="wel-feat">
-          <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span>
-          <div><div class="ft">Settings in sidebar</div><div class="fd">Every quiz setting in one inspector panel.</div></div>
-        </div>
+        </button>
+        <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(85)" title="Jump to this chapter in the tour">
+          <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><rect x="4" y="9" width="16" height="11" rx="2"/></svg></span>
+          <div><div class="ft">Quiz sections</div><div class="fd">Group questions to break down student scores.</div></div>
+        </button>
+        <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(167)" title="Jump to this chapter in the tour">
+          <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><line x1="9" y1="13" x2="15" y2="13"/></svg></span>
+          <div><div class="ft">Batch Page</div><div class="fd">Work on multiple quizzes simultaneously.</div></div>
+        </button>
       </div>
       <div class="wel-bug-callout">
         <span class="wbc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M12 6V3"/><path d="M9 9 6 6"/><path d="m15 9 3-3"/><path d="M3 13h5"/><path d="M16 13h5"/><path d="M6 19l3-2"/><path d="m18 19-3-2"/></svg></span>
@@ -13746,6 +13748,34 @@ function playWelcomeVideo() {
   if (!id) return;
   v.insertAdjacentHTML('beforeend',
     '<iframe src="https://player.vimeo.com/video/' + escH(id) + '?autoplay=1&title=0&byline=0&portrait=0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>');
+  v.classList.add('live');
+}
+
+// Jump the welcome modal video to a specific timestamp (in seconds). If the
+// video isn't loaded yet, swap in a fresh iframe pointed at that time. If
+// it's already playing, use the Vimeo Player postMessage API to seek without
+// reloading.
+function playWelcomeVideoAt(seconds) {
+  const v = document.getElementById('wel-video');
+  if (!v) return;
+  const id = v.dataset.vimeo || '';
+  if (!id) return;
+  const t = Math.max(0, parseInt(seconds, 10) || 0);
+  if (v.classList.contains('live')) {
+    const f = v.querySelector('iframe');
+    if (f && f.contentWindow) {
+      try {
+        f.contentWindow.postMessage(JSON.stringify({ method: 'setCurrentTime', value: t }), '*');
+        f.contentWindow.postMessage(JSON.stringify({ method: 'play' }), '*');
+        return;
+      } catch (_) {}
+    }
+    // Fallback: rebuild the iframe with the new time fragment.
+    const old = v.querySelector('iframe'); if (old) old.remove();
+    v.classList.remove('live');
+  }
+  v.insertAdjacentHTML('beforeend',
+    '<iframe src="https://player.vimeo.com/video/' + escH(id) + '?autoplay=1&title=0&byline=0&portrait=0#t=' + t + 's" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>');
   v.classList.add('live');
 }
 
