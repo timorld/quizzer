@@ -7962,6 +7962,10 @@ function renderInspector() {
   _rWireInspector();
   _rSyncSubs();
   _rRefreshChips();
+  // Repopulate the per-section quota sub-card now that the inspector HTML has
+  // been rebuilt — without this, importing a quiz (which schedules a full
+  // renderInspector via setTimeout) wipes the previously-rendered split UI.
+  if (typeof _rRenderSectionSplit === 'function') _rRenderSectionSplit();
 }
 
 // Determine which preset name to show in the dropdown button.
