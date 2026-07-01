@@ -438,6 +438,13 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 @media(max-width:780px){.afb-layout{grid-template-columns:1fr;height:auto}.afb-folders{max-height:240px}}
 .afb-folders{border-right:1px solid var(--border);padding:12px;overflow:auto;background:#fafbfc}
 .afb-questions{padding:14px 16px;overflow:auto}
+.afb-parent-view{display:flex;flex-direction:column;gap:6px}
+.afb-parent-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--border);border-radius:7px;background:#fff;cursor:pointer;transition:border-color .12s, background .12s;font-family:inherit}
+.afb-parent-row:hover{border-color:var(--green);background:#fafbf7}
+.afb-parent-row svg{width:18px;height:18px;color:var(--green-600);flex:none}
+.afb-parent-row .afb-parent-name{flex:1;font-size:13.5px;font-weight:600;color:var(--text);word-break:break-word}
+.afb-parent-row .afb-parent-meta{font-size:12px;color:var(--muted);white-space:nowrap}
+.afb-parent-row .afb-parent-sel{font-size:11px;font-weight:700;color:var(--green-600);background:var(--green-lt);padding:2px 7px;border-radius:9px;white-space:nowrap}
 .afb-q-row{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;background:#fafbfc;transition:background .1s,border-color .1s;cursor:pointer}
 .afb-q-row:hover{background:#fff;border-color:#cdd0d4}
 .afb-q-row.afb-selected{background:var(--green-lt);border-color:var(--green)}
@@ -2692,7 +2699,7 @@ body.bank-tab-active .r-topbar{display:none}
               </div>
               <input class="form-input bank-search" id="afb-q-search" type="text" placeholder="Search questions…" oninput="afbFilterQuestions(this.value)" style="max-width:200px;margin-bottom:0">
             </div>
-            <label style="display:inline-flex;align-items:center;gap:8px;padding:6px 10px;margin-bottom:8px;font-size:13px;color:var(--text);cursor:pointer">
+            <label id="afb-select-all-row" style="display:inline-flex;align-items:center;gap:8px;padding:6px 10px;margin-bottom:8px;font-size:13px;color:var(--text);cursor:pointer">
               <input type="checkbox" id="afb-select-all" onchange="afbToggleSelectAllInFolder(this.checked)"> Select all in this folder
             </label>
             <div id="afb-q-list"></div>
@@ -9325,8 +9332,15 @@ const ADD_FROM_BANK = {
   folderId: null,
   folderFilter: '',
   questionFilter: '',
-  scope: 'academy' // active bank tab inside the picker
+  scope: 'academy', // active bank tab inside the picker
+  expanded: new Set() // folder ids whose subfolders are visible in the tree
 };
+
+function afbToggleFolder(id) {
+  if (ADD_FROM_BANK.expanded.has(id)) ADD_FROM_BANK.expanded.delete(id);
+  else ADD_FROM_BANK.expanded.add(id);
+  _afbRenderFolders();
+}
 
 async function openAddFromBank() {
   await fetchBank();
@@ -9340,6 +9354,11 @@ async function openAddFromBank() {
   ADD_FROM_BANK.folderId = _selInScope || (_firstRoot && _firstRoot.id) || null;
   ADD_FROM_BANK.folderFilter = '';
   ADD_FROM_BANK.questionFilter = '';
+  // Auto-expand all root folders on open + the ancestor chain of any pre-selected folder.
+  ADD_FROM_BANK.expanded = new Set();
+  BANK.folders.filter(f => !f.parentId && _bankFolderScope(f) === ADD_FROM_BANK.scope)
+    .forEach(f => ADD_FROM_BANK.expanded.add(f.id));
+  if (ADD_FROM_BANK.folderId) _afbExpandAncestors(ADD_FROM_BANK.folderId);
   document.getElementById('afb-folder-search').value = '';
   document.getElementById('afb-q-search').value = '';
   _afbRenderScopeTabs();
@@ -9347,6 +9366,15 @@ async function openAddFromBank() {
   _afbRenderQuestions();
   _afbUpdateFooter();
   showModal('modal-add-from-bank');
+}
+
+function _afbExpandAncestors(id) {
+  let cur = BANK.folders.find(f => f.id === id);
+  let safety = 50;
+  while (cur && cur.parentId && safety-- > 0) {
+    ADD_FROM_BANK.expanded.add(cur.parentId);
+    cur = BANK.folders.find(f => f.id === cur.parentId);
+  }
 }
 
 function _afbRenderScopeTabs() {
@@ -9370,6 +9398,12 @@ function _afbSwitchScope(scope) {
     ADD_FROM_BANK.folderId = (firstRoot && firstRoot.id) || null;
   }
   ADD_FROM_BANK.folderFilter = '';
+  // Reset expansion state and open every root of the new scope so the tree
+  // starts from a clean, fully-expanded top level.
+  ADD_FROM_BANK.expanded = new Set();
+  BANK.folders.filter(f => !f.parentId && _bankFolderScope(f) === scope)
+    .forEach(f => ADD_FROM_BANK.expanded.add(f.id));
+  if (ADD_FROM_BANK.folderId) _afbExpandAncestors(ADD_FROM_BANK.folderId);
   const fsearch = document.getElementById('afb-folder-search'); if (fsearch) fsearch.value = '';
   _afbRenderScopeTabs();
   _afbRenderFolders();
@@ -9397,16 +9431,21 @@ function _afbFoldersHtml(parentId, visibleSet) {
   return kids.map(f => {
     const hasKids = _bankFolderChildren(f.id).length > 0;
     const isSelected = ADD_FROM_BANK.folderId === f.id;
+    // When a filter is active, force-open the chain so matches are reachable.
+    const isOpen = visibleSet ? true : ADD_FROM_BANK.expanded.has(f.id);
     const count = _bankQuestionCount(f.id);
     // Count how many selected questions live in this folder (helps when navigating away)
     const selInFolder = BANK.questions.filter(q => q.folderId === f.id && ADD_FROM_BANK.selectedIds.has(q.id)).length;
+    const chevron = hasKids
+      ? '<span class="bank-folder-toggle' + (isOpen ? ' open' : '') + '" onclick="event.stopPropagation();afbToggleFolder(\'' + f.id + '\')" role="button" aria-label="Toggle">▶</span>'
+      : '<span class="bank-folder-toggle leaf">▶</span>';
     return '<div class="bank-folder' + (isSelected ? ' selected' : '') + '" onclick="afbSelectFolder(\'' + f.id + '\')">'
-      + '<span class="bank-folder-toggle' + (hasKids ? ' open' : ' leaf') + '">▶</span>'
+      + chevron
       + '<svg class="bank-folder-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
       + '<span class="bank-folder-name">' + escH(f.name) + '</span>'
       + (selInFolder ? '<span class="bank-folder-count" style="color:var(--green-dk);font-weight:700">' + selInFolder + '✓</span>' : (count ? '<span class="bank-folder-count">' + count + '</span>' : ''))
       + '</div>'
-      + (hasKids ? '<div class="bank-folder-children">' + _afbFoldersHtml(f.id, visibleSet) + '</div>' : '');
+      + (hasKids && isOpen ? '<div class="bank-folder-children">' + _afbFoldersHtml(f.id, visibleSet) + '</div>' : '');
   }).join('');
 }
 
@@ -9417,6 +9456,9 @@ function afbSelectFolder(id) {
     if (inp) inp.value = '';
   }
   ADD_FROM_BANK.folderId = id;
+  // If the newly-selected folder has subfolders, auto-open it so the child
+  // rows in the tree stay in sync with the parent-view we're about to render.
+  if (_bankFolderChildren(id).length) ADD_FROM_BANK.expanded.add(id);
   _afbRenderFolders();
   _afbRenderQuestions();
 }
@@ -9436,12 +9478,37 @@ function _afbRenderQuestions() {
   const filter = (ADD_FROM_BANK.questionFilter || '').trim().toLowerCase();
   const qs = filter ? all.filter(q => _stripHtml(q.question || '').toLowerCase().includes(filter)) : all;
   const countEl = document.getElementById('afb-q-count');
+  const list = document.getElementById('afb-q-list');
+  const selAllRow = document.getElementById('afb-select-all-row');
+  const subfolders = _bankFolderChildren(ADD_FROM_BANK.folderId);
+  // Parent-folder view: when the selected folder has subfolders but no own
+  // questions, render a browsable list of those subfolders instead of the
+  // "This folder is empty" message — mirrors the main Bank tab behavior.
+  if (!all.length && subfolders.length && !filter) {
+    countEl.textContent = subfolders.length + ' subfolder' + (subfolders.length === 1 ? '' : 's');
+    if (selAllRow) selAllRow.style.display = 'none';
+    list.innerHTML = '<div class="afb-parent-view">' + subfolders.map(f => {
+      const qc = _bankQuestionCount(f.id);
+      const subc = _bankFolderChildren(f.id).length;
+      const meta = (qc ? qc + ' question' + (qc === 1 ? '' : 's') : '')
+        + (subc ? (qc ? ' · ' : '') + subc + ' subfolder' + (subc === 1 ? '' : 's') : '')
+        + (!qc && !subc ? 'Empty' : '');
+      const selInFolder = BANK.questions.filter(q => q.folderId === f.id && ADD_FROM_BANK.selectedIds.has(q.id)).length;
+      return '<div class="afb-parent-row" onclick="afbSelectFolder(\'' + f.id + '\')">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>'
+        + '<span class="afb-parent-name">' + escH(f.name) + '</span>'
+        + '<span class="afb-parent-meta">' + escH(meta) + '</span>'
+        + (selInFolder ? '<span class="afb-parent-sel">' + selInFolder + ' selected</span>' : '')
+        + '</div>';
+    }).join('') + '</div>';
+    return;
+  }
   if (filter) countEl.textContent = qs.length + ' of ' + all.length + ' match';
   else countEl.textContent = all.length + ' question' + (all.length === 1 ? '' : 's');
+  if (selAllRow) selAllRow.style.display = '';
   // "Select all" reflects whether every (filtered) question is selected
   const selAll = document.getElementById('afb-select-all');
   if (selAll) selAll.checked = qs.length > 0 && qs.every(q => ADD_FROM_BANK.selectedIds.has(q.id));
-  const list = document.getElementById('afb-q-list');
   if (!qs.length) {
     list.innerHTML = '<div class="bank-empty">' + (filter ? 'No questions match.' : 'This folder is empty.') + '</div>';
     return;
