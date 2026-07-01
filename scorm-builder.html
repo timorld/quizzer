@@ -1264,7 +1264,9 @@ body.bank-tab-active .r-topbar{display:none}
 .r-stepper button{width:28px;height:30px;border:none;background:#fff;color:var(--g600);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 .r-stepper button:hover{background:#f1f2f4;color:var(--text)}
 .r-stepper button:disabled{opacity:.3;cursor:not-allowed}
-.r-stepper .v{min-width:38px;text-align:center;font-size:13px;font-weight:700;border-left:1px solid var(--g100);border-right:1px solid var(--g100);padding:0 4px;height:30px;display:flex;align-items:center;justify-content:center}
+.r-stepper .v{min-width:38px;width:42px;text-align:center;font-size:13px;font-weight:700;border-top:none;border-bottom:none;border-left:1px solid var(--g100);border-right:1px solid var(--g100);padding:0 4px;height:30px;background:#fff;color:var(--text);font-family:inherit;outline:none;-moz-appearance:textfield}
+.r-stepper .v::-webkit-outer-spin-button,.r-stepper .v::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.r-stepper .v:focus{background:var(--green-lt,#e8f5c8);border-left-color:var(--green);border-right-color:var(--green)}
 .r-stepper .u{font-size:11px;color:var(--muted);padding:0 8px 0 7px;white-space:nowrap}
 .r-sub{margin:2px 0 4px 0;padding:10px 12px;background:var(--g025);border:1px solid #eef0f3;border-radius:8px}
 .r-sec-split-modes{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap}
@@ -4005,31 +4007,112 @@ function showSection(sectionId) {
     return out;
   }
 
-  // Pick the color tier for a section's percentage against the passing threshold.
-  // ≥ pass → green; ≥ 60% of pass → amber; otherwise red.
+  // Classify a section's percentage into a tier label that drives its color
+  // and chip text. "strong" ≥ 85% (well above pass), "pass" ≥ pass threshold
+  // (on track), "fail" below threshold (needs review).
   function _secTier(pct, passingPct) {
     var pass = passingPct || 70;
+    if (pct >= 85) return 'strong';
     if (pct >= pass) return 'pass';
-    if (pct >= Math.round(pass * 0.6)) return 'amber';
     return 'fail';
   }
+  function _secTierLabel(tier) {
+    if (tier === 'strong') return 'Strong';
+    if (tier === 'pass')   return 'On track';
+    return 'Needs review';
+  }
+  function _secEsc(s) {
+    return String(s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; });
+  }
 
-  // Build the HTML for the per-section block on the result screen.
+  // View state for the result-screen breakdown ("list" vs "cards"). Persisted
+  // in localStorage so the learner's last choice survives retries.
+  var _secViewMode = 'list';
+  try { var _v = localStorage.getItem('quizzer_sec_view'); if (_v === 'cards' || _v === 'list') _secViewMode = _v; } catch (_) {}
+  // Cache of the most recently computed breakdown so the view toggle can
+  // re-render without re-running calculateScore.
+  var _secLastBrk = null;
+
+  function setSecView(mode) {
+    _secViewMode = (mode === 'cards') ? 'cards' : 'list';
+    try { localStorage.setItem('quizzer_sec_view', _secViewMode); } catch (_) {}
+    var host = document.getElementById('section-breakdown-host');
+    if (!host || !_secLastBrk) return;
+    host.innerHTML = _renderSectionBreakdownHTML(_secLastBrk, CONFIG.passingPercentage);
+  }
+  // Expose the toggle so onclick handlers in the rendered HTML can reach it.
+  window.setSecView = setSecView;
+
+  // Build the HTML for the per-section block on the result screen. Renders
+  // either a list view (rank + name + bar + percentage chip) or a cards view
+  // (2-column grid of bigger tiles), controlled by _secViewMode.
   function _renderSectionBreakdownHTML(brk, passingPct) {
     if (!brk.length) return '';
-    var html = '<div class="sec-block"><p class="sec-block-title">By section</p>';
-    brk.forEach(function(b) {
-      var tier = _secTier(b.pct, passingPct);
-      var barCls = tier === 'pass' ? '' : (tier === 'amber' ? ' amber' : ' red');
-      var pctCls = tier === 'pass' ? '' : (tier === 'amber' ? ' amber' : ' red');
-      var name = b.name.replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; });
-      html += '<div class="sec-row">'
-        + '<span class="sec-name' + (b.key === '__unsectioned__' ? ' ungrouped' : '') + '" title="' + name + '">' + name + '</span>'
-        + '<div class="sec-bar"><div class="sec-bar-fill' + barCls + '" style="width:' + b.pct + '%"></div></div>'
-        + '<span class="sec-frac">' + b.correct + ' / ' + b.total + '</span>'
-        + '<span class="sec-pct' + pctCls + '">' + b.pct + '%</span>'
-        + '</div>';
-    });
+    var pass = passingPct || 70;
+    // Rank ordering for display: sort by percentage descending so the
+    // "strongest" sections lead. (The internal canonical order is preserved
+    // elsewhere — this only affects the visual ranking on the result screen.)
+    var ranked = brk.slice().sort(function(a, b) { return b.pct - a.pct; });
+    var isList = _secViewMode !== 'cards';
+    var ICO_LIST = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
+    var ICO_CARDS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>';
+    var html = '<div class="sec-block">'
+      + '<div class="sec-block-hd">'
+      +   '<div class="sec-block-title">By section</div>'
+      +   '<div class="sec-block-meta">'
+      +     '<span class="sec-threshold">Pass mark ' + pass + '%</span>'
+      +     '<div class="sec-view-toggle">'
+      +       '<button type="button" class="' + (isList ? 'on' : '') + '" onclick="setSecView(\'list\')" title="List view">' + ICO_LIST + 'List</button>'
+      +       '<button type="button" class="' + (!isList ? 'on' : '') + '" onclick="setSecView(\'cards\')" title="Cards view">' + ICO_CARDS + 'Cards</button>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="sec-block-sub">Dotted line marks the ' + pass + '% pass mark · ranked by mastery</div>';
+
+    if (isList) {
+      html += '<div class="sec-list">';
+      ranked.forEach(function(b, i) {
+        var tier = _secTier(b.pct, passingPct);
+        var name = _secEsc(b.name);
+        var rank = (i + 1) < 10 ? '0' + (i + 1) : '' + (i + 1);
+        html += '<div class="sec-list-row">'
+          + '<div class="sec-rank">' + rank + '</div>'
+          + '<div class="sec-mid">'
+          +   '<div class="sec-mid-hd">'
+          +     '<span class="sec-name' + (b.key === '__unsectioned__' ? ' ungrouped' : '') + '" title="' + name + '">' + name + '</span>'
+          +     '<span class="sec-frac">' + b.correct + ' / ' + b.total + ' correct</span>'
+          +   '</div>'
+          +   '<div class="sec-bar">'
+          +     '<div class="sec-bar-fill tier-' + tier + '" style="width:' + b.pct + '%"></div>'
+          +     '<div class="sec-bar-mark" style="left:' + pass + '%"></div>'
+          +   '</div>'
+          + '</div>'
+          + '<div class="sec-end">'
+          +   '<div class="sec-pct tier-' + tier + '">' + b.pct + '%</div>'
+          +   '<span class="sec-chip tier-' + tier + '">' + _secTierLabel(tier) + '</span>'
+          + '</div>'
+          + '</div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div class="sec-cards">';
+      ranked.forEach(function(b) {
+        var tier = _secTier(b.pct, passingPct);
+        var name = _secEsc(b.name);
+        html += '<div class="sec-card">'
+          + '<div class="sec-card-hd">'
+          +   '<span class="sec-name' + (b.key === '__unsectioned__' ? ' ungrouped' : '') + '">' + name + '</span>'
+          +   '<span class="sec-chip tier-' + tier + '">' + _secTierLabel(tier) + '</span>'
+          + '</div>'
+          + '<div class="sec-card-pct">'
+          +   '<span class="sec-pct tier-' + tier + '">' + b.pct + '%</span>'
+          +   '<span class="sec-frac">' + b.correct + ' / ' + b.total + ' correct</span>'
+          + '</div>'
+          + '<div class="sec-bar"><div class="sec-bar-fill tier-' + tier + '" style="width:' + b.pct + '%"></div></div>'
+          + '</div>';
+      });
+      html += '</div>';
+    }
     html += '</div>';
     return html;
   }
@@ -4198,6 +4281,7 @@ function showSection(sectionId) {
     var brkHost = document.getElementById('section-breakdown-host');
     if (brkHost) {
       brkHost.innerHTML = '';
+      _secLastBrk = null;
       if (CONFIG.sectionBreakdownOnResult) {
         var brk = _computeSectionBreakdown();
         var isPreview = CONFIG.previewScreen === 'pass' || CONFIG.previewScreen === 'fail';
@@ -4205,6 +4289,7 @@ function showSection(sectionId) {
         // fall back to a 3-section mock so the breakdown can still be demoed.
         if (isPreview && brk.length < 2) brk = _mockSectionBreakdown(passed);
         if (brk.length >= 2) {
+          _secLastBrk = brk;
           brkHost.innerHTML = _renderSectionBreakdownHTML(brk, CONFIG.passingPercentage);
         }
       }
@@ -4735,11 +4820,11 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .cert-link-btn { display: inline-flex; align-items: center; gap: 10px; color: #76B900; font-weight: 700; font-size: 18px; text-decoration: underline; text-underline-offset: 3px; border: none; background: linear-gradient(105deg, #76B900 40%, #b8e05a 50%, #76B900 60%) no-repeat; background-size: 250% 100%; background-position: -250% center; background-clip: text; -webkit-background-clip: text; animation: cert-shimmer 0.9s ease-in-out 0.5s 1 forwards; transition: opacity .15s; }
 .cert-link-btn svg { flex-shrink: 0; }
 .cert-link-btn:hover { opacity: 0.75; }
-.stats-grid { display: flex; width: 100%; margin-bottom: 20px; }
-.stat-item { flex: 1; background: transparent; border: none; border-right: 1px solid #e5e5e5; padding: 10px 12px; text-align: center; }
-.stat-item:last-child { border-right: none; }
-.stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #888; margin-bottom: 3px; }
-.stat-value { font-size: 18px; font-weight: 700; }
+.stats-grid { display: flex; width: 100%; margin: 30px 0; border-top: 1px solid #E4E4E4; border-bottom: 1px solid #E4E4E4; }
+.stat-item { flex: 1; background: transparent; border: none; padding: 18px 8px; text-align: center; }
+.stat-item + .stat-item { border-left: 1px solid #E4E4E4; }
+.stat-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #6B6B6B; margin-bottom: 6px; }
+.stat-value { font-size: 22px; font-weight: 700; }
 .stat-value.correct { color: #76B900; }
 .stat-value.incorrect { color: #890C58; }
 .stat-value.neutral { color: #1a1a1a; }
@@ -4751,7 +4836,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .result-attempts-remaining { font-size: 13px; color: #555; font-weight: 500; }
 .question-text img, #question-text img { max-width: 100%; max-height: 400px !important; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 15px auto; border-radius: 8px; }
 .option-text img { max-width: 100%; max-height: 200px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 10px 0; border-radius: 4px; border: 1px solid #555; }
-@media (max-width: 600px) { .details-grid { grid-template-columns: 1fr; } .stats-grid { flex-direction: column; } .stat-item { border-right: none; border-bottom: 1px solid #e5e5e5; } .stat-item:last-child { border-bottom: none; } .card-title { font-size: 20px; } .result-title { font-size: 26px; } }
+@media (max-width: 600px) { .details-grid { grid-template-columns: 1fr; } .stats-grid { flex-direction: column; } .stat-item + .stat-item { border-left: none; border-top: 1px solid #E4E4E4; } .card-title { font-size: 20px; } .result-title { font-size: 26px; } }
 @media (max-width: 768px) { .info-bar { flex-wrap: wrap; } .question-text { font-size: 1.2rem; } .question-text img, #question-text img { max-height: 200px; } .option-text img { max-width: 150px; max-height: 120px; } .navigation { flex-direction: column; } button { width: 100%; } .quiz-zoom-panel button { width: auto; } }
 .btn-review { background-color: #ffffff; color: #76B900; border: 1px solid #76B900; }
 .btn-review:hover { background-color: #f2fbe4; }
@@ -4827,20 +4912,54 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .hs-clear-btn{cursor:pointer}.hs-clear-btn:disabled{opacity:.4;cursor:not-allowed}
 
 /* ── Section breakdown on result screen ── */
+/* ── Section breakdown (result screen) ── */
 .sec-block{width:100%;margin:0 0 18px 0}
-.sec-block-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#555;margin:0 0 10px}
-.sec-row{display:flex;align-items:center;gap:14px;padding:9px 0}
-.sec-row + .sec-row{border-top:1px solid #eef0f3}
-.sec-name{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#1a1a1a;flex:0 0 32%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
-.sec-name.ungrouped{text-transform:none;font-style:italic;font-weight:600;color:#666;letter-spacing:0}
-.sec-bar{flex:1;height:9px;background:#f3f4f6;border-radius:6px;overflow:hidden;position:relative}
-.sec-bar-fill{height:100%;background:#76B900;border-radius:6px;transition:width .25s}
-.sec-bar-fill.amber{background:#d97706}
-.sec-bar-fill.red{background:#890C58}
-.sec-pct{font-size:13px;font-weight:700;color:#1a1a1a;width:50px;text-align:right;font-variant-numeric:tabular-nums}
-.sec-pct.amber{color:#d97706}
-.sec-pct.red{color:#890C58}
-.sec-frac{font-size:12px;color:#666;font-variant-numeric:tabular-nums;width:56px;text-align:right}
+.sec-block-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+.sec-block-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#1A1A1A;margin:0}
+.sec-block-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sec-threshold{font-size:12px;color:#6B6B6B}
+.sec-view-toggle{display:flex;border:1px solid #D4D4D4}
+.sec-view-toggle button{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:none;cursor:pointer;font:inherit;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#fff;color:#1A1A1A;font-family:inherit;line-height:1}
+.sec-view-toggle button + button{border-left:1px solid #D4D4D4}
+.sec-view-toggle button.on{background:#1A1A1A;color:#fff}
+.sec-view-toggle button svg{width:13px;height:13px;flex:none}
+.sec-block-sub{font-size:11px;color:#A7A7A7;margin-bottom:10px;line-height:1.4}
+
+/* List view */
+.sec-list{margin:0}
+.sec-list-row{display:grid;grid-template-columns:24px 1fr 96px;gap:14px;align-items:center;padding:11px 0;border-bottom:1px solid #F0F0F0}
+.sec-list-row:last-child{border-bottom:none}
+.sec-rank{font-family:'Roboto Mono',ui-monospace,monospace;font-size:13px;font-weight:500;color:#C4C4C4;text-align:left}
+.sec-mid{min-width:0}
+.sec-mid-hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;gap:10px}
+.sec-name{font-size:14px;font-weight:600;color:#1A1A1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.sec-name.ungrouped{font-style:italic;font-weight:500;color:#6B6B6B}
+.sec-frac{font-size:12px;color:#6B6B6B;font-variant-numeric:tabular-nums;flex:none;white-space:nowrap}
+.sec-bar{position:relative;height:8px;background:#EDEDED}
+.sec-bar-fill{position:absolute;left:0;top:0;bottom:0;background:#76B900;transition:width .25s}
+.sec-bar-fill.tier-strong,.sec-bar-fill.tier-pass{background:#76B900}
+.sec-bar-fill.tier-fail{background:#EF9100}
+.sec-bar-mark{position:absolute;top:-3px;bottom:-3px;width:0;border-left:2px dotted #A7A7A7;pointer-events:none}
+.sec-end{text-align:right;min-width:0}
+.sec-pct{font-size:17px;font-weight:700;color:#1A1A1A;font-variant-numeric:tabular-nums;line-height:1}
+.sec-pct.tier-strong{color:#76B900}
+.sec-pct.tier-fail{color:#B86A00}
+.sec-chip{display:inline-block;margin-top:6px;padding:2px 7px;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;line-height:1.4}
+.sec-chip.tier-strong{background:#F1F7E6;color:#4d7a00}
+.sec-chip.tier-pass{background:#F7F7F7;color:#6B6B6B}
+.sec-chip.tier-fail{background:#FCEFD9;color:#B86A00}
+
+/* Cards view */
+.sec-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.sec-card{border:1px solid #E4E4E4;padding:18px;background:#fff}
+.sec-card-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;min-height:34px}
+.sec-card-hd .sec-name{font-size:14px;font-weight:600;color:#1A1A1A;line-height:1.3;white-space:normal;overflow:visible;text-overflow:clip}
+.sec-card-hd .sec-chip{margin-top:0;flex:none;white-space:nowrap}
+.sec-card-pct{display:flex;align-items:baseline;gap:9px;margin:16px 0 12px}
+.sec-card-pct .sec-pct{font-size:32px;line-height:1}
+.sec-card-pct .sec-frac{font-size:13px}
+.sec-card .sec-bar{height:6px}
+@media (max-width: 600px) { .sec-cards{grid-template-columns:1fr} }
 .weak-callout{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;background:#fef3c7;border:1px solid #fcd34d;border-radius:9px;margin:0 0 16px;width:100%;box-sizing:border-box}
 .weak-callout svg{flex:none;width:24px;height:24px;stroke:#d97706;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:1px}
 .weak-callout-body{font-size:13.5px;line-height:1.5;color:#78350f}
@@ -7868,7 +7987,9 @@ function _rTogHtml(legacyId) {
 // Build a stepper that mirrors a legacy number input
 function _rStepHtml(legacyId, unit, min, max, fallback) {
   const v = _rVal(legacyId, fallback);
-  return '<span class="r-stepper" data-mirror="' + legacyId + '" data-min="' + min + '" data-max="' + max + '"><button data-d="-1" type="button">−</button><span class="v">' + v + '</span><span class="u">' + escH(unit) + '</span><button data-d="1" type="button">+</button></span>';
+  // .v is a real text input so the number can be typed OR adjusted via ± buttons.
+  // Keeps inputmode=numeric so mobile shows the number pad.
+  return '<span class="r-stepper" data-mirror="' + legacyId + '" data-min="' + min + '" data-max="' + max + '"><button data-d="-1" type="button">−</button><input class="v" type="text" inputmode="numeric" value="' + v + '" aria-label="Value"><span class="u">' + escH(unit) + '</span><button data-d="1" type="button">+</button></span>';
 }
 // Build a single .r-ctl row
 function _rCtlRow(togLegacyId, label, desc, val) {
@@ -8206,38 +8327,65 @@ function _rWireInspector() {
       _rUpdateRowStates();
     };
   });
-  // steppers → update legacy number input + saveSettings
+  // steppers → update legacy number input + saveSettings. .v is a real input,
+  // so both button clicks and direct typing feed into the same commit path.
   document.querySelectorAll('.r-stepper[data-mirror]').forEach(s => {
     const id = s.dataset.mirror;
     const mn = +s.dataset.min;
     const mx = +s.dataset.max;
     const vEl = s.querySelector('.v');
+    // Push a numeric value into the legacy input + this stepper's display and
+    // fire the side-effects the button click handler used to fire alone.
+    const commit = v => {
+      const legacy = document.getElementById(id);
+      const clamped = Math.max(mn, Math.min(mx, v));
+      if (legacy) { legacy.value = clamped; legacy.dispatchEvent(new Event('input')); legacy.dispatchEvent(new Event('change')); }
+      vEl.value = String(clamped);
+      // If this stepper sits next to a toggle that's currently off, turn it on too
+      const togSibling = s.parentElement.querySelector('.r-tog');
+      if (togSibling && !togSibling.classList.contains('on')) {
+        const togId = togSibling.dataset.mirror;
+        const togLegacy = togId ? document.getElementById(togId) : null;
+        if (togLegacy && !togLegacy.checked) {
+          togLegacy.checked = true;
+          togLegacy.dispatchEvent(new Event('change'));
+          togSibling.classList.add('on');
+        }
+      }
+      saveSettings();
+      _rRefreshChips();
+      _rSyncSubs();
+      _rUpdateRowStates();
+      if (id === 's-qcount') _rRenderSectionSplit();
+    };
     s.querySelectorAll('button').forEach(b => {
       b.onclick = e => {
         e.stopPropagation();
         const legacy = document.getElementById(id);
-        let v = parseInt(legacy && legacy.value) || +vEl.textContent || mn;
-        v = Math.max(mn, Math.min(mx, v + (+b.dataset.d)));
-        if (legacy) { legacy.value = v; legacy.dispatchEvent(new Event('input')); legacy.dispatchEvent(new Event('change')); }
-        vEl.textContent = v;
-        // If this stepper sits next to a toggle that's currently off, turn the toggle on too
-        const togSibling = s.parentElement.querySelector('.r-tog');
-        if (togSibling && !togSibling.classList.contains('on')) {
-          const togId = togSibling.dataset.mirror;
-          const togLegacy = togId ? document.getElementById(togId) : null;
-          if (togLegacy && !togLegacy.checked) {
-            togLegacy.checked = true;
-            togLegacy.dispatchEvent(new Event('change'));
-            togSibling.classList.add('on');
-          }
-        }
-        saveSettings();
-        _rRefreshChips();
-        _rSyncSubs();
-        _rUpdateRowStates();
-        if (id === 's-qcount') _rRenderSectionSplit();
+        let v = parseInt(legacy && legacy.value) || parseInt(vEl.value, 10) || mn;
+        commit(v + (+b.dataset.d));
       };
     });
+    if (vEl && vEl.tagName === 'INPUT') {
+      // Focus selects everything so typing overwrites the old value.
+      vEl.addEventListener('focus', () => { try { vEl.select(); } catch (_) {} });
+      // Filter to digits as the user types (block letters + symbols).
+      vEl.addEventListener('input', () => {
+        const cleaned = vEl.value.replace(/[^0-9]/g, '');
+        if (cleaned !== vEl.value) vEl.value = cleaned;
+      });
+      // Commit on Enter / blur — clamp to the stepper's min/max range.
+      const commitFromInput = () => {
+        const raw = parseInt(vEl.value, 10);
+        commit(isFinite(raw) ? raw : mn);
+      };
+      vEl.addEventListener('change', commitFromInput);
+      vEl.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); vEl.blur(); }
+      });
+      // Don't let clicks on the input bubble up to any row-level toggle.
+      vEl.addEventListener('click', e => e.stopPropagation());
+    }
   });
   // At-a-glance chip jumps to its section
   document.querySelectorAll('.r-chip[data-chip]').forEach(el => {
@@ -8267,7 +8415,7 @@ function _updateQCountMax() {
   if (stepper) {
     stepper.dataset.max = String(n);
     const v = stepper.querySelector('.v');
-    if (v && parseInt(v.textContent, 10) > n) v.textContent = String(n);
+    if (v && parseInt(v.value, 10) > n) v.value = String(n);
   }
 }
 
@@ -8372,7 +8520,7 @@ function _rRenderSectionSplit() {
       const stepper = document.querySelector('.r-stepper[data-mirror="s-qcount"]');
       if (stepper) {
         const sv = stepper.querySelector('.v');
-        if (sv) sv.textContent = String(sum);
+        if (sv) sv.value = String(sum);
       }
       const tog = document.getElementById('tog-qcount');
       if (tog && !tog.checked && sum > 0) {
