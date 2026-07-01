@@ -217,6 +217,31 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .m-close:hover{color:var(--text);background:#f3f4f6}
 .m-body{padding:22px 24px}
 .m-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+/* Confirm-download modal — settings summary card */
+.cdl-body{padding:22px 24px 24px}
+.cdl-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.cdl-quiz-title{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.3px;margin:0 0 18px;line-height:1.25}
+.cdl-summary{border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:16px}
+.cdl-row{display:grid;grid-template-columns:150px 1fr auto;gap:14px;align-items:center;padding:10px 4px;border-top:1px solid #eef0f3}
+.cdl-row:first-child{border-top:none}
+.cdl-row-label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.cdl-row-value{font-size:13.5px;font-weight:600;color:var(--text);word-break:break-word}
+.cdl-row-value.dim{color:var(--muted);font-weight:500}
+.cdl-row-value.warn{color:#b45309;font-weight:700}
+.cdl-row-ic{width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;flex:none;background:var(--green-lt);color:var(--green-600)}
+.cdl-row-ic svg{width:12px;height:12px}
+.cdl-row-ic.off{background:var(--g100);color:var(--muted)}
+.cdl-row-ic.warn{background:#fef3c7;color:#b45309}
+.cdl-warn{margin-top:4px;border:1px solid #fed7aa;background:#fff7ed;border-radius:9px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.cdl-warn.hidden{display:none}
+.cdl-warn-hd{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;line-height:1.5;color:#1a1a1a}
+.cdl-warn-hd svg{width:22px;height:22px;flex:none;stroke:#c2410c;margin-top:1px}
+.cdl-warn-hd > div > strong{display:block;color:#7c2d12;margin-bottom:2px}
+.cdl-warn-sub{font-size:12.5px;color:#7c2d12;line-height:1.5;font-weight:500;margin-top:2px}
+.cdl-warn-sub strong{color:#7c2d12}
+.cdl-tip{display:flex;gap:11px;align-items:flex-start;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;line-height:1.5;color:#14532d}
+.cdl-tip svg{width:19px;height:19px;flex:none;stroke:#15803d;margin-top:1px}
+.cdl-tip strong{color:#14532d}
 .type-row{display:flex;gap:10px;margin-bottom:8px}
 .type-opt{flex:1;padding:11px;border:2px solid var(--border);cursor:pointer;text-align:center;font-size:13px;font-weight:600;transition:border-color .15s,background .15s;border-radius:var(--radius-sm);user-select:none}
 .type-opt.sel{border-color:var(--green);background:var(--green-lt);color:var(--green-dk)}
@@ -569,6 +594,7 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-shell .qc.drag-over-top::before{top:-5px}
 .r-shell .qc.drag-over-bottom::after{bottom:-5px}
 .r-shell .qc.dragging{opacity:.55}
+.r-shell .qc.drag-multi{outline:2px dashed var(--green);outline-offset:-2px}
 .r-shell .qc .qcheck{flex:none;cursor:pointer;margin-top:2px}
 .r-shell .qc .grip{color:#c7ccd4;cursor:grab;flex:none;font-size:14px;line-height:1;user-select:none;margin-top:3px}
 .r-shell .qc .num{min-width:22px;height:22px;border-radius:6px;background:var(--green-lt);color:var(--green-600);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
@@ -2396,33 +2422,34 @@ body.bank-tab-active .r-topbar{display:none}
   </div>
 </div>
 
-<div class="m-overlay" id="modal-suspend-size">
-  <div class="modal" style="max-width:560px">
-    <div class="m-hdr"><span class="m-title">Quiz may exceed LMS state limit</span><button class="m-close" onclick="closeModal('modal-suspend-size')">&#x2715;</button></div>
-    <div class="m-body">
-      <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;padding:14px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:28px;height:28px;flex-shrink:0;stroke:#c2410c;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:1px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <div style="flex:1">
-          <p style="font-size:14px;line-height:1.6;color:#1a1a1a;margin-bottom:8px">This quiz's per-learner saved state could reach <strong id="suspend-size-actual">—</strong> characters, above the <strong>4,096</strong> limit set by the SCORM 1.2 spec.</p>
-          <p style="font-size:13px;line-height:1.6;color:#555">Some LMSes (including some Adobe Learning Manager tenants) enforce this strictly and silently reject oversized writes — which breaks attempt resume and attempt-count tracking.</p>
+<!-- CONFIRM DOWNLOAD MODAL — settings summary + optional SCORM 1.2 size warning -->
+<div class="m-overlay" id="modal-confirm-download">
+  <div class="modal cdl-modal" style="max-width:600px">
+    <div class="m-hdr"><span class="m-title">Confirm download</span><button class="m-close" onclick="closeModal('modal-confirm-download')">&#x2715;</button></div>
+    <div class="m-body cdl-body">
+      <div class="cdl-eyebrow">Quiz</div>
+      <div class="cdl-quiz-title" id="cdl-quiz-title">—</div>
+      <div class="cdl-summary" id="cdl-summary"></div>
+      <!-- Optional amber suspend_data callout (SCORM 1.2 + payload > 4096) -->
+      <div class="cdl-warn hidden" id="cdl-suspend-warn">
+        <div class="cdl-warn-hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <strong>May exceed the SCORM 1.2 state limit</strong>
+            <div class="cdl-warn-sub">Per-learner saved state could reach <strong id="cdl-suspend-actual">—</strong> characters, above the <strong>4,096</strong> ceiling. Some LMSes (Adobe Learning Manager included) silently reject oversized writes, which breaks attempt resume.</div>
+          </div>
+        </div>
+        <div class="cdl-tip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div><strong>Easiest fix:</strong> switch to <strong>SCORM 2004</strong> (~64,000 char limit) — click the green button below. Confirm your LMS supports SCORM 2004 first.</div>
         </div>
       </div>
-      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding:12px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:22px;height:22px;flex-shrink:0;stroke:#15803d;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <div style="flex:1;font-size:13.5px;line-height:1.55;color:#14532d">
-          <strong>Easiest fix:</strong> switch this package to <strong>SCORM 2004</strong>, which allows ~64,000 characters of saved state. Use the green button below to flip the version and download in one click. (Confirm your LMS supports SCORM 2004 first.)
-        </div>
-      </div>
-      <p style="font-size:14px;font-weight:600;margin-bottom:10px;color:#1a1a1a">Other ways to reduce the size on SCORM 1.2:</p>
-      <ul style="font-size:14px;line-height:1.7;padding-left:22px;margin:0;color:#333">
-        <li>Set a lower <strong>questions per attempt</strong> in Settings</li>
-        <li>Use fewer matching, sequencing, or hotspot questions per attempt</li>
-      </ul>
     </div>
     <div class="m-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-suspend-size')">Cancel</button>
-      <button class="btn" id="btn-suspend-size-continue">Download as SCORM 1.2 anyway</button>
-      <button class="btn btn-primary" id="btn-suspend-size-switch-2004">Use SCORM 2004 &amp; Download</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-confirm-download')">Cancel</button>
+      <button class="btn" id="cdl-download-anyway" style="display:none">Download as SCORM 1.2 anyway</button>
+      <button class="btn btn-primary" id="cdl-download">Download SCORM</button>
+      <button class="btn btn-primary" id="cdl-upgrade-2004" style="display:none">Use SCORM 2004 &amp; Download</button>
     </div>
   </div>
 </div>
@@ -8588,8 +8615,17 @@ function _rRefreshChips() {
   else chips.push(_rChipHtml('attempts', 'Unlimited tries', true));
   chips.push(_rChipHtml('timing', s.timeLimitMinutes ? s.timeLimitMinutes + ' min' : 'No time limit', !!s.timeLimitMinutes));
   const n = APP.questions.length;
-  if (s.questionsPerAttempt && n) chips.push(_rChipHtml('pool', s.questionsPerAttempt + ' of ' + n + ' Qs', true));
-  else if (n) chips.push(_rChipHtml('pool', 'All ' + n + ' Qs', true));
+  // Question pool summary — always render this chip so the pool state is
+  // visible at a glance. Shows either the subset ("5 of 15 questions") or
+  // "All N questions", and greys out when no questions are loaded yet.
+  const _qWord = w => w === 1 ? 'question' : 'questions';
+  if (n === 0) {
+    chips.push(_rChipHtml('pool', 'No questions yet', false));
+  } else if (s.questionsPerAttempt && s.questionsPerAttempt < n) {
+    chips.push(_rChipHtml('pool', s.questionsPerAttempt + ' of ' + n + ' ' + _qWord(n), true));
+  } else {
+    chips.push(_rChipHtml('pool', 'All ' + n + ' ' + _qWord(n), true));
+  }
   chips.push(_rChipHtml('pool', s.randomizeQuestions !== false ? 'Shuffled' : 'In order', s.randomizeQuestions !== false));
   chips.push(_rChipHtml('after', s.showAnswerReview ? 'Review on' : 'No review on fail', !!s.showAnswerReview));
   const _secCount = (APP.settings.sections || []).length;
@@ -8597,6 +8633,11 @@ function _rRefreshChips() {
     const _brkOn = !!s.sectionBreakdownOnResult;
     const _brkLabel = _secCount + (_secCount === 1 ? ' section' : ' sections') + (_brkOn ? ' breakdown' : '');
     chips.push(_rChipHtml('breakdown', _brkLabel, _brkOn));
+  }
+  // Certificate link — only render the chip when the toggle is on. Clicking
+  // it jumps to the Certificate settings card (same pattern as the others).
+  if (s.showCertificateLink) {
+    chips.push(_rChipHtml('cert', 'Certificate link', true));
   }
   sm.innerHTML = chips.join('');
   // Rebind clicks on the new chip elements
@@ -8871,26 +8912,37 @@ function _attachSectionGroupDnD() {
   groups.forEach(group => {
     const sectionKey = group.dataset.sectionKey;
     const handleDragOver = e => {
-      if (_dragSrcIdx === null) return;
+      if (_dragSrcIdx === null && !_dragSrcIds) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       group.classList.add('drag-section-over');
     };
     const handleDrop = e => {
-      if (_dragSrcIdx === null) return;
+      if (_dragSrcIdx === null && !_dragSrcIds) return;
       e.preventDefault();
       e.stopPropagation();
       group.classList.remove('drag-section-over');
       const newSection = sectionKey === '__unsectioned__' ? '' : sectionKey;
-      pushQHistory();
-      const item = APP.questions.splice(_dragSrcIdx, 1)[0];
-      if (newSection) item.section = newSection;
-      else delete item.section;
-      // Insert at the end of the target section's questions in the array
-      const lastInSection = _lastIndexOfSection(newSection);
-      if (lastInSection === -1) APP.questions.push(item);
-      else APP.questions.splice(lastInSection + 1, 0, item);
+      const dragIds = _dragSrcIds && _dragSrcIds.length
+        ? _dragSrcIds.slice()
+        : (typeof _dragSrcIdx === 'number' && APP.questions[_dragSrcIdx] ? [APP.questions[_dragSrcIdx].id] : null);
       _dragSrcIdx = null;
+      _dragSrcIds = null;
+      if (!dragIds || !dragIds.length) return;
+      pushQHistory();
+      const dragSet = new Set(dragIds);
+      const movingItems = APP.questions.filter(q => dragSet.has(q.id));
+      movingItems.forEach(q => {
+        if (newSection) q.section = newSection;
+        else delete q.section;
+      });
+      APP.questions = APP.questions.filter(q => !dragSet.has(q.id));
+      // Insert at the end of the target section (after the last question in it)
+      const lastInSection = _lastIndexOfSection(newSection);
+      if (lastInSection === -1) APP.questions.push(...movingItems);
+      else APP.questions.splice(lastInSection + 1, 0, ...movingItems);
+      // Reset the multi-select once dropped so the checkboxes clear.
+      if (APP.selectedQids && APP.selectedQids.size) APP.selectedQids.clear();
       renderQuestions();
       updateBadges();
       syncToBatch();
@@ -9505,19 +9557,93 @@ function confirmAddFromBank() {
   toast('Added ' + added + ' question' + (added !== 1 ? 's' : '') + ' from bank', 'ok');
 }
 
-let _dragSrcIdx = null;
+// Drag state for the Quiz Builder cards. Now supports multi-drag: when the
+// card grabbed is part of APP.selectedQids (and the selection has 2+), the
+// drop handlers move every selected question together.
+let _dragSrcIdx = null;         // legacy single-drag index (kept for backwards compat)
+let _dragSrcIds = null;         // array of question ids when multi-dragging
+
+function _qBuildMultiDragGhost(e, count) {
+  _qRemoveMultiDragGhost();
+  const g = document.createElement('div');
+  g.className = 'bk-drag-ghost';
+  g.id = '_q-drag-ghost';
+  g.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>'
+    + '<span>Moving</span>'
+    + '<span class="bk-dg-badge">' + count + ' question' + (count === 1 ? '' : 's') + '</span>';
+  document.body.appendChild(g);
+  try { e.dataTransfer.setDragImage(g, 20, 20); } catch (_) {}
+}
+function _qRemoveMultiDragGhost() {
+  const g = document.getElementById('_q-drag-ghost');
+  if (g) g.remove();
+}
+
+// Reorder APP.questions by moving a set of ids as a contiguous block to a
+// new position (after or before targetIdx). Optionally reassigns the block's
+// section field. Returns true if anything moved.
+function _reorderQuestionsBlock(dragIds, targetIdx, insertAfter, newSectionKey) {
+  if (!Array.isArray(dragIds) || !dragIds.length) return false;
+  const dragSet = new Set(dragIds);
+  // Preserve the dragged questions in their current APP.questions order
+  const movingItems = APP.questions.filter(q => dragSet.has(q.id));
+  if (!movingItems.length) return false;
+  // Reassign section if the drop target is in a different section
+  if (typeof newSectionKey === 'string') {
+    const newSection = newSectionKey === '__unsectioned__' ? '' : newSectionKey;
+    movingItems.forEach(q => {
+      if (newSection) q.section = newSection;
+      else delete q.section;
+    });
+  }
+  const targetId = APP.questions[targetIdx] ? APP.questions[targetIdx].id : null;
+  // Remove the dragged items from the array
+  APP.questions = APP.questions.filter(q => !dragSet.has(q.id));
+  // Recompute insertion index against the trimmed array
+  let insertIdx;
+  if (targetId != null && !dragSet.has(targetId)) {
+    insertIdx = APP.questions.findIndex(q => q.id === targetId);
+    if (insertIdx < 0) insertIdx = APP.questions.length;
+    if (insertAfter) insertIdx++;
+  } else {
+    insertIdx = APP.questions.length;
+  }
+  APP.questions.splice(insertIdx, 0, ...movingItems);
+  return true;
+}
 
 function attachDragHandlers() {
   document.querySelectorAll('#q-list .qc').forEach(card => {
     card.addEventListener('dragstart', e => {
-      _dragSrcIdx = parseInt(card.dataset.qidx);
-      card.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
+      const myIdx = parseInt(card.dataset.qidx);
+      const myId = card.dataset.qid;
+      const sel = APP.selectedQids;
+      const isMulti = sel && sel.size > 1 && myId && sel.has(myId);
+      if (isMulti) {
+        // Collect the selected question ids in canonical APP.questions order.
+        _dragSrcIds = APP.questions.filter(q => sel.has(q.id)).map(q => q.id);
+        _dragSrcIdx = myIdx;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', 'qs:' + _dragSrcIds.join(','));
+        // Visual: dim every selected card, dashed outline so it's obvious
+        // which questions are being moved together.
+        document.querySelectorAll('#q-list .qc').forEach(c => {
+          if (sel.has(c.dataset.qid)) { c.classList.add('dragging'); c.classList.add('drag-multi'); }
+        });
+        _qBuildMultiDragGhost(e, _dragSrcIds.length);
+      } else {
+        _dragSrcIdx = myIdx;
+        _dragSrcIds = null;
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      }
     });
     card.addEventListener('dragend', () => {
-      card.classList.remove('dragging');
+      document.querySelectorAll('#q-list .qc.dragging').forEach(c => c.classList.remove('dragging'));
+      document.querySelectorAll('#q-list .qc.drag-multi').forEach(c => c.classList.remove('drag-multi'));
       document.querySelectorAll('#q-list .qc').forEach(c =>
         c.classList.remove('drag-over-top', 'drag-over-bottom'));
+      _qRemoveMultiDragGhost();
     });
     card.addEventListener('dragover', e => {
       e.preventDefault();
@@ -9534,25 +9660,22 @@ function attachDragHandlers() {
       e.preventDefault();
       e.stopPropagation();
       const targetIdx = parseInt(card.dataset.qidx);
-      if (_dragSrcIdx === null || _dragSrcIdx === targetIdx) return;
-      const rect = card.getBoundingClientRect();
-      const insertAfter = e.clientY >= rect.top + rect.height / 2;
-      // If we're dropping onto a card in a different section, reassign the
-      // dragged question's section field so the visual position matches reality.
-      // New canvas uses .qsection with data-section-key; legacy uses .q-section-group
       const targetGroup = card.closest('.qsection,.q-section-group');
       const targetSectionKey = targetGroup ? targetGroup.dataset.sectionKey : null;
-      pushQHistory();
-      const item = APP.questions.splice(_dragSrcIdx, 1)[0];
-      if (targetSectionKey) {
-        const newSection = targetSectionKey === '__unsectioned__' ? '' : targetSectionKey;
-        if (newSection) item.section = newSection;
-        else delete item.section;
-      }
-      let insertIdx = targetIdx > _dragSrcIdx ? targetIdx - 1 : targetIdx;
-      if (insertAfter) insertIdx++;
-      APP.questions.splice(insertIdx, 0, item);
+      const rect = card.getBoundingClientRect();
+      const insertAfter = e.clientY >= rect.top + rect.height / 2;
+      const dragIds = _dragSrcIds && _dragSrcIds.length
+        ? _dragSrcIds.slice()
+        : (typeof _dragSrcIdx === 'number' && APP.questions[_dragSrcIdx] ? [APP.questions[_dragSrcIdx].id] : null);
       _dragSrcIdx = null;
+      _dragSrcIds = null;
+      if (!dragIds || !dragIds.length) return;
+      const targetId = APP.questions[targetIdx] ? APP.questions[targetIdx].id : null;
+      if (dragIds.length === 1 && dragIds[0] === targetId) return; // drop on self
+      pushQHistory();
+      _reorderQuestionsBlock(dragIds, targetIdx, insertAfter, targetSectionKey);
+      // Reset the multi-select once dropped so the checkboxes clear.
+      if (APP.selectedQids && APP.selectedQids.size) APP.selectedQids.clear();
       renderQuestions();
       updateBadges();
       syncToBatch();
@@ -10492,6 +10615,8 @@ async function _bankHandleQuestionDropOnFolder(data, targetFolderId) {
   }
   if (failed) toast(failed + ' question' + (failed === 1 ? '' : 's') + ' could not be moved', 'err');
   if (moves.length) bankPushUndo({ kind: 'move-batch', moves });
+  // Clear the multi-select set once the move completes so the checkboxes reset.
+  if (BANK.quizSelectedIds && BANK.quizSelectedIds.size) BANK.quizSelectedIds.clear();
   await fetchBank();
   renderBank();
   return true;
@@ -11099,14 +11224,25 @@ function _bankAttachSectionDnD() {
       e.stopPropagation();
       group.classList.remove('drag-section-over');
       const data = e.dataTransfer.getData('text/plain') || '';
-      if (!data.startsWith('q:')) return;
-      const qId = data.slice(2);
-      const q = BANK.questions.find(x => x.id === qId);
-      if (!q || q.folderId !== BANK.selectedFolderId) return;
+      // Accept both single (q:id) and multi (qs:id1,id2,…) drags — the caller
+      // uses the multi form when the dragged card is part of the selection.
+      let ids = [];
+      if (data.startsWith('qs:')) ids = data.slice(3).split(',').filter(Boolean);
+      else if (data.startsWith('q:')) ids = [data.slice(2)];
+      if (!ids.length) return;
       const newSection = sectionKey === '__unsectioned__' ? '' : sectionKey;
-      if ((q.section || '') === newSection) return;
-      const ok = await API.patch('/api/bank/questions/' + qId, { section: newSection });
-      if (!ok) { toast('Move failed', 'err'); return; }
+      let failed = 0, moved = 0;
+      for (const qId of ids) {
+        const q = BANK.questions.find(x => x.id === qId);
+        if (!q || q.folderId !== BANK.selectedFolderId) continue;
+        if ((q.section || '') === newSection) continue;
+        const ok = await API.patch('/api/bank/questions/' + qId, { section: newSection });
+        if (ok) moved++; else failed++;
+      }
+      if (failed) toast(failed + ' question' + (failed === 1 ? '' : 's') + ' could not be moved', 'err');
+      if (!moved && !failed) return;
+      // Reset the multi-select after the move so the checkboxes clear.
+      if (BANK.quizSelectedIds && BANK.quizSelectedIds.size) BANK.quizSelectedIds.clear();
       await fetchBank();
       renderBankQuestionList();
     });
@@ -12089,31 +12225,98 @@ async function generateAndDownload() {
     });
     if (!ok) return;
   }
-  // Check estimated suspend_data size against SCORM 1.2's 4096-char ceiling.
-  // SCORM 2004 supports ~64 KB — skip the warning entirely for that version.
-  if (APP.settings.scormVersion !== 'scorm2004') {
+  _openConfirmDownloadModal();
+}
+
+// Builds a human-readable label for a setting value + returns whether the
+// setting is "on" (green icon) vs "off" (grey icon). Kept close to the
+// at-a-glance chip vocabulary so the summary reads consistently.
+function _cdlRow(label, value, on) {
+  const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  const DASH  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  const icCls = on === 'warn' ? 'warn' : (on ? '' : 'off');
+  const valCls = on === 'warn' ? 'warn' : (on ? '' : 'dim');
+  return '<div class="cdl-row">'
+    + '<span class="cdl-row-label">' + escH(label) + '</span>'
+    + '<span class="cdl-row-value ' + valCls + '">' + escH(value) + '</span>'
+    + '<span class="cdl-row-ic ' + icCls + '">' + (on ? CHECK : DASH) + '</span>'
+    + '</div>';
+}
+
+// Populate + open the "Confirm download" modal with a summary of the current
+// quiz settings and (if applicable) the SCORM 1.2 suspend_data warning + a
+// one-click SCORM 2004 upgrade.
+function _openConfirmDownloadModal() {
+  const s = APP.settings || {};
+  const n = APP.questions.length;
+  document.getElementById('cdl-quiz-title').textContent = s.title || 'Untitled quiz';
+  // Human-readable quiz type
+  const qtLabel = ({
+    course_completion: 'Completion quiz',
+    course_final_exam: 'Final exam',
+    gpu_genius_fast_track: 'GPU Genius Fast Track',
+    knowledge_check: 'Knowledge check',
+    topic_quiz: 'Topic quiz',
+    custom: (s.customQuizTypeName || 'Custom') + (s.customQuizMode === 'exam' ? ' (exam)' : ' (quiz)')
+  })[s.quizType] || 'Completion quiz';
+  const is2004 = s.scormVersion === 'scorm2004';
+  const rows = [];
+  rows.push(_cdlRow('Quiz type', qtLabel, true));
+  rows.push(_cdlRow('SCORM version', is2004 ? 'SCORM 2004 (4th Ed.)' : 'SCORM 1.2', true));
+  rows.push(_cdlRow('Passing score', s.passingPercentage ? s.passingPercentage + '% to pass' : 'No pass mark', !!s.passingPercentage));
+  rows.push(_cdlRow('Attempts', s.maxAttempts ? s.maxAttempts + ' tries' + (s.cooldownDays ? ' · ' + s.cooldownDays + 'd cooldown' : '') : 'Unlimited', true));
+  rows.push(_cdlRow('Time limit', s.timeLimitMinutes ? s.timeLimitMinutes + ' minutes per attempt' : 'No time limit', !!s.timeLimitMinutes));
+  const poolLabel = (s.questionsPerAttempt && s.questionsPerAttempt < n)
+    ? s.questionsPerAttempt + ' of ' + n + ' questions'
+    : 'All ' + n + ' question' + (n === 1 ? '' : 's');
+  rows.push(_cdlRow('Question pool', poolLabel + (s.randomizeQuestions !== false ? ' · shuffled' : ' · in order'), true));
+  const secCount = (s.sections || []).length;
+  if (secCount) {
+    rows.push(_cdlRow('Sections', secCount + (secCount === 1 ? ' section' : ' sections') + (s.sectionBreakdownOnResult ? ' · breakdown on results' : ''), true));
+  }
+  // Answer review — reviews are ALWAYS available after a pass (with correct
+  // answers revealed by default). The "Show answer review" toggle only
+  // controls whether learners can review after a fail.
+  const _reviewValue = 'Available on pass · ' + (s.showAnswerReview ? 'shown on fail' : 'hidden on fail');
+  rows.push(_cdlRow('Answer review', _reviewValue, true));
+  if (s.showCertificateLink) rows.push(_cdlRow('Certificate link', 'Shown on pass', true));
+  document.getElementById('cdl-summary').innerHTML = rows.join('');
+
+  // Suspend-data ceiling check (SCORM 1.2 only). If the payload would exceed
+  // 4096 chars, surface the warning + swap in the "Use SCORM 2004" upgrade
+  // button in the footer.
+  const warnEl = document.getElementById('cdl-suspend-warn');
+  const dlBtn = document.getElementById('cdl-download');
+  const dlAnywayBtn = document.getElementById('cdl-download-anyway');
+  const upgradeBtn = document.getElementById('cdl-upgrade-2004');
+  let showWarn = false;
+  if (!is2004) {
     const size = _estimateSuspendDataSize(APP.settings, APP.questions);
     if (size > 4096) {
-      document.getElementById('suspend-size-actual').textContent = size.toLocaleString();
-      const continueBtn = document.getElementById('btn-suspend-size-continue');
-      continueBtn.onclick = function() { closeModal('modal-suspend-size'); _doDownload(); };
-      const switchBtn = document.getElementById('btn-suspend-size-switch-2004');
-      if (switchBtn) {
-        switchBtn.onclick = function() {
-          APP.settings.scormVersion = 'scorm2004';
-          // Keep the Advanced settings dropdown in sync so the change is visible
-          // next time the user opens that panel.
-          const sel = document.getElementById('adv-scorm-version');
-          if (sel) sel.value = 'scorm2004';
-          closeModal('modal-suspend-size');
-          _doDownload();
-        };
-      }
-      showModal('modal-suspend-size');
-      return;
+      showWarn = true;
+      document.getElementById('cdl-suspend-actual').textContent = size.toLocaleString();
     }
   }
-  await _doDownload();
+  warnEl.classList.toggle('hidden', !showWarn);
+  if (showWarn) {
+    dlBtn.style.display = 'none';
+    dlAnywayBtn.style.display = '';
+    upgradeBtn.style.display = '';
+    dlAnywayBtn.onclick = () => { closeModal('modal-confirm-download'); _doDownload(); };
+    upgradeBtn.onclick = () => {
+      APP.settings.scormVersion = 'scorm2004';
+      const sel = document.getElementById('adv-scorm-version');
+      if (sel) sel.value = 'scorm2004';
+      closeModal('modal-confirm-download');
+      _doDownload();
+    };
+  } else {
+    dlBtn.style.display = '';
+    dlAnywayBtn.style.display = 'none';
+    upgradeBtn.style.display = 'none';
+    dlBtn.onclick = () => { closeModal('modal-confirm-download'); _doDownload(); };
+  }
+  showModal('modal-confirm-download');
 }
 
 async function _doDownload() {
