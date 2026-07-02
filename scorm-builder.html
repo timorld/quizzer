@@ -8634,7 +8634,10 @@ function _rRefreshChips() {
     chips.push(_rChipHtml('pool', 'All ' + n + ' ' + _qWord(n), true));
   }
   chips.push(_rChipHtml('pool', s.randomizeQuestions !== false ? 'Shuffled' : 'In order', s.randomizeQuestions !== false));
-  chips.push(_rChipHtml('after', s.showAnswerReview ? 'Review on' : 'No review on fail', !!s.showAnswerReview));
+  // Review is always available after a pass by default; the toggle only adds
+  // the review to the fail screen. Label the chip accordingly so users don't
+  // think an off toggle means "no review at all".
+  chips.push(_rChipHtml('after', s.showAnswerReview ? 'Review on pass · fail' : 'Review on pass', true));
   const _secCount = (APP.settings.sections || []).length;
   if (_secCount) {
     const _brkOn = !!s.sectionBreakdownOnResult;
