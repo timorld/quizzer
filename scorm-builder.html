@@ -1680,13 +1680,6 @@ body.bank-tab-active .r-topbar{display:none}
             <div id="inp-passing" style="display:none" class="inp-inline"><input id="s-passing" type="number" min="1" max="100" value="70"><span>%</span></div>
           </div>
         </div>
-        <div class="toggle-row">
-          <label class="toggle"><input type="checkbox" id="tog-best-score" onchange="confirmBestScoreTracking(this)"><span class="tog-slider"></span></label>
-          <div style="flex:1">
-            <div class="tog-label">Best score tracking</div>
-            <div class="tog-desc">Lets a learner who already passed retake the quiz; the LMS keeps their highest score.</div>
-          </div>
-        </div>
         <div class="toggle-row" title="Each correct pick earns a fraction; each wrong pick deducts a fraction (floor 0). Picking everything gives zero, so it can't be gamed.">
           <label class="toggle"><input type="checkbox" id="tog-partial-credit" onchange="saveSettings()"><span class="tog-slider"></span></label>
           <div style="flex:1">
@@ -1696,6 +1689,7 @@ body.bank-tab-active .r-topbar{display:none}
         <!-- Section breakdown — surfaced in the inspector card, hidden here -->
         <input type="checkbox" id="tog-section-breakdown" onchange="saveSettings()" style="display:none">
         <input type="checkbox" id="tog-section-review" onchange="saveSettings()" style="display:none">
+        <input type="checkbox" id="tog-practice" onchange="saveSettings()" style="display:none">
       </div>
 
       <!-- Timing -->
@@ -2799,26 +2793,6 @@ body.bank-tab-active .r-topbar{display:none}
 </div>
 
 <!-- BEST SCORE TRACKING CONFIRMATION MODAL -->
-<div class="m-overlay" id="modal-best-score-confirm">
-  <div class="modal" style="max-width:500px">
-    <div class="m-hdr"><span class="m-title">Enable Best Score Tracking?</span></div>
-    <div class="m-body">
-      <p style="font-size:15px;line-height:1.65;margin-bottom:16px">When best score tracking is enabled, the following applies to this quiz:</p>
-      <ul style="font-size:14px;line-height:1.8;padding-left:20px;margin-bottom:16px;color:#333">
-        <li>Learners who have already passed can retake the quiz, subject to your attempts and cooldown settings</li>
-        <li>The LMS always records the <strong>highest passing score</strong>, not the most recent attempt</li>
-        <li>If a learner retakes and scores lower, their original higher score is preserved</li>
-        <li>The result screen will inform learners that their highest score will be saved</li>
-        <li>The Review Quiz button will show answers in normal mode — correct answers are not revealed, so retakes reflect genuine learning</li>
-      </ul>
-    </div>
-    <div class="m-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-best-score-confirm')">Cancel</button>
-      <button class="btn btn-primary" onclick="document.getElementById('tog-best-score').checked=true;closeModal('modal-best-score-confirm')">Enable</button>
-    </div>
-  </div>
-</div>
-
 <!-- ═══════════════════════════════════════════════════════════
      TEMPLATES  (type="text/plain" — not executed by browser)
      ═══════════════════════════════════════════════════════════ -->
@@ -2989,8 +2963,25 @@ function showSection(sectionId) {
   let viewingStartDuringAttempt = false;
   let quizFinished = false;
   let hasPassed = false;
+  // Practice mode — a passer can take the quiz again "just to practice".
+  // While this is true, NO LMS writes happen (score/status/session_time/state
+  // are all skipped) and no state is persisted to suspend_data. Review still
+  // works within the browser session; a refresh drops the practice.
+  let IS_PRACTICE_MODE = false;
+  // Snapshot of the official attempt's result-screen stats. Captured when a
+  // real (non-practice) attempt renders, so we can restore the main stats grid
+  // to those numbers when a practice attempt overlays its own results.
+  let _officialStats = null;
+  // Snapshots of the most recent practice attempt, so tabs, review, and the
+  // per-section breakdown all have data to draw on. Not persisted (refresh
+  // wipes them — practice is session-only by design).
+  let _practiceQuestionIds = null;
+  let _practiceAnswers = null;
+  let _practiceOptionsOrder = null;
+  let _practiceStats = null;   // { percentage, correct, incorrect, timeSec, passed }
+  // Which result tab is active on the result screen ('official' | 'practice').
+  let _activeResultTab = 'official';
   let lastScore = null;
-  let bestScore = null;
   let lastAttemptQuestionIds = null;
   let lastAttemptAnswers = null;
   let lastAttemptOptionsOrder = null;
@@ -3025,6 +3016,19 @@ function showSection(sectionId) {
 
   scormAPI = findAPI(window);
   if (scormAPI && callInit(scormAPI)) {
+    // NOTE: intentionally NOT writing lesson_status/score.min/score.max here.
+    // ALM interprets any early LMSSetValue as the start of a new attempt and
+    // clears the grade record's latest `score` field — which our preflight
+    // check reads. Deferring those writes until the learner actually starts
+    // the quiz keeps ALM's grade record intact for the preflight fetch.
+    console.log('SCORM API initialized (' + (IS_2004 ? '2004' : '1.2') + ')');
+  } else { scormAPI = null; console.warn('SCORM API not found - running in standalone mode'); }
+  // Called from the "learner clicks Start" path — sets the baseline SCORM
+  // fields that used to be set on script load.
+  var _lmsBaselineWritten = false;
+  function _writeLmsBaseline() {
+    if (_lmsBaselineWritten || !scormAPI) return;
+    _lmsBaselineWritten = true;
     if (IS_2004) {
       callSet(scormAPI, 'cmi.completion_status', 'incomplete');
       callSet(scormAPI, 'cmi.score.min', '0');
@@ -3035,8 +3039,7 @@ function showSection(sectionId) {
       callSet(scormAPI, 'cmi.core.score.max', '100');
     }
     callCommit(scormAPI);
-    console.log('SCORM API initialized (' + (IS_2004 ? '2004' : '1.2') + ')');
-  } else { scormAPI = null; console.warn('SCORM API not found - running in standalone mode'); }
+  }
 
   const scorm = {
     _mapKey: function(k) {
@@ -3101,7 +3104,6 @@ function showSection(sectionId) {
         timeExpiredAt = state.timeExpiredAt || null;
         hasPassed = state.hasPassed || false;
         lastScore = state.lastScore != null ? state.lastScore : null;
-        bestScore = state.bestScore != null ? state.bestScore : null;
         if (state.lastAttemptQuestionIds) lastAttemptQuestionIds = state.lastAttemptQuestionIds;
         if (state.lastAttemptAnswers) lastAttemptAnswers = state.lastAttemptAnswers;
         if (state.lastAttemptOptionsOrder) lastAttemptOptionsOrder = state.lastAttemptOptionsOrder;
@@ -3117,6 +3119,9 @@ function showSection(sectionId) {
   }
 
   function saveState(state) {
+    // Practice mode → nothing gets persisted to the LMS. If the learner
+    // refreshes mid-practice, the attempt is dropped (expected).
+    if (IS_PRACTICE_MODE) return;
     var payload = JSON.stringify(state);
     // SCORM 1.2 caps suspend_data at 4096 chars; SCORM 2004 supports ~64 KB.
     if (!IS_2004) {
@@ -3132,7 +3137,7 @@ function showSection(sectionId) {
 
   function getStateForSave() {
     const base = { attemptCount, lastAttemptTimestamp };
-    if (hasPassed) { base.hasPassed = true; base.lastScore = lastScore; if (bestScore != null) base.bestScore = bestScore; if (lastAttemptQuestionIds) base.lastAttemptQuestionIds = lastAttemptQuestionIds; if (lastAttemptAnswers) base.lastAttemptAnswers = lastAttemptAnswers; if (lastAttemptOptionsOrder) base.lastAttemptOptionsOrder = lastAttemptOptionsOrder; }
+    if (hasPassed) { base.hasPassed = true; base.lastScore = lastScore; if (lastAttemptQuestionIds) base.lastAttemptQuestionIds = lastAttemptQuestionIds; if (lastAttemptAnswers) base.lastAttemptAnswers = lastAttemptAnswers; if (lastAttemptOptionsOrder) base.lastAttemptOptionsOrder = lastAttemptOptionsOrder; }
     if (timeExpiredAt) base.timeExpiredAt = timeExpiredAt;
     if (startTime != null && currentQuestions.length > 0) {
       base.elapsedMs = accumulatedTimeMs + (Date.now() - startTime);
@@ -3298,21 +3303,35 @@ function showSection(sectionId) {
   }
 
   function selectQuestions() {
-    const pool = CONFIG.randomizeQuestions ? shuffleArray(questionBank) : [...questionBank];
+    // Selection vs. order: these are independent concerns.
+    // - Which questions get picked out of the pool should ALWAYS vary from
+    //   attempt to attempt when totalQuestions < questionBank.length,
+    //   otherwise every attempt shows the exact same first N questions.
+    // - How the picked questions are ordered on screen respects the
+    //   `randomizeQuestions` setting: shuffled if on, authored order if off.
+    // So we always shuffle for the pick, then optionally sort back afterwards.
+    const shuffled = shuffleArray(questionBank);
     const useSplit = (CONFIG.sectionSplitMode === 'equal' || CONFIG.sectionSplitMode === 'custom')
       && (Array.isArray(CONFIG.sectionsOrder) ? CONFIG.sectionsOrder.length : 0) > 0;
     let picked;
     if (useSplit) {
-      const target = CONFIG.totalQuestions || pool.length;
-      picked = _selectBySection(pool, target);
+      const target = CONFIG.totalQuestions || shuffled.length;
+      picked = _selectBySection(shuffled, target);
     } else {
-      picked = (CONFIG.totalQuestions && CONFIG.totalQuestions < pool.length) ? pool.slice(0, CONFIG.totalQuestions) : pool;
+      picked = (CONFIG.totalQuestions && CONFIG.totalQuestions < shuffled.length) ? shuffled.slice(0, CONFIG.totalQuestions) : shuffled;
+    }
+    if (!CONFIG.randomizeQuestions) {
+      // Snap the picked subset back to the authored order so the on-screen
+      // sequence matches the quiz builder — while keeping the picks random.
+      const pos = new Map();
+      questionBank.forEach((q, i) => { pos.set(q.id != null ? q.id : q, i); });
+      picked = picked.slice().sort((a, b) => (pos.get(a.id != null ? a.id : a) - pos.get(b.id != null ? b.id : b)));
     }
     currentQuestions = CONFIG.randomizeOptions ? picked.map(_shuffleQuestionOptions) : picked;
   }
 
   function canRetry() {
-    if (hasPassed && !CONFIG.bestScoreTracking) return { allowed: false, reason: '' };
+    if (hasPassed) return { allowed: false, reason: '' };
     if (!CONFIG.maxAttempts || CONFIG.maxAttempts === undefined || attemptCount < CONFIG.maxAttempts) return { allowed: true };
     if (attemptCount >= CONFIG.maxAttempts && !CONFIG.cooldownDays) return { allowed: false, reason: `Maximum attempts reached (${CONFIG.maxAttempts})` };
     if (CONFIG.cooldownDays && lastAttemptTimestamp) {
@@ -3335,6 +3354,31 @@ function showSection(sectionId) {
     const detailsGrid = document.getElementById('start-details-grid');
     const noteTextEl = document.getElementById('start-note-text');
     const startWrapper = document.getElementById('start-wrapper');
+
+    if (IS_PRACTICE_MODE) {
+      // Start screen while inside a practice attempt (learner clicked Previous
+      // all the way out). Show the quiz identity but re-cast the attempts row
+      // as "Unlimited · practice", strip the pass-banner and any cooldown
+      // note, and keep the details grid + start button visible so they can
+      // resume the practice.
+      if (banner) banner.classList.add('hidden');
+      var pracBanner = document.getElementById('start-practice-banner');
+      if (pracBanner) pracBanner.classList.remove('hidden');
+      if (recommendation) recommendation.classList.add('hidden');
+      if (noteTextEl) { noteTextEl.textContent = ''; noteTextEl.classList.add('hidden'); }
+      if (detailsGrid) detailsGrid.classList.remove('hidden');
+      if (startWrapper) startWrapper.classList.remove('hidden');
+      const attDispP = document.getElementById('start-attempts');
+      if (attDispP) attDispP.textContent = 'Unlimited · practice';
+      startBtn.disabled = false;
+      // Fresh practice launch → "Start practice". Resuming from a Prev
+      // navigation mid-attempt → "Next" (matches the normal quiz behavior).
+      startBtn.textContent = viewingStartDuringAttempt ? LABEL_NEXT : 'Start practice';
+      if (messageEl) { messageEl.textContent = ''; messageEl.classList.add('hidden'); }
+      return;
+    }
+    var pracBanner2 = document.getElementById('start-practice-banner');
+    if (pracBanner2) pracBanner2.classList.add('hidden');
 
     if (hasPassed) {
       if (banner) {
@@ -3944,9 +3988,27 @@ function showSection(sectionId) {
     hideWarningModal();
     if (timerInterval) clearInterval(timerInterval);
     const score = calculateScore(); const passedThisAttempt = score.percentage >= CONFIG.passingPercentage; const sessionTime = accumulatedTimeMs + (Date.now() - startTime);
-    if (passedThisAttempt) { hasPassed = true; if (CONFIG.bestScoreTracking) bestScore = Math.max(bestScore != null ? bestScore : 0, score.percentage); }
-    const reportScore = (CONFIG.bestScoreTracking && hasPassed && bestScore != null) ? bestScore : score.percentage;
-    const reportStatus = (CONFIG.bestScoreTracking && hasPassed) ? 'passed' : (passedThisAttempt ? 'passed' : 'failed');
+    // Practice mode: display the score in the local UI, allow review, but
+    // write NOTHING to the LMS and don't touch hasPassed / attemptCount / etc.
+    if (IS_PRACTICE_MODE) {
+      // Snapshot the practice attempt into its own slot so tabs, breakdown,
+      // and the "Review practice" button all have data — without clobbering
+      // the official attempt's snapshot (which the main Review button uses).
+      _practiceQuestionIds = currentQuestions.map(q => q.id);
+      _practiceAnswers = Object.assign({}, userAnswers);
+      _practiceOptionsOrder = _collectOptionsOrderMap(currentQuestions);
+      _practiceStats = { percentage: score.percentage, correct: score.correct, incorrect: score.incorrect, timeSec: Math.floor(sessionTime / 1000), passed: passedThisAttempt };
+      _activeResultTab = 'practice';
+      _showPracticeIndicator(false);
+      showResults(score, passedThisAttempt, sessionTime);
+      // We didn't touch attemptCount; keep the visible field pinned to the real one.
+      document.getElementById('attempt-count').textContent = attemptCount;
+      startTime = null;
+      return;
+    }
+    if (passedThisAttempt) { hasPassed = true; }
+    const reportScore = score.percentage;
+    const reportStatus = passedThisAttempt ? 'passed' : 'failed';
     scorm.set('cmi.core.score.raw', reportScore); scorm.set('cmi.core.score.min', 0); scorm.set('cmi.core.score.max', 100);
     scorm.set('cmi.core.lesson_status', reportStatus);
     const totalSeconds = Math.floor(sessionTime / 1000); const hours = Math.floor(totalSeconds / 3600); const minutes = Math.floor((totalSeconds % 3600) / 60); const seconds = totalSeconds % 60;
@@ -3976,7 +4038,7 @@ function showSection(sectionId) {
     attemptCount++; lastAttemptTimestamp = new Date().toISOString(); quizFinished = true;
     lastScore = score.percentage; lastAttemptQuestionIds = currentQuestions.map(q => q.id); lastAttemptAnswers = Object.assign({}, userAnswers);
     lastAttemptOptionsOrder = _collectOptionsOrderMap(currentQuestions);
-    const _save = { attemptCount, lastAttemptTimestamp, hasPassed, lastScore, bestScore, lastAttemptQuestionIds, lastAttemptAnswers };
+    const _save = { attemptCount, lastAttemptTimestamp, hasPassed, lastScore, lastAttemptQuestionIds, lastAttemptAnswers };
     if (lastAttemptOptionsOrder) _save.lastAttemptOptionsOrder = lastAttemptOptionsOrder;
     saveState(_save); startTime = null; scorm.commit();
     showResults(score, passedThisAttempt, sessionTime);
@@ -4233,28 +4295,62 @@ function showSection(sectionId) {
   function showResults(score, passed, sessionTime) {
     document.getElementById('quiz-screen').classList.add('hidden');
     const resultScreen = document.getElementById('result-screen'); resultScreen.classList.remove('hidden'); resultScreen.classList.add('active');
-    const iconColor = passed ? '#76B900' : '#890C58';
+    // In practice mode the learner has already passed — the header always reflects
+    // the OFFICIAL pass state, never the practice attempt's pass/fail.
+    const _headerPassed = IS_PRACTICE_MODE ? true : passed;
+    const iconColor = _headerPassed ? '#76B900' : '#890C58';
     const iconWrap = document.getElementById('result-icon-wrap');
-    if (iconWrap) { iconWrap.className = 'result-icon-wrap ' + (passed ? 'pass' : 'fail'); }
+    if (iconWrap) { iconWrap.className = 'result-icon-wrap ' + (_headerPassed ? 'pass' : 'fail'); }
     const svg = document.getElementById('result-icon-svg');
     if (svg) { svg.querySelectorAll('path').forEach(function(p) { p.setAttribute('stroke', iconColor); }); }
     const iconPath = document.getElementById('result-icon-path');
-    if (iconPath) { iconPath.setAttribute('d', passed ? 'M20 6L9 17l-5-5' : 'M18 6L6 18M6 6l12 12'); }
+    if (iconPath) { iconPath.setAttribute('d', _headerPassed ? 'M20 6L9 17l-5-5' : 'M18 6L6 18M6 6l12 12'); }
     const titleElement = document.getElementById('result-title');
     const passMsg = (CONFIG.passMessage && CONFIG.passMessage.trim()) ? CONFIG.passMessage.trim() : 'You passed!';
     const failMsg = (CONFIG.failMessage && CONFIG.failMessage.trim()) ? CONFIG.failMessage.trim() : 'Not Quite There';
-    titleElement.textContent = passed ? passMsg : failMsg;
-    titleElement.className = `result-title ${passed ? 'pass' : 'fail'}`;
+    titleElement.textContent = _headerPassed ? passMsg : failMsg;
+    titleElement.className = `result-title ${_headerPassed ? 'pass' : 'fail'}`;
     const scoreValEl = document.getElementById('result-score-val');
-    if (scoreValEl) { scoreValEl.textContent = score.percentage + '%'; scoreValEl.style.color = passed ? '#76B900' : '#890C58'; }
-    document.getElementById('correct-count').textContent = score.correct; document.getElementById('incorrect-count').textContent = score.incorrect;
-    const timeTakenSeconds = Math.floor(sessionTime / 1000); document.getElementById('time-taken').textContent = formatTime(timeTakenSeconds);
+    const timeTakenSeconds = Math.floor(sessionTime / 1000);
+    if (IS_PRACTICE_MODE) {
+      // Populate the official grid from the snapshot (unchanged) and the
+      // practice grid from THIS attempt.
+      if (_officialStats) {
+        if (scoreValEl) { scoreValEl.textContent = _officialStats.percentage + '%'; scoreValEl.style.color = _officialStats.passed ? '#76B900' : '#890C58'; }
+        document.getElementById('correct-count').textContent = _officialStats.correct;
+        document.getElementById('incorrect-count').textContent = _officialStats.incorrect;
+        document.getElementById('time-taken').textContent = formatTime(_officialStats.timeSec);
+      }
+      var pv = document.getElementById('practice-score-val');
+      if (pv) { pv.textContent = score.percentage + '%'; pv.style.color = passed ? '#76B900' : '#890C58'; }
+      document.getElementById('practice-correct').textContent = score.correct;
+      document.getElementById('practice-incorrect').textContent = score.incorrect;
+      document.getElementById('practice-time').textContent = formatTime(timeTakenSeconds);
+    } else {
+      if (scoreValEl) { scoreValEl.textContent = score.percentage + '%'; scoreValEl.style.color = passed ? '#76B900' : '#890C58'; }
+      document.getElementById('correct-count').textContent = score.correct; document.getElementById('incorrect-count').textContent = score.incorrect;
+      document.getElementById('time-taken').textContent = formatTime(timeTakenSeconds);
+      // Snapshot the official attempt's stats so a later practice run can restore them.
+      _officialStats = { percentage: score.percentage, correct: score.correct, incorrect: score.incorrect, timeSec: timeTakenSeconds, passed: passed };
+      _activeResultTab = 'official';
+    }
     document.getElementById('attempt-count').textContent = attemptCount;
     const retryBtn = document.getElementById('retry-btn'); const retryMsg = document.getElementById('retry-disabled-message');
     if (retryBtn && retryMsg) {
       const retryCheck = canRetry();
-      if (!retryCheck.allowed) { retryBtn.disabled = true; if (passed) retryBtn.classList.add('hidden'); retryBtn.setAttribute('title', retryCheck.reason); retryMsg.textContent = passed ? '' : retryCheck.reason; if (!passed) retryMsg.classList.remove('hidden'); else retryMsg.classList.add('hidden'); }
+      if (!retryCheck.allowed) { retryBtn.disabled = true; if (_headerPassed) retryBtn.classList.add('hidden'); retryBtn.setAttribute('title', retryCheck.reason); retryMsg.textContent = _headerPassed ? '' : retryCheck.reason; if (!_headerPassed) retryMsg.classList.remove('hidden'); else retryMsg.classList.add('hidden'); }
       else { retryBtn.disabled = false; retryBtn.classList.remove('hidden'); retryBtn.removeAttribute('title'); retryMsg.textContent = ''; retryMsg.classList.add('hidden'); }
+    }
+    // Practice button — shown ONLY on the pass screen when the setting is on.
+    // Sits where Retry sits, since a passer never retries (retry is hidden).
+    var practiceBtn = document.getElementById('practice-btn');
+    if (practiceBtn) {
+      if (_headerPassed && CONFIG.allowPractice !== false) {
+        practiceBtn.classList.remove('hidden');
+        if (retryBtn) retryBtn.classList.add('hidden');
+      } else {
+        practiceBtn.classList.add('hidden');
+      }
     }
     var exitEl = document.querySelector('.exit-message');
     if (exitEl) {
@@ -4265,18 +4361,18 @@ function showSection(sectionId) {
                           : (CONFIG.quizType === 'custom') ? ('Congratulations, you have passed the ' + _customExitLabel + '.')
                           : 'Congratulations, you have passed the knowledge check.';
       var defaultFailExit = canRetry().allowed ? 'Please try again.' : '';
-      var exitMsg = passed ? ((CONFIG.passExitMessage && CONFIG.passExitMessage.trim()) ? CONFIG.passExitMessage.trim() : defaultPassExit) : ((CONFIG.failExitMessage && CONFIG.failExitMessage.trim()) ? CONFIG.failExitMessage.trim() : defaultFailExit);
+      var exitMsg = _headerPassed ? ((CONFIG.passExitMessage && CONFIG.passExitMessage.trim()) ? CONFIG.passExitMessage.trim() : defaultPassExit) : ((CONFIG.failExitMessage && CONFIG.failExitMessage.trim()) ? CONFIG.failExitMessage.trim() : defaultFailExit);
       exitEl.textContent = exitMsg;
     }
     var reviewBtn = document.getElementById('review-btn');
     if (reviewBtn) {
       var failReviewAllowed = CONFIG.showAnswerReview && (!CONFIG.minAttemptsBeforeReview || attemptCount >= CONFIG.minAttemptsBeforeReview);
-      if (passed || failReviewAllowed) reviewBtn.classList.remove('hidden'); else reviewBtn.classList.add('hidden');
+      if (_headerPassed || failReviewAllowed) reviewBtn.classList.remove('hidden'); else reviewBtn.classList.add('hidden');
     }
     var certRow = document.getElementById('cert-link-row');
     var certBtn = document.getElementById('cert-link-btn');
     if (certRow && certBtn) {
-      if (passed && CONFIG.showCertificateLink && CONFIG.certificateUrl) {
+      if (_headerPassed && CONFIG.showCertificateLink && CONFIG.certificateUrl) {
         certBtn.href = CONFIG.certificateUrl;
         const customText = CONFIG.certificateLinkText && CONFIG.certificateLinkText.trim();
         if (customText) {
@@ -4287,41 +4383,74 @@ function showSection(sectionId) {
         certRow.classList.add('hidden');
       }
     }
-    var bestNoteEl = document.getElementById('best-score-note');
-    if (bestNoteEl) {
-      if (CONFIG.bestScoreTracking) {
-        if (hasPassed && bestScore != null && bestScore > score.percentage) {
-          bestNoteEl.textContent = 'Your best score of ' + bestScore + '% has been saved.';
-          bestNoteEl.classList.remove('hidden');
-        } else if (passed && canRetry().allowed) {
-          bestNoteEl.textContent = 'You can retake this quiz. Your highest score will be recorded.';
-          bestNoteEl.classList.remove('hidden');
-        } else {
-          bestNoteEl.classList.add('hidden');
-        }
-      } else {
-        bestNoteEl.classList.add('hidden');
-      }
-    }
     var attRemainingEl = document.getElementById('result-attempts-remaining');
     if (attRemainingEl) {
-      if (CONFIG.maxAttempts && !passed) {
+      if (CONFIG.maxAttempts && !_headerPassed) {
         const remaining = CONFIG.maxAttempts - attemptCount;
         if (remaining > 0) { attRemainingEl.textContent = 'Attempts remaining: ' + remaining; attRemainingEl.classList.remove('hidden'); }
         else { attRemainingEl.classList.add('hidden'); }
       } else { attRemainingEl.classList.add('hidden'); }
     }
-    // Section breakdown (toggle-gated). Always re-render so a retry refreshes it.
+    // Tab visibility: only surface tabs once a practice result exists.
+    var tabBar = document.getElementById('result-tabs');
+    var revPractice = document.getElementById('review-practice-btn');
+    if (_practiceStats) {
+      if (tabBar) tabBar.classList.remove('hidden');
+      if (revPractice) revPractice.classList.remove('hidden');
+    } else {
+      if (tabBar) tabBar.classList.add('hidden');
+      if (revPractice) revPractice.classList.add('hidden');
+    }
+    _applyResultTab(_activeResultTab);
+  }
+
+  // Swap the appropriate attempt's questions/answers into currentQuestions/
+  // userAnswers so section breakdown + review both reflect the active tab.
+  function _swapToOfficial() {
+    if (lastAttemptQuestionIds && lastAttemptAnswers) {
+      restoreQuestionsFromIds(lastAttemptQuestionIds, lastAttemptOptionsOrder);
+      userAnswers = Object.assign({}, lastAttemptAnswers);
+    } else {
+      currentQuestions = [];
+      userAnswers = {};
+    }
+  }
+  function _swapToPractice() {
+    if (_practiceQuestionIds && _practiceAnswers) {
+      restoreQuestionsFromIds(_practiceQuestionIds, _practiceOptionsOrder);
+      userAnswers = Object.assign({}, _practiceAnswers);
+    }
+  }
+  function _applyResultTab(name) {
+    if (name !== 'practice') name = 'official';
+    if (name === 'practice' && !_practiceStats) name = 'official';
+    _activeResultTab = name;
+    var tabOff = document.getElementById('result-tab-official');
+    var tabPrac = document.getElementById('result-tab-practice');
+    var panOff = document.getElementById('stats-grid-official');
+    var panPrac = document.getElementById('stats-grid-practice');
+    if (name === 'practice') {
+      _swapToPractice();
+      if (tabOff) tabOff.classList.remove('active');
+      if (tabPrac) tabPrac.classList.add('active');
+      if (panOff) panOff.classList.add('hidden');
+      if (panPrac) panPrac.classList.remove('hidden');
+    } else {
+      _swapToOfficial();
+      if (tabOff) tabOff.classList.add('active');
+      if (tabPrac) tabPrac.classList.remove('active');
+      if (panOff) panOff.classList.remove('hidden');
+      if (panPrac) panPrac.classList.add('hidden');
+    }
+    // Section breakdown for the active tab's data. Always re-render.
     var brkHost = document.getElementById('section-breakdown-host');
     if (brkHost) {
       brkHost.innerHTML = '';
       _secLastBrk = null;
-      if (CONFIG.sectionBreakdownOnResult) {
+      if (CONFIG.sectionBreakdownOnResult && currentQuestions.length > 0) {
         var brk = _computeSectionBreakdown();
         var isPreview = CONFIG.previewScreen === 'pass' || CONFIG.previewScreen === 'fail';
-        // Preview mode: if the real quiz has no sections (or no questions),
-        // fall back to a 3-section mock so the breakdown can still be demoed.
-        if (isPreview && brk.length < 2) brk = _mockSectionBreakdown(passed);
+        if (isPreview && brk.length < 2) brk = _mockSectionBreakdown(true);
         if (brk.length >= 2) {
           _secLastBrk = brk;
           brkHost.innerHTML = _renderSectionBreakdownHTML(brk, CONFIG.passingPercentage);
@@ -4351,6 +4480,9 @@ function showSection(sectionId) {
     } else {
       document.getElementById('result-screen').classList.remove('hidden');
       document.getElementById('result-screen').classList.add('active');
+      // Re-sync the result screen with the active tab — the review may have
+      // swapped currentQuestions to the "other" tab's data.
+      if (typeof _applyResultTab === 'function') _applyResultTab(_activeResultTab);
     }
     reviewSource = 'result';
   }
@@ -4364,7 +4496,7 @@ function showSection(sectionId) {
     // When best score tracking is off, passed learners always see correct answers in review.
     // When it's on, use the showCorrectAnswers setting as-is.
     var origShowCorrect = CONFIG.showCorrectAnswers;
-    CONFIG.showCorrectAnswers = origShowCorrect || (hasPassed && !CONFIG.bestScoreTracking);
+    CONFIG.showCorrectAnswers = origShowCorrect || hasPassed;
     // The "Correct answer revealed" legend swatch only applies when the blue
     // reveal color is actually used — hide it otherwise.
     var revealItem = document.querySelector('#review-legend .rl-reveal-item');
@@ -4536,22 +4668,60 @@ function showSection(sectionId) {
       const timerElement = document.getElementById('timer'); if (timerElement) { timerElement.classList.remove('timer-warning'); timerElement.textContent = '--:--'; }
       const sst = document.getElementById('start-screen-timer'); if (sst) { sst.classList.remove('timer-warning'); sst.textContent = '--:--'; }
     }
-    if (CONFIG.bestScoreTracking && hasPassed) {
-      // Bypass start screen — go straight to quiz
-      document.getElementById('start-screen').classList.add('hidden'); document.getElementById('quiz-screen').classList.remove('hidden');
-      startTime = Date.now(); saveState(getStateForSave()); if (CONFIG.timeLimitMinutes) startTimer();
-      document.getElementById('attempt-count').textContent = attemptCount + 1; renderQuestion();
-    } else {
-      document.getElementById('quiz-screen').classList.add('hidden'); document.getElementById('start-screen').classList.remove('hidden');
-      const retryStartBtn = document.getElementById('start-quiz-btn'); if (retryStartBtn) retryStartBtn.textContent = LABEL_START_QUIZ;
-      document.getElementById('attempt-count').textContent = attemptCount + 1;
-      updateStartScreenAttemptState();
+    document.getElementById('quiz-screen').classList.add('hidden'); document.getElementById('start-screen').classList.remove('hidden');
+    const retryStartBtn = document.getElementById('start-quiz-btn'); if (retryStartBtn) retryStartBtn.textContent = LABEL_START_QUIZ;
+    document.getElementById('attempt-count').textContent = attemptCount + 1;
+    updateStartScreenAttemptState();
+  }
+
+  // Practice mode entry — like retry but flips IS_PRACTICE_MODE on so nothing
+  // gets written to the LMS. Learner keeps their existing pass in ALM; this
+  // is a "review your knowledge" run only.
+  function startPractice() {
+    IS_PRACTICE_MODE = true;
+    currentQuestionIndex = 0; userAnswers = {}; timeExpired = false;
+    viewingStartDuringAttempt = false; accumulatedTimeMs = 0;
+    selectQuestions();
+    document.getElementById('result-screen').classList.add('hidden'); document.getElementById('result-screen').classList.remove('active');
+    var rs2 = document.getElementById('review-screen'); if (rs2) { rs2.classList.add('hidden'); rs2.classList.remove('active'); }
+    hideTimeExpiredUi(); if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    if (CONFIG.timeLimitMinutes) {
+      const timerElement = document.getElementById('timer'); if (timerElement) { timerElement.classList.remove('timer-warning'); timerElement.textContent = '--:--'; }
+      const sst = document.getElementById('start-screen-timer'); if (sst) { sst.classList.remove('timer-warning'); sst.textContent = '--:--'; }
+    }
+    // Remove the "no review available" note left by the pre-flight pass screen —
+    // it doesn't apply to this fresh practice attempt.
+    var noReviewNote = document.getElementById('no-review-note');
+    if (noReviewNote && noReviewNote.parentNode) noReviewNote.parentNode.removeChild(noReviewNote);
+    // Route through the start screen so the learner gets the practice banner
+    // and can review the setup before jumping into the questions. Clicking
+    // Start on that screen calls beginQuizAfterConfirm(), which starts the
+    // timer and renders the first question (LMS writes are skipped because
+    // IS_PRACTICE_MODE is true).
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    updateStartScreenAttemptState();
+    updateStartTimerRowVisible();
+    document.getElementById('start-question-count').textContent = currentQuestions.length;
+  }
+  function _showPracticeIndicator(on) {
+    var container = document.querySelector('#quiz-screen .info-bar') || document.querySelector('#quiz-screen .question-header') || document.getElementById('quiz-screen');
+    var existing = document.getElementById('practice-indicator');
+    if (on) {
+      if (existing || !container) return;
+      var pill = document.createElement('span');
+      pill.id = 'practice-indicator';
+      pill.className = 'practice-indicator';
+      pill.textContent = 'Practice';
+      container.insertBefore(pill, container.firstChild);
+    } else if (existing) {
+      existing.parentNode.removeChild(existing);
     }
   }
 
   document.getElementById('prev-btn').addEventListener('click', () => {
     if (timeExpired) return;
-    if (currentQuestionIndex === 0) { viewingStartDuringAttempt = true; document.getElementById('quiz-screen').classList.add('hidden'); document.getElementById('start-screen').classList.remove('hidden'); const sb = document.getElementById('start-quiz-btn'); if (sb) sb.textContent = LABEL_NEXT; updateStartTimerRowVisible(); saveState(getStateForSave()); return; }
+    if (currentQuestionIndex === 0) { viewingStartDuringAttempt = true; document.getElementById('quiz-screen').classList.add('hidden'); document.getElementById('start-screen').classList.remove('hidden'); const sb = document.getElementById('start-quiz-btn'); if (sb) sb.textContent = LABEL_NEXT; updateStartTimerRowVisible(); if (IS_PRACTICE_MODE) updateStartScreenAttemptState(); saveState(getStateForSave()); return; }
     currentQuestionIndex--; saveState(getStateForSave()); renderQuestion();
   });
 
@@ -4564,7 +4734,24 @@ function showSection(sectionId) {
   document.getElementById('cancel-submit').addEventListener('click', hideWarningModal);
   document.getElementById('confirm-submit').addEventListener('click', performSubmit);
   const retryBtn = document.getElementById('retry-btn'); if (retryBtn) retryBtn.addEventListener('click', retryQuiz);
-  const reviewBtn2 = document.getElementById('review-btn'); if (reviewBtn2) reviewBtn2.addEventListener('click', showReviewPanel);
+  const practiceBtn = document.getElementById('practice-btn'); if (practiceBtn) practiceBtn.addEventListener('click', startPractice);
+  const reviewBtn2 = document.getElementById('review-btn');
+  if (reviewBtn2) reviewBtn2.addEventListener('click', function() {
+    // The Review button always reviews the OFFICIAL attempt, even when the
+    // Practice tab is active — that's the "test they actually took".
+    _swapToOfficial();
+    showReviewPanel();
+  });
+  const reviewPracticeBtn = document.getElementById('review-practice-btn');
+  if (reviewPracticeBtn) reviewPracticeBtn.addEventListener('click', function() {
+    if (!_practiceQuestionIds || !_practiceAnswers) return;
+    _swapToPractice();
+    showReviewPanel();
+  });
+  var _tabOff = document.getElementById('result-tab-official');
+  var _tabPrac = document.getElementById('result-tab-practice');
+  if (_tabOff) _tabOff.addEventListener('click', function() { _applyResultTab('official'); });
+  if (_tabPrac) _tabPrac.addEventListener('click', function() { _applyResultTab('practice'); });
   const reviewBackBtn = document.getElementById('review-back-btn'); if (reviewBackBtn) reviewBackBtn.addEventListener('click', hideReviewPanel);
   const reviewLastBtn = document.getElementById('start-review-last-btn');
   if (reviewLastBtn) reviewLastBtn.addEventListener('click', function() {
@@ -4577,12 +4764,19 @@ function showSection(sectionId) {
   });
 
   function beginQuizAfterConfirm() {
+    if (!IS_PRACTICE_MODE) _writeLmsBaseline();
     viewingStartDuringAttempt = false; updateStartTimerRowVisible();
     const sb = document.getElementById('start-quiz-btn'); if (sb) sb.textContent = LABEL_START_QUIZ;
     document.getElementById('start-screen').classList.add('hidden'); document.getElementById('quiz-screen').classList.remove('hidden');
     hideTimeExpiredUi(); accumulatedTimeMs = 0; startTime = Date.now(); currentQuestionIndex = 0; userAnswers = {};
     saveState(getStateForSave()); if (CONFIG.timeLimitMinutes) startTimer();
-    document.getElementById('attempt-count').textContent = attemptCount + 1; renderQuestion();
+    if (IS_PRACTICE_MODE) {
+      _showPracticeIndicator(true);
+      document.getElementById('attempt-count').textContent = attemptCount;
+    } else {
+      document.getElementById('attempt-count').textContent = attemptCount + 1;
+    }
+    renderQuestion();
   }
 
   function returnToQuizFromStart() {
@@ -4600,6 +4794,105 @@ function showSection(sectionId) {
     startAutoSubmitCountdown();
   }
 
+  // ── ALM pre-flight: does this learner already have a passing score for
+  // this module in ALM's Prime API? If yes, skip the quiz and go directly
+  // to the pass screen. Only runs when the SCORM was launched inside ALM
+  // (all needed parameters live in document.referrer / parent frame URL).
+  //
+  // Uses the enrollment's per-module `loResourceGrade.score` (the LATEST
+  // attempt on this module) — not the course-level enrollment score, which
+  // is a sum of all modules and unreliable. See docs/alm-preflight-check.md.
+  function _extractAlmLaunchParams() {
+    const params = {};
+    function scan(src) {
+      if (!src) return;
+      const qs = (src.split('?')[1] || '').split('#')[0];
+      qs.split('&').forEach(function(p) {
+        const eq = p.indexOf('=');
+        if (eq < 0) return;
+        const k = p.slice(0, eq);
+        const v = p.slice(eq + 1);
+        if (!k || !v || params[k]) return;
+        try { params[k] = decodeURIComponent(v); } catch (_) { params[k] = v; }
+      });
+    }
+    scan(document.referrer);
+    try { scan(window.parent.location.href); } catch (_) {}
+    scan(location.search);
+    if (!params.access_token) {
+      try { if (window.parent && window.parent.oauthToken) params.access_token = String(window.parent.oauthToken); } catch (_) {}
+    }
+    return params;
+  }
+  async function _almPreflightCheck() {
+    try {
+      const p = _extractAlmLaunchParams();
+      console.log('[Quizzer preflight] extracted params:', { course_id: p.course_id, module_id: p.module_id, hasToken: !!p.access_token, hostName: p.hostName });
+      if (!p.access_token || !p.course_id || !p.module_id) {
+        console.log('[Quizzer preflight] skipping — missing launch params (not launched from ALM?)');
+        return { checked: false, reason: 'not launched from ALM (missing params)' };
+      }
+      const host = (p.hostName || 'learningmanager.adobe.com').replace(/^https?:\/\//, '');
+      const url = 'https://' + host + '/primeapi/v2/learningObjects/' + encodeURIComponent(p.course_id) + '?include=enrollment.loResourceGrades';
+      console.log('[Quizzer preflight] fetching:', url);
+      // Bound the wait so a flaky API doesn't leave the learner staring at the spinner.
+      const controller = new AbortController();
+      const timer = setTimeout(function() { controller.abort(); }, 4000);
+      const r = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        mode: 'cors',
+        headers: { 'Authorization': 'oauth ' + p.access_token },
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+      if (!r.ok) {
+        console.warn('[Quizzer preflight] fetch failed:', r.status, r.statusText);
+        return { checked: true, ok: false, reason: 'http ' + r.status };
+      }
+      const json = await r.json();
+      const included = Array.isArray(json.included) ? json.included : [];
+      const allGrades = included.filter(function(x) { return x && x.type === 'learningObjectResourceGrade'; });
+      console.log('[Quizzer preflight] response OK. All grades in course:', allGrades.map(function(g) { return { id: g.id, score: g.attributes && g.attributes.score, highest: g.attributes && g.attributes.highestScore }; }));
+      // Match by grade id prefix: {course}_{instance}_{resource}_{version}_{user}
+      // where the leading portion equals our module_id.
+      const grade = allGrades.find(function(x) {
+        return x && x.id && x.id.indexOf(p.module_id + '_') === 0;
+      });
+      if (!grade || !grade.attributes) {
+        console.log('[Quizzer preflight] no grade record matching module_id "' + p.module_id + '" (learner hasn\'t attempted this module yet, or id shape changed).');
+        return { checked: true, ok: true, hasGrade: false };
+      }
+      const a = grade.attributes;
+      console.log('[Quizzer preflight] matched grade for this module:', { id: grade.id, score: a.score, highestScore: a.highestScore, hasPassed: a.hasPassed, completed: a.completed });
+      // Use highestScore ("best ever") as the decision field. `score` (latest
+      // attempt) is unreliable here: ALM clears it as soon as any SCORM in
+      // this module calls LMSSetValue(lesson_status, 'incomplete'), and our
+      // own player would do that if we didn't defer it. highestScore survives.
+      const _best = typeof a.highestScore === 'number' ? a.highestScore
+                 : (typeof a.score === 'number' ? a.score : null);
+      return {
+        checked: true, ok: true, hasGrade: true,
+        score: _best,
+        latestScore: typeof a.score === 'number' ? a.score : null,
+        highestScore: typeof a.highestScore === 'number' ? a.highestScore : null,
+        hasPassed: a.hasPassed === true,
+        completed: a.completed === true,
+        dateCompleted: a.dateCompleted || null
+      };
+    } catch (e) {
+      console.warn('[Quizzer preflight] error:', e);
+      return { checked: true, ok: false, reason: (e && e.message) || 'error' };
+    }
+  }
+  function _hidePreflightLoading() {
+    const el = document.getElementById('alm-preflight-loading');
+    if (!el) return;
+    el.classList.add('hidden');
+    // Remove from DOM after the fade so it doesn't intercept clicks.
+    setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 260);
+  }
+
   async function initialize() {
     try {
       if (window.QUIZ_QUESTIONS && window.QUIZ_QUESTIONS.length) {
@@ -4611,10 +4904,30 @@ function showSection(sectionId) {
       }
       if (questionBank.length === 0) throw new Error('No questions available');
 
+      // ── ALM pre-flight (silent fallback if not applicable) ──
+      // If ALM already has a passing score for this learner on this module,
+      // route straight to the pass screen — mimics what happens when SCORM
+      // suspend_data preserves lastScore, but survives module content
+      // replacement (which wipes suspend_data).
+      const _preflight = await _almPreflightCheck();
+      const _passingPct = CONFIG.passingPercentage || 70;
+      console.log('[Quizzer preflight] final decision — highestScore:', _preflight && _preflight.highestScore, 'latestScore:', _preflight && _preflight.latestScore, 'used:', _preflight && _preflight.score, 'threshold:', _passingPct, '→', (_preflight && _preflight.hasGrade && typeof _preflight.score === 'number' && _preflight.score >= _passingPct) ? 'ALREADY PASSED, showing pass screen' : 'not passed / no grade, running quiz');
+      if (_preflight && _preflight.hasGrade && typeof _preflight.score === 'number' && _preflight.score >= _passingPct) {
+        // Seed the same globals the "returning passer" branch reads below.
+        // We don't have lastAttemptQuestionIds (SCORM content was replaced),
+        // so the pass screen will render without a Review button.
+        hasPassed = true;
+        lastScore = _preflight.score;
+        attemptCount = Math.max(attemptCount || 0, 1);
+      }
+
       const state = loadState();
       const resuming = state && (state.elapsedMs != null || state.quizStartTime) && state.attemptQuestionIds && state.attemptQuestionIds.length > 0;
 
       if (resuming) {
+        // Resuming an in-progress attempt — write the SCORM baseline that we
+        // deferred at load time (so preflight could read a clean grade record).
+        _writeLmsBaseline();
         restoreQuestionsFromIds(state.attemptQuestionIds, attemptOptionsOrder);
         accumulatedTimeMs = state.elapsedMs != null ? state.elapsedMs : (Date.now() - new Date(state.quizStartTime).getTime());
         startTime = Date.now();
@@ -4635,7 +4948,25 @@ function showSection(sectionId) {
             var savedScore = calculateScore();
             showResults({ percentage: lastScore != null ? lastScore : savedScore.percentage, correct: savedScore.correct, incorrect: savedScore.incorrect }, true, 0);
           } else {
+            // Returning passer OR pre-flight passer with no attempt data —
+            // we know they passed and their latest score, but not the specific
+            // questions they answered. Hide the correct/incorrect/time stats
+            // and the Review button, and add a small note explaining.
             showResults({ percentage: lastScore || 0, correct: 0, incorrect: 0 }, true, 0);
+            ['correct-count','incorrect-count'].forEach(function(id) {
+              var el = document.getElementById(id);
+              if (el) { var stat = el.closest('.stat-item'); if (stat) stat.style.display = 'none'; }
+            });
+            var reviewBtnHide = document.getElementById('review-btn');
+            if (reviewBtnHide) reviewBtnHide.classList.add('hidden');
+            var actions = document.querySelector('#result-screen .action-buttons');
+            if (actions && !document.getElementById('no-review-note')) {
+              var note = document.createElement('div');
+              note.id = 'no-review-note';
+              note.className = 'no-review-note';
+              note.textContent = 'Answer review isn’t available for this attempt — the quiz was updated since you last took it.';
+              actions.parentNode.insertBefore(note, actions);
+            }
           }
           var timeTakenEl = document.getElementById('time-taken');
           if (timeTakenEl) { var timeStat = timeTakenEl.closest('.stat-item'); if (timeStat) timeStat.style.display = 'none'; }
@@ -4685,8 +5016,11 @@ function showSection(sectionId) {
         currentQuestionIndex = 0; userAnswers = {}; startTime = Date.now();
         renderQuestion();
       }
+      // Everything's routed to the correct screen — drop the preflight spinner.
+      _hidePreflightLoading();
     } catch (error) {
       console.error('Initialization failed:', error);
+      _hidePreflightLoading();
       alert(`Failed to load quiz: ${error.message}\n\nPlease contact your administrator.`);
     }
   }
@@ -4840,7 +5174,6 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .start-review-last-btn:hover { background: #76B900; color: #fff; }
 .retry-disabled-message { margin-top: 8px; text-align: center; color: #890C58; font-size: 14px; }
 .retry-group { display: flex; align-items: center; gap: 12px; }
-.best-score-note { font-size: 13px; color: #555; font-style: italic; }
 .result-card { background: #ffffff; border: 1px solid #c5c5c5; padding: 36px 36px 28px; display: flex; flex-direction: column; align-items: center; }
 .result-icon-wrap { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
 .result-icon-wrap.pass { background: #e8f5c8; }
@@ -4855,6 +5188,14 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .cert-link-btn svg { flex-shrink: 0; }
 .cert-link-btn:hover { opacity: 0.75; }
 .stats-grid { display: flex; width: 100%; margin: 30px 0; border-top: 1px solid #E4E4E4; border-bottom: 1px solid #E4E4E4; }
+.result-tabs { display: flex; gap: 0; margin: 26px 0 0; border-bottom: 1px solid #E4E4E4; width: 100%; }
+.result-tab { background: transparent; border: none; padding: 10px 18px; font: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; color: #6B6B6B; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s ease, border-color 0.15s ease; }
+.result-tab:hover { color: #1a1a1a; }
+.result-tab.active { color: #1a1a1a; border-bottom-color: #76B900; }
+.result-tabs ~ #stats-grid-official,
+.result-tabs ~ #stats-grid-practice { margin-top: 0; border-top: none; }
+.btn-review-practice { background-color: #ffffff; color: #6B6B6B; border: 1px solid #d4d4d4; }
+.btn-review-practice:hover { color: #1a1a1a; border-color: #1a1a1a; }
 .stat-item { flex: 1; background: transparent; border: none; padding: 18px 8px; text-align: center; }
 .stat-item + .stat-item { border-left: 1px solid #E4E4E4; }
 .stat-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #6B6B6B; margin-bottom: 6px; }
@@ -4874,6 +5215,19 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 @media (max-width: 768px) { .info-bar { flex-wrap: wrap; } .question-text { font-size: 1.2rem; } .question-text img, #question-text img { max-height: 200px; } .option-text img { max-width: 150px; max-height: 120px; } .navigation { flex-direction: column; } button { width: 100%; } .quiz-zoom-panel button { width: auto; } }
 .btn-review { background-color: #ffffff; color: #76B900; border: 1px solid #76B900; }
 .btn-review:hover { background-color: #f2fbe4; }
+/* Practice button — replaces Retry on the pass screen when allowPractice is on.
+   Distinct color so learners don't confuse it with a graded retry. */
+.btn-practice { background-color: #ffffff; color: #1a1a1a; border: 1px solid #1a1a1a; }
+.btn-practice:hover { background-color: #f7f7f7; }
+/* Small pill shown in the quiz info-bar during a practice attempt */
+.practice-indicator { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; background: #fef3c7; color: #78350f; border: 1px solid #fcd34d; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-right: 10px; }
+.practice-indicator::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #b45309; }
+.start-practice-banner { display: flex; flex-direction: row; align-items: center; gap: 16px; padding: 14px 18px; margin-bottom: 20px; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; text-align: left; }
+.start-practice-icon { width: 42px; height: 42px; border-radius: 50%; background: #b45309; color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+.start-practice-icon svg { width: 22px; height: 22px; }
+.start-practice-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.start-practice-msg { font-size: 14px; font-weight: 700; color: #78350f; margin: 0; letter-spacing: 0.04em; text-transform: uppercase; text-align: left; }
+.start-practice-sub { font-size: 13px; color: #92400e; margin: 0; text-align: left; line-height: 1.45; }
 .review-screen { display: none; }
 .review-screen.active { display: block; }
 .review-card { background: #ffffff; border: 1px solid #c5c5c5; padding: 24px 32px 32px; }
@@ -4944,6 +5298,15 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .hotspot-wrap img{display:block;width:100%;height:auto;max-height:400px;object-fit:contain;user-select:none;-webkit-user-drag:none;pointer-events:none}
 .hs-pin{position:absolute;width:32px;height:32px;transform:translate(-50%,-50%);pointer-events:none;z-index:10;border-radius:50%;background:#76B900;box-shadow:0 0 0 3px rgba(118,185,0,.3),0 2px 10px rgba(0,0,0,.28);display:none;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;line-height:1}
 .hs-clear-btn{cursor:pointer}.hs-clear-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── ALM pre-flight loading overlay ── */
+.alm-loading{position:fixed;inset:0;background:#fff;z-index:10000;display:flex;align-items:center;justify-content:center;transition:opacity .2s ease}
+.alm-loading.hidden{opacity:0;pointer-events:none;display:flex}
+.alm-loading-inner{display:flex;flex-direction:column;align-items:center;gap:14px}
+.alm-loading-spinner{width:44px;height:44px;border:4px solid #eef0f3;border-top-color:#76B900;border-radius:50%;animation:alm-spin 0.8s linear infinite}
+.alm-loading-text{font-size:13px;color:#6b6b6b;font-weight:500;letter-spacing:.02em}
+@keyframes alm-spin{to{transform:rotate(360deg)}}
+.no-review-note{font-size:12px;color:#6b6b6b;font-style:italic;text-align:center;padding:10px 20px 0;line-height:1.5}
 
 /* ── Section breakdown on result screen ── */
 /* ── Section breakdown (result screen) ── */
@@ -5046,7 +5409,7 @@ const APP = {
     showCertificateLink: true,
     certificateUrl: 'https://www.nvidia.com/en-us/training/academy/certificates/',
     certificateLinkText: '',
-    bestScoreTracking: false,
+    allowPractice: true,
     customQuizTypeName: '',
     customQuizMode: 'quiz',
     manifestIdentifier: '',
@@ -8054,11 +8417,11 @@ function renderInspector() {
 
   // Build group rows
   const rowsScoring = _rCtlRow('tog-passing', 'Passing score', 'Minimum to pass', _rStepHtml('s-passing', '%', 1, 100, 70) + _rTogHtml('tog-passing'))
-    + _rCtlRow('tog-best-score', 'Best-score tracking', 'Let a passed learner retake; LMS keeps the highest', _rTogHtml('tog-best-score'))
     + _rCtlRow('tog-partial-credit', 'Partial credit on multi-select', 'Each correct pick earns a fraction; wrong picks deduct', _rTogHtml('tog-partial-credit'));
 
   const rowsAttempts = _rCtlRow('tog-attempts', 'Limit attempts', '', _rStepHtml('s-attempts', 'tries', 1, 99, 2) + _rTogHtml('tog-attempts'))
-    + '<div class="r-sub" data-sub="attempts">' + _rCtlRow('tog-cooldown', 'Cooldown between tries', '', _rStepHtml('s-cooldown', 'days', 1, 365, 7) + _rTogHtml('tog-cooldown')) + '</div>';
+    + '<div class="r-sub" data-sub="attempts">' + _rCtlRow('tog-cooldown', 'Cooldown between tries', '', _rStepHtml('s-cooldown', 'days', 1, 365, 7) + _rTogHtml('tog-cooldown')) + '</div>'
+    + _rCtlRow('tog-practice', 'Practice button after passing', 'Passer can retake for practice — no LMS write', _rTogHtml('tog-practice'));
 
   const rowsTiming = _rCtlRow('tog-timelimit', 'Time limit', 'Per attempt', _rStepHtml('s-timelimit', 'min', 1, 999, 45) + _rTogHtml('tog-timelimit'))
     + '<div class="r-sub"><div class="r-ctl" style="padding-top:2px"><div class="lab"><div class="l">Pace by question</div><div class="d">Apply a per-question budget as the total time limit</div></div></div>'
@@ -8620,6 +8983,7 @@ function _rRefreshChips() {
   chips.push(_rChipHtml('scoring', s.passingPercentage ? s.passingPercentage + '% to pass' : 'No pass mark', !!s.passingPercentage));
   if (s.maxAttempts) chips.push(_rChipHtml('attempts', s.maxAttempts + ' attempts' + (s.cooldownDays ? ' · ' + s.cooldownDays + 'd cooldown' : ''), true));
   else chips.push(_rChipHtml('attempts', 'Unlimited tries', true));
+  if (s.allowPractice !== false) chips.push(_rChipHtml('attempts', 'Practice on pass', true));
   chips.push(_rChipHtml('timing', s.timeLimitMinutes ? s.timeLimitMinutes + ' min' : 'No time limit', !!s.timeLimitMinutes));
   const n = APP.questions.length;
   // Question pool summary — always render this chip so the pool state is
@@ -9274,6 +9638,21 @@ async function _sendBankCreateFolder(name, parentId) {
 }
 
 async function confirmSendToBank() {
+  // If a "new folder" input is still open with a typed name, commit it first —
+  // the user's intent was clearly to send to that folder, they just forgot to
+  // click the check. An empty input is silently discarded.
+  const pendingInp = document.getElementById('qtb-newinput');
+  if (pendingInp) {
+    const typed = (pendingInp.value || '').trim();
+    if (typed) {
+      const parentId = pendingInp.dataset.sub === '1' ? _sendBankAddingUnderId : null;
+      await _sendBankCreateFolder(typed, parentId);
+    } else {
+      _sendBankAdding = false;
+      _sendBankAddingUnderId = null;
+      _renderSendBankFolders();
+    }
+  }
   const targetFolderId = _sendBankTargetId;
   if (!targetFolderId) { toast('Pick or create a folder first', 'err'); return; }
   const ids = _sendToBankAll ? APP.questions.map(q => q.id) : Array.from(APP.selectedQids);
@@ -9484,13 +9863,12 @@ function _afbRenderQuestions() {
   const list = document.getElementById('afb-q-list');
   const selAllRow = document.getElementById('afb-select-all-row');
   const subfolders = _bankFolderChildren(ADD_FROM_BANK.folderId);
-  // Parent-folder view: when the selected folder has subfolders but no own
-  // questions, render a browsable list of those subfolders instead of the
-  // "This folder is empty" message — mirrors the main Bank tab behavior.
-  if (!all.length && subfolders.length && !filter) {
-    countEl.textContent = subfolders.length + ' subfolder' + (subfolders.length === 1 ? '' : 's');
-    if (selAllRow) selAllRow.style.display = 'none';
-    list.innerHTML = '<div class="afb-parent-view">' + subfolders.map(f => {
+  // Render subfolders above the questions whenever they exist and no search
+  // filter is active — mirrors the main Bank tab, where a mixed folder shows
+  // both its subfolders and its own questions.
+  const renderSubfoldersHTML = () => {
+    if (!subfolders.length || filter) return '';
+    return '<div class="afb-parent-view" style="margin-bottom:12px">' + subfolders.map(f => {
       const qc = _bankQuestionCount(f.id);
       const subc = _bankFolderChildren(f.id).length;
       const meta = (qc ? qc + ' question' + (qc === 1 ? '' : 's') : '')
@@ -9504,19 +9882,30 @@ function _afbRenderQuestions() {
         + (selInFolder ? '<span class="afb-parent-sel">' + selInFolder + ' selected</span>' : '')
         + '</div>';
     }).join('') + '</div>';
+  };
+  // Pure parent view — no own questions, has subfolders. Keep the concise
+  // header ("N subfolders") and hide the Select-all row.
+  if (!all.length && subfolders.length && !filter) {
+    countEl.textContent = subfolders.length + ' subfolder' + (subfolders.length === 1 ? '' : 's');
+    if (selAllRow) selAllRow.style.display = 'none';
+    list.innerHTML = renderSubfoldersHTML();
     return;
   }
   if (filter) countEl.textContent = qs.length + ' of ' + all.length + ' match';
-  else countEl.textContent = all.length + ' question' + (all.length === 1 ? '' : 's');
+  else {
+    const qPart = all.length + ' question' + (all.length === 1 ? '' : 's');
+    const sPart = subfolders.length ? ' · ' + subfolders.length + ' subfolder' + (subfolders.length === 1 ? '' : 's') : '';
+    countEl.textContent = qPart + sPart;
+  }
   if (selAllRow) selAllRow.style.display = '';
   // "Select all" reflects whether every (filtered) question is selected
   const selAll = document.getElementById('afb-select-all');
   if (selAll) selAll.checked = qs.length > 0 && qs.every(q => ADD_FROM_BANK.selectedIds.has(q.id));
   if (!qs.length) {
-    list.innerHTML = '<div class="bank-empty">' + (filter ? 'No questions match.' : 'This folder is empty.') + '</div>';
+    list.innerHTML = renderSubfoldersHTML() + '<div class="bank-empty">' + (filter ? 'No questions match.' : 'This folder is empty.') + '</div>';
     return;
   }
-  list.innerHTML = qs.map(q => {
+  list.innerHTML = renderSubfoldersHTML() + qs.map(q => {
     const text = _stripHtml(q.question || '');
     const preview = text.length > 180 ? text.slice(0, 180) + '…' : text;
     const isSel = ADD_FROM_BANK.selectedIds.has(q.id);
@@ -9803,7 +10192,6 @@ const BUILTIN_PRESETS = [
       allowBlankAnswers: true,
       warnOnBlankAnswers: true,
       showAnswerReview: false,
-      bestScoreTracking: false,
       partialCreditMultiSelect: true,
       showCertificateLink: false
     }
@@ -11624,13 +12012,6 @@ function enableShowAnswerReview() {
   closeModal('modal-review-confirm');
 }
 
-function confirmBestScoreTracking(checkbox) {
-  if (checkbox.checked) {
-    checkbox.checked = false;
-    showModal('modal-best-score-confirm');
-  }
-}
-
 function toggleSettingInput(key, on) {
   const el = document.getElementById('inp-' + key);
   if (el) el.style.display = on ? 'flex' : 'none';
@@ -11800,8 +12181,8 @@ function readSettingsToForm() {
   document.querySelectorAll('input[name="q-custom-mode"][value="' + customMode + '"], input[name="s-custom-mode"][value="' + customMode + '"]').forEach(r => r.checked = true);
   _updateCertificateToggleForQuizType(s.quizType || 'course_completion');
   _refreshPassExitPlaceholder();
-  if (_gi('tog-best-score')) _gi('tog-best-score').checked = s.bestScoreTracking !== false;
   if (_gi('tog-partial-credit')) _gi('tog-partial-credit').checked = !!s.partialCreditMultiSelect;
+  if (_gi('tog-practice')) _gi('tog-practice').checked = s.allowPractice !== false;
   if (_gi('tog-section-breakdown')) _gi('tog-section-breakdown').checked = !!s.sectionBreakdownOnResult;
   if (_gi('tog-section-review')) _gi('tog-section-review').checked = !!s.sectionReviewGrouping;
   if (_gi('s-cert-url')) _gi('s-cert-url').value = s.certificateUrl || 'https://www.nvidia.com/en-us/training/academy/certificates/';
@@ -11869,8 +12250,8 @@ function saveSettings() {
     showCertificateLink: document.getElementById('tog-certificate').checked,
     certificateUrl: (document.getElementById('s-cert-url').value || '').trim() || 'https://www.nvidia.com/en-us/training/academy/certificates/',
     certificateLinkText: (document.getElementById('s-cert-text').value || '').trim(),
-    bestScoreTracking: document.getElementById('tog-best-score').checked,
     partialCreditMultiSelect: document.getElementById('tog-partial-credit').checked,
+    allowPractice: !!(document.getElementById('tog-practice') && document.getElementById('tog-practice').checked),
     sectionBreakdownOnResult: !!(document.getElementById('tog-section-breakdown') && document.getElementById('tog-section-breakdown').checked),
     sectionReviewGrouping: !!(document.getElementById('tog-section-review') && document.getElementById('tog-section-review').checked),
     customQuizTypeName: (document.getElementById('s-custom-name') && document.getElementById('s-custom-name').value || '').trim(),
@@ -11967,8 +12348,8 @@ function buildQuizHTML(settings, questions, isTest, useRemote) {
     showCertificateLink: !!settings.showCertificateLink,
     certificateUrl: settings.certificateUrl || '',
     certificateLinkText: settings.certificateLinkText || '',
-    bestScoreTracking: settings.bestScoreTracking !== false,
     partialCreditMultiSelect: !!settings.partialCreditMultiSelect,
+    allowPractice: settings.allowPractice !== false,
     customQuizTypeName: settings.customQuizTypeName || '',
     customQuizMode: settings.customQuizMode === 'exam' ? 'exam' : 'quiz',
     previewScreen: settings._previewScreen || null,
@@ -12034,6 +12415,7 @@ function buildQuizHTML(settings, questions, isTest, useRemote) {
     + '        <button type="button" id="quiz-zoom-reset" class="quiz-viewscale-reset">Reset</button>\n'
     + '        <button type="button" id="quiz-zoom-close" class="quiz-zoom-close" aria-label="Close zoom">\u2715</button>\n'
     + '      </div>\n    </div>\n    <div id="quiz-zoom-root" class="quiz-zoom-root">\n'
+    + '    <div id="alm-preflight-loading" class="alm-loading"><div class="alm-loading-inner"><div class="alm-loading-spinner"></div><div class="alm-loading-text">Loading…</div></div></div>\n'
     + '    <div id="start-screen">\n      <div class="start-card">\n'
     + '        <h1 class="card-title">' + escH(settings.title) + '</h1>\n'
     + '        <p class="card-subtitle">' + escH(subtitle) + '</p>\n'
@@ -12042,6 +12424,13 @@ function buildQuizHTML(settings, questions, isTest, useRemote) {
     + '          <p class="start-passed-msg">You passed this ' + n + '!</p>\n'
     + '          <p class="start-passed-score">Your score: <span id="start-passed-score-val"></span></p>\n'
     + '          <button type="button" id="start-review-last-btn" class="start-review-last-btn hidden">Review last attempt</button>\n'
+    + '        </div>\n'
+    + '        <div id="start-practice-banner" class="start-practice-banner hidden">\n'
+    + '          <div class="start-practice-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>\n'
+    + '          <div class="start-practice-text">\n'
+    + '            <p class="start-practice-msg">Practice mode</p>\n'
+    + '            <p class="start-practice-sub">You already passed. Nothing you do here is saved to your record.</p>\n'
+    + '          </div>\n'
     + '        </div>\n'
     + '        <p class="recommendation" id="start-recommendation">It is highly recommended that you complete all the course activities before you begin the ' + n + '.</p>\n'
     + '        <div id="start-attempt-timer-row" class="start-attempt-timer-row" aria-live="polite"><span class="detail-label">Time remaining</span><span class="detail-value" id="start-screen-timer">--:--</span></div>\n'
@@ -12089,14 +12478,24 @@ function buildQuizHTML(settings, questions, isTest, useRemote) {
     + '        <div class="cert-link-row hidden" id="cert-link-row">\n'
     + '          <a class="cert-link-btn" id="cert-link-btn" href="#" target="_blank" rel="noopener noreferrer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 107.51 96.86" style="width:36px;height:36px;flex-shrink:0;fill:#76b900"><path d="M68.87,72.39l-15.11-7.97-15.11,7.97,2.91-16.84-12.25-11.91,16.91-2.43,7.54-15.33,7.54,15.33,16.91,2.43-12.25,11.91,2.91,16.84ZM53.76,61.34l11.48,6.06-2.21-12.79,9.31-9.04-12.84-1.85-5.73-11.65-5.73,11.65-12.84,1.85,9.31,9.04-2.21,12.79,11.48-6.06ZM107.38,57.44l-1.45-2.31-5.05,3.17c.36-2.26.56-4.57.59-6.91l6.04-6.05-1.93-1.93-4.22,4.22c-.15-2.33-.49-4.62-.97-6.86l.46-.73h0l4.11-6.53-2.31-1.45-3.19,5.08c-.67-2.23-1.49-4.39-2.46-6.48l.29-.83h0l2.55-7.28-2.57-.9-1.99,5.67c-1.15-2.02-2.42-3.96-3.84-5.79l.96-8.53-2.71-.31-.67,5.96c-1.55-1.7-3.24-3.29-5.03-4.76l-.1-.88h0l-.86-7.67-2.71.31.67,5.98c-1.88-1.31-3.88-2.47-5.96-3.51l-2.85-8.14-2.57.9,2,5.7c-1.78-.72-3.6-1.37-5.49-1.87l-.71,2.63c1.59.43,3.13.96,4.64,1.55l-5.18,1.81.9,2.57,7.28-2.55h0l.65-.23c1.84.91,3.62,1.92,5.3,3.06l-5.5.62.31,2.71,8.38-.94c1.58,1.29,3.05,2.68,4.44,4.16l-5.47-.62-.31,2.71,8.39.95c1.25,1.6,2.37,3.29,3.39,5.04l-5.2-1.82-.9,2.57,7.28,2.55h0l.68.24c.86,1.84,1.6,3.73,2.21,5.69l-4.69-2.95-1.45,2.31,6.53,4.1h0l.62.39c.43,1.98.75,4,.91,6.06l-3.95-3.95-1.93,1.93,6,6c-.02,2.05-.2,4.08-.49,6.07l-2.96-4.71-2.31,1.45,4.11,6.53h0l.4.64c-.48,1.98-1.11,3.91-1.84,5.78l-1.83-5.21-2.57.9,2.55,7.28h0s.24.68.24.68c-.91,1.82-1.93,3.58-3.07,5.26l-.62-5.48-2.71.31.94,8.36c-1.29,1.58-2.67,3.09-4.16,4.48l.62-5.5-2.71-.31-.86,7.67h0l-.08.71c-4.65,3.62-10.04,6.38-15.99,7.98l.71,2.63c6.28-1.68,11.97-4.59,16.88-8.4l.76.09h.13s7.67.88,7.67.88l.31-2.71-5.98-.67c1.71-1.56,3.29-3.24,4.76-5.03l.9-.1h0l7.67-.86-.31-2.71-5.99.68c1.32-1.9,2.51-3.89,3.55-5.97l8.12-2.84-.9-2.58-5.67,1.98c.87-2.14,1.6-4.35,2.15-6.62l7.24-4.55ZM26.05,85.54h0l-.86-7.67-2.71.31.62,5.5c-1.49-1.39-2.87-2.9-4.16-4.48l.94-8.36-2.71-.31-.62,5.48c-1.14-1.68-2.16-3.43-3.07-5.26l.24-.68h0s2.55-7.28,2.55-7.28l-2.57-.9-1.83,5.21c-.74-1.88-1.36-3.8-1.84-5.78l.4-.64h0l4.11-6.53-2.31-1.45-2.96,4.71c-.3-1.99-.47-4.02-.49-6.07l6-6-1.93-1.93-3.95,3.95c.16-2.06.48-4.08.91-6.06l.62-.39h0l6.53-4.1-1.45-2.31-4.69,2.95c.61-1.95,1.35-3.85,2.21-5.69l.68-.24h0l7.28-2.55-.9-2.57-5.2,1.82c1.02-1.75,2.14-3.44,3.39-5.04l8.39-.95-.31-2.71-5.47.62c1.38-1.48,2.86-2.87,4.44-4.16l8.38.94.31-2.71-5.5-.62c1.68-1.14,3.46-2.14,5.3-3.06l.65.23h0l7.28,2.55.9-2.57-5.18-1.81c1.51-.59,3.05-1.12,4.64-1.55l-.71-2.63c-1.89.5-3.71,1.16-5.49,1.87l2-5.7-2.57-.9-2.85,8.14c-2.08,1.03-4.07,2.2-5.96,3.51l.67-5.98-2.71-.31-.86,7.67h0l-.1.88c-1.79,1.47-3.48,3.05-5.03,4.76l-.67-5.96-2.71.31.96,8.53c-1.42,1.83-2.69,3.77-3.84,5.79l-1.99-5.67-2.57.9,2.55,7.28h0l.29.83c-.98,2.09-1.8,4.25-2.46,6.48l-3.19-5.08-2.31,1.45,4.11,6.53h0l.46.73c-.48,2.24-.82,4.52-.97,6.86l-4.22-4.22-1.93,1.93,6.04,6.05c.03,2.34.22,4.65.59,6.91l-5.05-3.17-1.45,2.31,7.24,4.55c.55,2.27,1.28,4.48,2.15,6.62l-5.67-1.98-.9,2.58,8.12,2.84c1.04,2.08,2.22,4.07,3.55,5.97l-5.99-.68-.31,2.71,7.67.86h0l.9.1c1.46,1.78,3.05,3.47,4.76,5.03l-5.98.67.31,2.71,7.67-.86h.13s.76-.1.76-.1c4.91,3.81,10.61,6.72,16.88,8.4l.71-2.63c-5.95-1.59-11.34-4.35-15.99-7.98l-.08-.71Z"/></svg> Click here to see your certificate</a>\n'
     + '        </div>\n'
-    + '        <div class="stats-grid">\n'
+    + '        <div class="result-tabs hidden" id="result-tabs" role="tablist">\n'
+    + '          <button type="button" class="result-tab active" id="result-tab-official" role="tab" data-tab="official">Test result</button>\n'
+    + '          <button type="button" class="result-tab" id="result-tab-practice" role="tab" data-tab="practice">Practice result</button>\n'
+    + '        </div>\n'
+    + '        <div class="stats-grid" id="stats-grid-official">\n'
     + '          <div class="stat-item"><p class="stat-label">Score</p><p class="stat-value" id="result-score-val" style="font-size:20px"></p></div>\n'
     + '          <div class="stat-item"><p class="stat-label">Correct Answers</p><p class="stat-value correct" id="correct-count">0</p></div>\n'
     + '          <div class="stat-item"><p class="stat-label">Incorrect Answers</p><p class="stat-value incorrect" id="incorrect-count">0</p></div>\n'
     + '          <div class="stat-item"><p class="stat-label">Time Taken</p><p class="stat-value neutral" id="time-taken">--:--</p></div>\n'
     + '        </div>\n'
+    + '        <div class="stats-grid hidden" id="stats-grid-practice">\n'
+    + '          <div class="stat-item"><p class="stat-label">Score</p><p class="stat-value" id="practice-score-val" style="font-size:20px"></p></div>\n'
+    + '          <div class="stat-item"><p class="stat-label">Correct Answers</p><p class="stat-value correct" id="practice-correct">0</p></div>\n'
+    + '          <div class="stat-item"><p class="stat-label">Incorrect Answers</p><p class="stat-value incorrect" id="practice-incorrect">0</p></div>\n'
+    + '          <div class="stat-item"><p class="stat-label">Time Taken</p><p class="stat-value neutral" id="practice-time">--:--</p></div>\n'
+    + '        </div>\n'
     + '        <div id="section-breakdown-host" style="width:100%"></div>\n'
-    + '        <div class="action-buttons"><div class="retry-group"><button type="button" class="action-btn btn-retry" id="retry-btn">Retry ' + N + '</button><span id="best-score-note" class="best-score-note hidden"></span></div><span id="result-attempts-remaining" class="result-attempts-remaining hidden"></span><button type="button" class="action-btn btn-review hidden" id="review-btn">Review ' + N + '</button></div>\n'
+    + '        <div class="action-buttons"><div class="retry-group"><button type="button" class="action-btn btn-retry" id="retry-btn">Retry ' + N + '</button><button type="button" class="action-btn btn-practice hidden" id="practice-btn">Practice ' + N + '</button><button type="button" class="action-btn btn-review-practice hidden" id="review-practice-btn">Review practice</button></div><span id="result-attempts-remaining" class="result-attempts-remaining hidden"></span><button type="button" class="action-btn btn-review hidden" id="review-btn">Review ' + N + '</button></div>\n'
     + '        <p id="retry-disabled-message" class="retry-disabled-message hidden" aria-live="polite"></p>\n'
     + '      </div>\n    </div>\n\n'
     + '    <div id="review-screen" class="review-screen hidden">\n'
@@ -12269,7 +12668,6 @@ function _estimateSuspendDataSize(settings, questions) {
     lastAttemptTimestamp: '2030-12-31T23:59:59.999Z',
     hasPassed: true,
     lastScore: 100,
-    bestScore: 100,
     timeExpiredAt: 1735689599999,
     elapsedMs: 999999999,
     currentQuestionIndex: Math.max(0, perAttempt - 1),
@@ -12335,6 +12733,7 @@ function _openConfirmDownloadModal() {
   rows.push(_cdlRow('SCORM version', is2004 ? 'SCORM 2004 (4th Ed.)' : 'SCORM 1.2', true));
   rows.push(_cdlRow('Passing score', s.passingPercentage ? s.passingPercentage + '% to pass' : 'No pass mark', !!s.passingPercentage));
   rows.push(_cdlRow('Attempts', s.maxAttempts ? s.maxAttempts + ' tries' + (s.cooldownDays ? ' · ' + s.cooldownDays + 'd cooldown' : '') : 'Unlimited', true));
+  rows.push(_cdlRow('Practice mode', s.allowPractice !== false ? 'Available after pass · no LMS write' : 'Off', s.allowPractice !== false));
   rows.push(_cdlRow('Time limit', s.timeLimitMinutes ? s.timeLimitMinutes + ' minutes per attempt' : 'No time limit', !!s.timeLimitMinutes));
   const poolLabel = (s.questionsPerAttempt && s.questionsPerAttempt < n)
     ? s.questionsPerAttempt + ' of ' + n + ' questions'
@@ -12447,7 +12846,6 @@ function testSingleQuestion(id) {
     warnOnBlankAnswers: false,
     confirmBeforeSubmit: false,
     showCertificateLink: false,
-    bestScoreTracking: false,
     _previewScreen: 'singleQuestion'
   });
   resetTestSim();
@@ -13243,12 +13641,9 @@ async function clearHistory() {
 }
 
 // ── MODAL CLOSE ON OVERLAY CLICK ─────────────────────────
-// Only the test preview modal closes on outside click; all other modals require explicit close
-document.querySelectorAll('.m-overlay').forEach(el => {
-  if (el.id === 'modal-test') {
-    el.addEventListener('click', e => { if (e.target === el) closeTestModal(); });
-  }
-});
+// No modal closes on backdrop click — accidental clicks outside the test
+// preview were dismissing in-progress attempts. Every modal now requires an
+// explicit close (× button or Cancel).
 
 // ── BATCH ─────────────────────────────────────────────────
 const BATCH = [];
