@@ -1282,6 +1282,9 @@ body.bank-tab-active .r-topbar{display:none}
 .r-grp-bd{padding:5px 14px 13px}
 .r-grp.closed .r-grp-bd{display:none}
 .r-ctl{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid #f3f4f6}
+.r-pool-total{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin:2px 0 8px;background:#f6f8fa;border-radius:6px;font-size:12px}
+.r-pool-total .l{color:var(--muted);font-weight:600;letter-spacing:.03em;text-transform:uppercase;font-size:10.5px}
+.r-pool-total .v{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
 .r-ctl:first-child{border-top:none}
 .r-ctl .lab{flex:1;min-width:0}
 .r-ctl .lab .l{font-size:13px;font-weight:600;color:var(--text)}
@@ -4905,13 +4908,44 @@ function showSection(sectionId) {
       if (questionBank.length === 0) throw new Error('No questions available');
 
       // ── ALM pre-flight (silent fallback if not applicable) ──
-      // If ALM already has a passing score for this learner on this module,
-      // route straight to the pass screen — mimics what happens when SCORM
-      // suspend_data preserves lastScore, but survives module content
-      // replacement (which wipes suspend_data).
-      const _preflight = await _almPreflightCheck();
+      // Two-tier check:
+      //   1. Fast path — read the SCORM's own lesson_status. If a prior launch
+      //      already wrote 'passed' back into ALM's data model, we can trust
+      //      it and skip the API call entirely. This survives repeated
+      //      launches of the same SCORM file.
+      //   2. Slow path — ask ALM's Prime API. Runs only when the SCORM's data
+      //      model is blank (fresh content replacement wipes lesson_status).
+      //      On a pass, we write it back into the data model so path #1
+      //      catches it next time — no matter how many times the file is
+      //      replaced.
       const _passingPct = CONFIG.passingPercentage || 70;
-      console.log('[Quizzer preflight] final decision — highestScore:', _preflight && _preflight.highestScore, 'latestScore:', _preflight && _preflight.latestScore, 'used:', _preflight && _preflight.score, 'threshold:', _passingPct, '→', (_preflight && _preflight.hasGrade && typeof _preflight.score === 'number' && _preflight.score >= _passingPct) ? 'ALREADY PASSED, showing pass screen' : 'not passed / no grade, running quiz');
+      let _preflight = null;
+      let _scormFastPass = false;
+      if (scormAPI) {
+        const _statusKey = IS_2004 ? 'cmi.success_status' : 'cmi.core.lesson_status';
+        const _rawKey = IS_2004 ? 'cmi.score.raw' : 'cmi.core.score.raw';
+        const _cachedStatus = callGet(scormAPI, _statusKey);
+        // Any definitive outcome on the current SCORM file — passed OR failed —
+        // is enough to skip the API. Only "unknown"/"incomplete"/blank means we
+        // need to ask ALM (fresh install, or content just replaced).
+        if (_cachedStatus === 'passed' || _cachedStatus === 'failed') {
+          const _cachedRaw = parseFloat(callGet(scormAPI, _rawKey));
+          const _isPass = _cachedStatus === 'passed';
+          _scormFastPass = _isPass;
+          _preflight = {
+            checked: true, ok: true, hasGrade: true,
+            score: isNaN(_cachedRaw) ? (_isPass ? _passingPct : 0) : _cachedRaw,
+            latestScore: isNaN(_cachedRaw) ? null : _cachedRaw,
+            highestScore: isNaN(_cachedRaw) ? null : _cachedRaw,
+            hasPassed: _isPass, completed: _isPass, dateCompleted: null
+          };
+          console.log('[Quizzer preflight] fast path — SCORM already reports ' + _cachedStatus + ' (score ' + _preflight.score + '), skipping API call');
+        }
+      }
+      if (!_preflight) {
+        _preflight = await _almPreflightCheck();
+        console.log('[Quizzer preflight] final decision — highestScore:', _preflight && _preflight.highestScore, 'latestScore:', _preflight && _preflight.latestScore, 'used:', _preflight && _preflight.score, 'threshold:', _passingPct, '→', (_preflight && _preflight.hasGrade && typeof _preflight.score === 'number' && _preflight.score >= _passingPct) ? 'ALREADY PASSED, showing pass screen' : 'not passed / no grade, running quiz');
+      }
       if (_preflight && _preflight.hasGrade && typeof _preflight.score === 'number' && _preflight.score >= _passingPct) {
         // Seed the same globals the "returning passer" branch reads below.
         // We don't have lastAttemptQuestionIds (SCORM content was replaced),
@@ -4919,6 +4953,17 @@ function showSection(sectionId) {
         hasPassed = true;
         lastScore = _preflight.score;
         attemptCount = Math.max(attemptCount || 0, 1);
+        // Write the pass back into SCORM's data model so the fast path can
+        // short-circuit the API call on future launches. Only when the API
+        // told us (fast path already has it); guard against no-op re-writes.
+        if (!_scormFastPass && scormAPI) {
+          console.log('[Quizzer preflight] writing pass back into SCORM (score ' + _preflight.score + ') so future launches skip the API call');
+          scorm.set('cmi.core.score.raw', _preflight.score);
+          scorm.set('cmi.core.score.min', 0);
+          scorm.set('cmi.core.score.max', 100);
+          scorm.set('cmi.core.lesson_status', 'passed');
+          scorm.commit();
+        }
       }
 
       const state = loadState();
@@ -8427,7 +8472,8 @@ function renderInspector() {
     + '<div class="r-sub"><div class="r-ctl" style="padding-top:2px"><div class="lab"><div class="l">Pace by question</div><div class="d">Apply a per-question budget as the total time limit</div></div></div>'
     + '<div style="display:flex;align-items:center;gap:8px;margin-top:2px">' + _rStepHtml('s-mins-per-q', 'min / question', 1, 60, 3) + '<button class="r-lnk" onclick="applyMinsPerQuestion()" style="margin-left:auto">Apply</button></div></div>';
 
-  const rowsPool = _rCtlRow('tog-qcount', 'Questions per attempt', 'Randomly drawn from the pool', _rStepHtml('s-qcount', 'questions', 1, 999, 10) + _rTogHtml('tog-qcount'))
+  const rowsPool = '<div class="r-pool-total"><span class="l">Total questions in pool</span><span class="v" id="r-pool-total">0</span></div>'
+    + _rCtlRow('tog-qcount', 'Questions per attempt', 'Randomly drawn from the pool', _rStepHtml('s-qcount', 'questions', 1, 999, 10) + _rTogHtml('tog-qcount'))
     + '<div class="r-sub" data-sub="qcount" id="r-section-split-host"></div>'
     + _rCtlRow('s-randomize', 'Shuffle question order', '', _rTogHtml('s-randomize'))
     + _rCtlRow('s-randomize-options', 'Shuffle answer options', '', _rTogHtml('s-randomize-options'));
@@ -8803,6 +8849,8 @@ function _rWireInspector() {
 // Keep min at 1 even when no questions exist so the input is still valid.
 function _updateQCountMax() {
   const n = Math.max(1, APP.questions.length);
+  const poolTotal = document.getElementById('r-pool-total');
+  if (poolTotal) poolTotal.textContent = APP.questions.length;
   const legacy = document.getElementById('s-qcount');
   if (legacy) {
     legacy.max = String(n);
