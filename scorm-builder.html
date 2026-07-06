@@ -1091,6 +1091,32 @@ body.bank-tab-active .r-topbar{display:none}
 .welcome-modal .wel-feat .ft{font-size:13px;font-weight:700;letter-spacing:-.1px;color:var(--text)}
 .welcome-modal .wel-feat .fd{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
 .welcome-modal .wel-ft{display:flex;align-items:center;gap:12px;padding:16px 28px;border-top:1px solid var(--border);margin-top:18px;background:#fbfcfd;border-radius:0 0 14px 14px}
+.welcome-modal .wel-tabs{display:flex;gap:2px;padding:0 28px;border-bottom:1px solid var(--border);margin-top:18px}
+.welcome-modal .wel-tab{position:relative;padding:11px 3px;margin-right:22px;border:none;background:none;font:inherit;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.welcome-modal .wel-tab:hover{color:var(--text)}
+.welcome-modal .wel-tab.on{color:var(--green-600)}
+.welcome-modal .wel-tab.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--green);border-radius:2px}
+.welcome-modal .wel-tab .cnt{margin-left:6px;font-size:11px;font-weight:700;color:var(--g500);background:var(--g050);padding:1px 6px;border-radius:20px}
+.welcome-modal .wel-tab.on .cnt{color:var(--green-600);background:var(--green-lt)}
+.welcome-modal .wel-panel{display:none}
+.welcome-modal .wel-panel.on{display:block}
+.welcome-modal .wel-log{padding:6px 28px 4px;max-height:360px;overflow-y:auto}
+.welcome-modal .wel-rel{position:relative;padding:18px 0 18px 24px}
+.welcome-modal .wel-rel::before{content:"";position:absolute;left:4px;top:24px;bottom:-2px;width:2px;background:var(--g100)}
+.welcome-modal .wel-rel:last-child::before{display:none}
+.welcome-modal .wel-rel::after{content:"";position:absolute;left:0;top:6px;width:10px;height:10px;border-radius:50%;background:var(--g200);border:2px solid #fff;box-shadow:0 0 0 1px var(--g150)}
+.welcome-modal .wel-rel.latest::after{background:var(--green);box-shadow:0 0 0 1px var(--green),0 0 0 4px var(--green-lt)}
+.welcome-modal .wel-rel-hd{display:flex;align-items:baseline;gap:9px;margin-bottom:9px;flex-wrap:wrap}
+.welcome-modal .wel-rel-v{font-size:14px;font-weight:800;letter-spacing:-.2px;color:var(--text)}
+.welcome-modal .wel-rel-date{font-size:11.5px;color:var(--muted)}
+.welcome-modal .wel-rel-tag{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-600);background:var(--green-lt);border:1px solid var(--green-lt2,#c8e590);padding:1px 7px;border-radius:20px}
+.welcome-modal .wel-li{display:flex;gap:9px;align-items:flex-start;padding:5px 0}
+.welcome-modal .wel-li .k{font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;flex:none;margin-top:3px;padding:1px 7px;border-radius:20px}
+.welcome-modal .wel-li .k.new{color:var(--green-600);background:var(--green-lt)}
+.welcome-modal .wel-li .k.improved{color:var(--blue,#0074df);background:#e8f2ff}
+.welcome-modal .wel-li .k.fixed{color:var(--g700);background:var(--g050)}
+.welcome-modal .wel-li .lt{font-size:13px;line-height:1.5;color:var(--text)}
+.welcome-modal .wel-li .lt b{font-weight:700}
 .welcome-modal .wel-dismiss{display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--g600);cursor:pointer;user-select:none}
 .welcome-modal .wel-dismiss input[type=checkbox]{appearance:none;-webkit-appearance:none;width:16px;height:16px;border:1.5px solid var(--g200);border-radius:4px;background:#fff;position:relative;cursor:pointer;flex:none;margin:0;padding:0}
 .welcome-modal .wel-dismiss input[type=checkbox]:checked{background:var(--green);border-color:var(--green)}
@@ -2493,38 +2519,47 @@ body.bank-tab-active .r-topbar{display:none}
       <div class="wel-eyebrow"><span class="dot"></span> What's new</div>
       <div class="wel-title">Welcome to the new Quizzer</div>
     </div>
-    <div class="wel-bd">
-      <div class="wel-video" id="wel-video" data-vimeo="1204838612">
-        <div class="vph" onclick="playWelcomeVideo()">
-          <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="7 5 20 12 7 19 7 5"/></svg></div>
-          <div class="pl">Watch this Guide</div>
+    <div class="wel-tabs" role="tablist">
+      <button class="wel-tab on" type="button" data-weltab="highlights" onclick="welSetTab('highlights')" role="tab">Highlights</button>
+      <button class="wel-tab" type="button" data-weltab="updates" onclick="welSetTab('updates')" role="tab">All updates<span class="cnt" id="wel-update-count">0</span></button>
+    </div>
+    <div class="wel-panel on" data-welpanel="highlights">
+      <div class="wel-bd">
+        <div class="wel-video" id="wel-video" data-vimeo="1204838612">
+          <div class="vph" onclick="playWelcomeVideo()">
+            <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="7 5 20 12 7 19 7 5"/></svg></div>
+            <div class="pl">Watch this Guide</div>
+          </div>
+        </div>
+        <div class="wel-feats">
+          <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(2)" title="Jump to this chapter in the tour">
+            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></span>
+            <div><div class="ft">New design</div><div class="fd">Refreshed interface with all quiz settings in a sidebar panel.</div></div>
+          </button>
+          <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(46)" title="Jump to this chapter in the tour">
+            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M9 6l3 3 3-3"/><path d="M5 14h14"/><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg></span>
+            <div><div class="ft">Question bank</div><div class="fd">Reuse questions from a shared library.</div></div>
+          </button>
+          <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(85)" title="Jump to this chapter in the tour">
+            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><rect x="4" y="9" width="16" height="11" rx="2"/></svg></span>
+            <div><div class="ft">Quiz sections</div><div class="fd">Group questions to break down student scores.</div></div>
+          </button>
+          <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(134)" title="Jump to this chapter in the tour">
+            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><line x1="9" y1="13" x2="15" y2="13"/></svg></span>
+            <div><div class="ft">Batch Page</div><div class="fd">Work on multiple quizzes simultaneously.</div></div>
+          </button>
+        </div>
+        <div class="wel-bug-callout">
+          <span class="wbc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M12 6V3"/><path d="M9 9 6 6"/><path d="m15 9 3-3"/><path d="M3 13h5"/><path d="M16 13h5"/><path d="M6 19l3-2"/><path d="m18 19-3-2"/></svg></span>
+          <div class="wbc-text">
+            <strong>Found a bug or have feedback?</strong>
+            Please email <a href="mailto:tpraag@nvidia.com?subject=Quizzer%20feedback">tpraag@nvidia.com</a>
+          </div>
         </div>
       </div>
-      <div class="wel-feats">
-        <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(2)" title="Jump to this chapter in the tour">
-          <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></span>
-          <div><div class="ft">New design</div><div class="fd">Refreshed interface with all quiz settings in a sidebar panel.</div></div>
-        </button>
-        <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(46)" title="Jump to this chapter in the tour">
-          <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M9 6l3 3 3-3"/><path d="M5 14h14"/><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg></span>
-          <div><div class="ft">Question bank</div><div class="fd">Reuse questions from a shared library.</div></div>
-        </button>
-        <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(85)" title="Jump to this chapter in the tour">
-          <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><rect x="4" y="9" width="16" height="11" rx="2"/></svg></span>
-          <div><div class="ft">Quiz sections</div><div class="fd">Group questions to break down student scores.</div></div>
-        </button>
-        <button type="button" class="wel-feat" onclick="playWelcomeVideoAt(134)" title="Jump to this chapter in the tour">
-          <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><line x1="9" y1="13" x2="15" y2="13"/></svg></span>
-          <div><div class="ft">Batch Page</div><div class="fd">Work on multiple quizzes simultaneously.</div></div>
-        </button>
-      </div>
-      <div class="wel-bug-callout">
-        <span class="wbc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M12 6V3"/><path d="M9 9 6 6"/><path d="m15 9 3-3"/><path d="M3 13h5"/><path d="M16 13h5"/><path d="M6 19l3-2"/><path d="m18 19-3-2"/></svg></span>
-        <div class="wbc-text">
-          <strong>Found a bug or have feedback?</strong>
-          Please email <a href="mailto:tpraag@nvidia.com?subject=Quizzer%20feedback">tpraag@nvidia.com</a>
-        </div>
-      </div>
+    </div>
+    <div class="wel-panel" data-welpanel="updates">
+      <div class="wel-log" id="wel-log"></div>
     </div>
     <div class="wel-ft">
       <label class="wel-dismiss"><input type="checkbox" id="wel-dismiss"> Don't show this again</label>
@@ -14594,6 +14629,60 @@ function downloadWordDoc() {
 }
 
 // ── What's new / welcome modal ────────────────────────────
+// Changelog — newest first. kind: 'new' | 'improved' | 'fixed'. Add entries here.
+const WELCOME_CHANGELOG = [
+  { v: '2.2', date: 'July 2026', tag: 'Latest', items: [
+    { kind: 'new', t: '<b>Practice mode</b> — passers can retake the quiz for practice without touching their LMS record. Tabbed results (Test vs Practice), unlimited practice runs, dedicated review of practice answers.' },
+    { kind: 'new', t: '<b>ALM preflight</b> — when a SCORM file is replaced in ALM, prior passes are preserved automatically. First launch queries the ALM API; subsequent launches read the SCORM data model directly, no extra network calls.' },
+    { kind: 'new', t: '<b>Confirm-download modal</b> — settings summary before you export a SCORM package, with a suspend-data size check for SCORM 1.2 packages.' },
+    { kind: 'improved', t: '<b>Add-from-Bank</b> shows subfolders alongside questions in mixed folders.' },
+    { kind: 'improved', t: '<b>Send to Bank</b> auto-commits a typed new-folder name when you confirm.' },
+    { kind: 'improved', t: 'Question pool card now shows the total pool size at a glance.' },
+    { kind: 'improved', t: 'At-a-glance chip added for Practice mode.' },
+    { kind: 'fixed', t: 'Preview modal no longer closes when you click outside the window.' },
+    { kind: 'fixed', t: 'When "shuffle questions" is off but the pool is limited, each attempt still draws a random subset instead of the same first N.' },
+  ]},
+  { v: '2.1', date: 'June 2026', items: [
+    { kind: 'new', t: '<b>Result-screen section breakdown</b> — per-section bar with color-coded mastery, list / cards views.' },
+    { kind: 'new', t: '<b>Answer-review legend</b> explaining correct / wrong / revealed colors.' },
+    { kind: 'new', t: '<b>Multi-question drag</b> — select several questions and move them together.' },
+    { kind: 'improved', t: 'At-a-glance Expand-all toggle for settings cards.' },
+    { kind: 'improved', t: 'Typeable steppers throughout the inspector.' },
+    { kind: 'fixed', t: 'Section breakdown now respects the canvas section order.' },
+    { kind: 'fixed', t: 'Settings save no longer drops sections; Bank-to-quiz drops empty folder sections.' },
+  ]},
+  { v: '2.0', date: 'June 2026', items: [
+    { kind: 'new', t: '<b>Quiz sections</b> — group questions into collapsible sections and reorder them.' },
+    { kind: 'new', t: '<b>Question bank</b> — send questions to a shared library and reuse them across quizzes.' },
+    { kind: 'new', t: '<b>Batch builder</b> — work on multiple quizzes simultaneously and switch between them without leaving the editor.' },
+    { kind: 'new', t: '<b>Test SCORM tab</b> and preview loading screen.' },
+    { kind: 'new', t: '<b>Advanced settings modal</b> for fine-tuning packaging and LMS reporting.' },
+    { kind: 'improved', t: '<b>Settings in the sidebar</b> — every quiz setting lives in one inspector panel with presets.' },
+    { kind: 'improved', t: 'Refreshed interface — cleaner layout, faster navigation, centered canvas.' },
+    { kind: 'improved', t: 'Question editor now supports matching, sequencing, and hotspot types.' },
+    { kind: 'improved', t: 'History panel and drag-and-drop empty-state drop zones.' },
+  ]},
+];
+let _welTab = 'highlights';
+function _welLogHtml() {
+  return WELCOME_CHANGELOG.map(function(r, i) {
+    return '<div class="wel-rel' + (i === 0 ? ' latest' : '') + '">'
+      + '<div class="wel-rel-hd"><span class="wel-rel-v">Version ' + escH(r.v) + '</span><span class="wel-rel-date">' + escH(r.date) + '</span>'
+      + (r.tag ? '<span class="wel-rel-tag">' + escH(r.tag) + '</span>' : '')
+      + '</div>'
+      + r.items.map(function(it) {
+        return '<div class="wel-li"><span class="k ' + it.kind + '">' + it.kind + '</span><span class="lt">' + it.t + '</span></div>';
+      }).join('')
+      + '</div>';
+  }).join('');
+}
+function welSetTab(tab) {
+  if (tab !== 'updates') tab = 'highlights';
+  _welTab = tab;
+  document.querySelectorAll('#modal-welcome .wel-tab').forEach(function(b) { b.classList.toggle('on', b.dataset.weltab === tab); });
+  document.querySelectorAll('#modal-welcome .wel-panel').forEach(function(p) { p.classList.toggle('on', p.dataset.welpanel === tab); });
+}
+
 function openWelcome() {
   // Reset the "Don't show again" checkbox each time the modal opens so it
   // reflects current state (rather than a stale tick from a previous open).
@@ -14606,6 +14695,12 @@ function openWelcome() {
     v.classList.remove('live');
     const f = v.querySelector('iframe'); if (f) f.remove();
   }
+  // Populate the changelog + count, default back to the Highlights tab.
+  const log = document.getElementById('wel-log');
+  if (log) log.innerHTML = _welLogHtml();
+  const cnt = document.getElementById('wel-update-count');
+  if (cnt) cnt.textContent = WELCOME_CHANGELOG.reduce(function(n, r) { return n + r.items.length; }, 0);
+  welSetTab('highlights');
   if (typeof showModal === 'function') showModal('modal-welcome');
 }
 
