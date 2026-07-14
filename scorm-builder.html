@@ -10980,6 +10980,9 @@ function bankSelectFolder(id) {
     BANK.questionFilter = '';
     const inp = document.getElementById('bank-q-search');
     if (inp) inp.value = '';
+    // Clear the "add-to-quiz" selection too — carrying it across folders led
+    // to accidental adds from folders the user thought they'd deselected.
+    if (BANK.quizSelectedIds && BANK.quizSelectedIds.size) BANK.quizSelectedIds.clear();
   }
   BANK.selectedFolderId = id;
   renderBank();
@@ -12070,26 +12073,58 @@ function _updateBankQuizSelectionBar() {
   }
 }
 
-function addBankSelectionToQuiz() {
+async function addBankSelectionToQuiz() {
   const ids = Array.from(BANK.quizSelectedIds);
   if (!ids.length) return;
-  pushQHistory();
   _ensureSectionsList();
-  // Register sections in the source folder's canonical order before adding questions
   const folder = BANK.folders.find(f => f.id === BANK.selectedFolderId);
-  const _usedSet = new Set();
-  ids.forEach(bid => {
-    const src = BANK.questions.find(q => q.id === bid);
-    if (!src) return;
-    const name = src.section || '';
-    if (name) _usedSet.add(name);
+  const folderName = folder ? folder.name : 'this folder';
+  // Ask where these questions should land in the quiz. Options:
+  //   __bank__  → keep whatever section each question already has in the bank
+  //   __new__   → create a new quiz section named after the source folder
+  //   <name>    → an existing quiz section
+  const existing = (APP.settings.sections || []).slice();
+  const options = [{ value: '__bank__', label: 'Use bank sections (default)' }];
+  existing.forEach(s => options.push({ value: s, label: s, group: 'Existing quiz sections' }));
+  options.push({ value: '__new__', label: '+ New section: “' + folderName + '”' });
+  const choice = await cdlg({
+    title: 'Add ' + ids.length + ' question' + (ids.length === 1 ? '' : 's') + ' to quiz',
+    msg: 'Pick where these questions should land in the quiz builder.',
+    confirmText: 'Add to quiz',
+    cancelText: 'Cancel',
+    select: { options: options, value: '__bank__', label: 'Add to section' }
   });
-  _pushSectionsToQuizInOrder(BANK.selectedFolderId, _usedSet);
+  if (choice === null || choice === undefined) return; // user cancelled
+  pushQHistory();
+  // Resolve the choice
+  let overrideSection = null;   // if set, every question goes here
+  let useBankSections = false;
+  if (choice === '__bank__') {
+    useBankSections = true;
+  } else if (choice === '__new__') {
+    overrideSection = folderName;
+  } else {
+    overrideSection = choice;
+  }
+  if (overrideSection && !APP.settings.sections.includes(overrideSection)) {
+    APP.settings.sections.push(overrideSection);
+  }
+  if (useBankSections) {
+    // Register bank sections in the source folder's canonical order
+    const _usedSet = new Set();
+    ids.forEach(bid => {
+      const src = BANK.questions.find(q => q.id === bid);
+      if (!src) return;
+      const name = src.section || '';
+      if (name) _usedSet.add(name);
+    });
+    _pushSectionsToQuizInOrder(BANK.selectedFolderId, _usedSet);
+  }
   let added = 0;
   ids.forEach(bid => {
     const src = BANK.questions.find(q => q.id === bid);
     if (!src) return;
-    const sectionName = src.section || '';
+    const sectionName = overrideSection != null ? overrideSection : (src.section || '');
     const copy = Object.assign({}, src, { id: qid(), section: sectionName });
     if (!sectionName) delete copy.section;
     delete copy.folderId;
@@ -14293,7 +14328,8 @@ async function processBatchFiles(files) {
 
 // ── CUSTOM DIALOG ─────────────────────────────────────────
 function cdlg(opts) {
-  // opts: { title, msg, icon, confirmText, cancelText, input, inputDefault, onConfirm, onCancel }
+  // opts: { title, msg, icon, confirmText, cancelText, input, inputDefault,
+  //         select: { options:[{value,label,group?}], value, label } }
   return new Promise(resolve => {
     const overlay  = document.getElementById('cdlg-overlay');
     const titleEl  = document.getElementById('cdlg-title');
@@ -14315,6 +14351,40 @@ function cdlg(opts) {
       inputEl.style.display = 'none';
     }
 
+    // Optional dropdown — sits below msg, above the buttons. Rebuilt on each call.
+    let selectHost = document.getElementById('cdlg-select-host');
+    if (!selectHost) {
+      selectHost = document.createElement('div');
+      selectHost.id = 'cdlg-select-host';
+      selectHost.style.cssText = 'margin-top:10px;display:flex;flex-direction:column;gap:6px;text-align:left';
+      msgEl.parentNode.insertBefore(selectHost, actions);
+    }
+    let selectEl = null;
+    if (opts.select && Array.isArray(opts.select.options)) {
+      const groups = new Map();
+      const ungrouped = [];
+      opts.select.options.forEach(o => {
+        if (o.group) {
+          if (!groups.has(o.group)) groups.set(o.group, []);
+          groups.get(o.group).push(o);
+        } else {
+          ungrouped.push(o);
+        }
+      });
+      const renderOpt = o => '<option value="' + escH(o.value) + '"' + (o.value === opts.select.value ? ' selected' : '') + '>' + escH(o.label) + '</option>';
+      let optsHtml = ungrouped.map(renderOpt).join('');
+      groups.forEach((list, name) => {
+        optsHtml += '<optgroup label="' + escH(name) + '">' + list.map(renderOpt).join('') + '</optgroup>';
+      });
+      selectHost.innerHTML = (opts.select.label ? '<label style="font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.02em">' + escH(opts.select.label) + '</label>' : '')
+        + '<select class="form-input" id="cdlg-select" style="width:100%;margin:0">' + optsHtml + '</select>';
+      selectHost.style.display = '';
+      selectEl = document.getElementById('cdlg-select');
+    } else {
+      selectHost.innerHTML = '';
+      selectHost.style.display = 'none';
+    }
+
     actions.innerHTML = '';
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'btn';
@@ -14327,7 +14397,9 @@ function cdlg(opts) {
     confirmBtn.textContent = opts.confirmText || 'OK';
     confirmBtn.onclick = () => {
       overlay.classList.remove('active');
-      resolve(opts.input ? inputEl.value : true);
+      if (opts.select && selectEl) resolve(selectEl.value);
+      else if (opts.input) resolve(inputEl.value);
+      else resolve(true);
     };
     actions.appendChild(confirmBtn);
 
