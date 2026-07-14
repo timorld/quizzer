@@ -2731,6 +2731,7 @@ body.bank-tab-active .r-topbar{display:none}
               </div>
               <input class="form-input bank-search" id="afb-q-search" type="text" placeholder="Search questions…" oninput="afbFilterQuestions(this.value)" style="max-width:200px;margin-bottom:0">
             </div>
+            <div id="afb-section-row"></div>
             <label id="afb-select-all-row" style="display:inline-flex;align-items:center;gap:8px;padding:6px 10px;margin-bottom:8px;font-size:13px;color:var(--text);cursor:pointer">
               <input type="checkbox" id="afb-select-all" onchange="afbToggleSelectAllInFolder(this.checked)"> Select all in this folder
             </label>
@@ -9798,7 +9799,8 @@ const ADD_FROM_BANK = {
   folderFilter: '',
   questionFilter: '',
   scope: 'academy', // active bank tab inside the picker
-  expanded: new Set() // folder ids whose subfolders are visible in the tree
+  expanded: new Set(), // folder ids whose subfolders are visible in the tree
+  folderSectionMap: new Map() // folderId -> target quiz section name (absent = use bank sections)
 };
 
 function afbToggleFolder(id) {
@@ -9819,6 +9821,7 @@ async function openAddFromBank() {
   ADD_FROM_BANK.folderId = _selInScope || (_firstRoot && _firstRoot.id) || null;
   ADD_FROM_BANK.folderFilter = '';
   ADD_FROM_BANK.questionFilter = '';
+  ADD_FROM_BANK.folderSectionMap = new Map();
   // Auto-expand all root folders on open + the ancestor chain of any pre-selected folder.
   ADD_FROM_BANK.expanded = new Set();
   BANK.folders.filter(f => !f.parentId && _bankFolderScope(f) === ADD_FROM_BANK.scope)
@@ -9928,12 +9931,41 @@ function afbSelectFolder(id) {
   _afbRenderQuestions();
 }
 
+function _afbRenderSectionRow() {
+  const el = document.getElementById('afb-section-row');
+  if (!el) return;
+  const folderId = ADD_FROM_BANK.folderId;
+  if (!folderId) { el.innerHTML = ''; return; }
+  const folder = BANK.folders.find(f => f.id === folderId);
+  const folderName = folder ? folder.name : 'this folder';
+  const sections = (APP.settings.sections || []);
+  const current = ADD_FROM_BANK.folderSectionMap.has(folderId)
+    ? ADD_FROM_BANK.folderSectionMap.get(folderId)
+    : '__bank__';
+  let opts = '<option value="__bank__"' + (current === '__bank__' ? ' selected' : '') + '>Use bank sections (default)</option>';
+  if (sections.length) {
+    opts += '<optgroup label="Existing quiz sections">';
+    sections.forEach(s => {
+      opts += '<option value="' + escH(s) + '"' + (current === s ? ' selected' : '') + '>' + escH(s) + '</option>';
+    });
+    opts += '</optgroup>';
+  }
+  opts += '<option value="__new__"' + (current === '__new__' ? ' selected' : '') + '>+ New section: “' + escH(folderName) + '”</option>';
+  el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:4px;background:var(--surface,#f8f9fa);border-radius:6px;border:1px solid var(--border)">'
+    + '<label style="font-size:12px;color:var(--muted);white-space:nowrap;font-weight:600;letter-spacing:.02em">Add to section</label>'
+    + '<select class="form-input" style="font-size:13px;flex:1;padding:4px 8px;height:auto;margin:0" onchange="afbSetFolderTargetSection(\'' + folderId + '\', this.value)">'
+    + opts
+    + '</select>'
+    + '</div>';
+}
+
 function _afbRenderQuestions() {
   const placeholder = document.getElementById('afb-q-placeholder');
   const pane = document.getElementById('afb-q-pane');
   if (!ADD_FROM_BANK.folderId) { placeholder.style.display = ''; pane.style.display = 'none'; return; }
   placeholder.style.display = 'none';
   pane.style.display = '';
+  _afbRenderSectionRow();
   const path = _bankFolderPath(ADD_FROM_BANK.folderId);
   const titleEl = document.getElementById('afb-q-title');
   titleEl.innerHTML = path.length > 1
@@ -10029,6 +10061,17 @@ function afbToggleSelectAllInFolder(checked) {
   _afbUpdateFooter();
 }
 
+function afbSetFolderTargetSection(folderId, value) {
+  if (value === '__bank__') {
+    ADD_FROM_BANK.folderSectionMap.delete(folderId);
+  } else {
+    ADD_FROM_BANK.folderSectionMap.set(folderId, value);
+  }
+  // Re-render just the section row (no need to rebuild the whole question list)
+  _afbRenderSectionRow();
+  _afbUpdateFooter();
+}
+
 function afbFilterFolders(value) {
   ADD_FROM_BANK.folderFilter = value || '';
   _afbRenderFolders();
@@ -10070,28 +10113,50 @@ function confirmAddFromBank() {
   if (!ids.length) return;
   pushQHistory();
   _ensureSectionsList();
-  // First pass: gather used sections grouped by source folder so we can push
-  // them onto the quiz in each folder's canonical order.
+
+  // Resolve __new__ overrides to the actual folder name, then ensure those
+  // sections exist in the quiz section list before we start copying questions.
+  const resolvedMap = new Map(); // folderId -> target section name (only for overridden folders)
+  ADD_FROM_BANK.folderSectionMap.forEach((val, folderId) => {
+    if (val === '__new__') {
+      const folder = BANK.folders.find(f => f.id === folderId);
+      if (folder) resolvedMap.set(folderId, folder.name);
+    } else if (val && val !== '__bank__') {
+      resolvedMap.set(folderId, val);
+    }
+  });
+  resolvedMap.forEach(sectionName => {
+    if (sectionName && !APP.settings.sections.includes(sectionName)) {
+      APP.settings.sections.push(sectionName);
+    }
+  });
+
+  // For non-overridden folders, sync their section names into the quiz in
+  // the folder's declared canonical order (existing behaviour).
   const byFolder = new Map();
   ids.forEach(bid => {
     const src = BANK.questions.find(q => q.id === bid);
-    if (!src) return;
+    if (!src || resolvedMap.has(src.folderId)) return;
     if (!byFolder.has(src.folderId)) byFolder.set(src.folderId, new Set());
     const name = src.section || '';
     if (name) byFolder.get(src.folderId).add(name);
   });
   byFolder.forEach((usedSet, folderId) => _pushSectionsToQuizInOrder(folderId, usedSet));
+
   let added = 0;
   ids.forEach(bid => {
     const src = BANK.questions.find(q => q.id === bid);
     if (!src) return;
-    const sectionName = src.section || '';
+    const sectionName = resolvedMap.has(src.folderId)
+      ? (resolvedMap.get(src.folderId) || '')
+      : (src.section || '');
     const copy = Object.assign({}, src, { id: qid(), section: sectionName });
     if (!sectionName) delete copy.section;
     delete copy.folderId;
     APP.questions.push(copy);
     added++;
   });
+
   closeModal('modal-add-from-bank');
   renderQuestions();
   updateBadges();
