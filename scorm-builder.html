@@ -1719,6 +1719,8 @@ body.bank-tab-active .r-topbar{display:none}
         <input type="checkbox" id="tog-section-breakdown" onchange="saveSettings()" style="display:none">
         <input type="checkbox" id="tog-section-review" onchange="saveSettings()" style="display:none">
         <input type="checkbox" id="tog-practice" onchange="saveSettings()" style="display:none">
+        <input type="checkbox" id="tog-section-passing" onchange="saveSettings()" style="display:none">
+        <input type="number" id="s-section-passing" min="1" max="100" value="70" style="display:none">
       </div>
 
       <!-- Timing -->
@@ -1896,6 +1898,15 @@ body.bank-tab-active .r-topbar{display:none}
       <div class="form-field full">
         <label class="form-label">Fail Exit Message <small>default: "Please try again."</small></label>
         <textarea class="form-textarea" id="s-fail-exit" placeholder="Please try again."></textarea>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Complete Title <small>shown when there's no pass mark</small></label>
+        <input class="form-input" id="s-complete-title" type="text" placeholder="Quiz complete">
+      </div>
+      <div class="form-field full">
+        <label class="form-label">Start Page Text <small>shown on the start screen above the details</small></label>
+        <textarea class="form-textarea" id="s-start-recommendation" placeholder="It is highly recommended that you complete all the course activities before you begin the quiz."></textarea>
+        <label style="display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#555;margin-top:6px"><input type="checkbox" id="tog-hide-start-text"> Hide start-page text entirely</label>
       </div>
     </div>
   </div>
@@ -2325,6 +2336,7 @@ body.bank-tab-active .r-topbar{display:none}
     </div>
     <div class="m-footer">
       <button class="btn btn-sm" onclick="closeModal('modal-editor')">Cancel</button>
+      <button class="btn btn-sm" onclick="previewEditorQuestion()" title="Preview this question" style="margin-left:auto"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Preview</button>
       <button class="btn btn-sm btn-primary" onclick="saveQuestion()"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Save question</button>
     </div>
   </div>
@@ -2475,7 +2487,13 @@ body.bank-tab-active .r-topbar{display:none}
         </div>
       </div>
     </div>
-    <div class="m-footer">
+    <div class="m-footer" style="flex-wrap:wrap;gap:8px">
+      <div class="cdl-previews" style="display:flex;gap:6px;margin-right:auto">
+        <span style="font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);align-self:center;margin-right:4px">Preview</span>
+        <button type="button" class="btn btn-outline btn-sm" onclick="_previewReturnToConfirmDownload=true;closeModal('modal-confirm-download');testInBrowser(null)" title="Preview the start screen"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Start</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="_previewReturnToConfirmDownload=true;closeModal('modal-confirm-download');previewScreen('pass')" title="Preview the pass result screen"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Pass</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="_previewReturnToConfirmDownload=true;closeModal('modal-confirm-download');previewScreen('fail')" title="Preview the fail result screen"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Fail</button>
+      </div>
       <button class="btn btn-outline" onclick="closeModal('modal-confirm-download')">Cancel</button>
       <button class="btn" id="cdl-download-anyway" style="display:none">Download as SCORM 1.2 anyway</button>
       <button class="btn btn-primary" id="cdl-download">Download SCORM</button>
@@ -4146,14 +4164,14 @@ function showSection(sectionId) {
   // and chip text. "strong" ≥ 85% (well above pass), "pass" ≥ pass threshold
   // (on track), "fail" below threshold (needs review).
   function _secTier(pct, passingPct) {
-    var pass = passingPct || 70;
-    if (pct >= 85) return 'strong';
-    if (pct >= pass) return 'pass';
-    return 'fail';
+    // No threshold at all → neutral for everything except ≥85% (still "strong").
+    if (!passingPct) return pct >= 85 ? 'strong' : 'neutral';
+    // With a threshold, only two states: at/above → strong, below → needs review.
+    return pct >= passingPct ? 'strong' : 'fail';
   }
   function _secTierLabel(tier) {
     if (tier === 'strong') return 'Strong';
-    if (tier === 'pass')   return 'On track';
+    if (tier === 'neutral') return '';
     return 'Needs review';
   }
   function _secEsc(s) {
@@ -4173,7 +4191,7 @@ function showSection(sectionId) {
     try { localStorage.setItem('quizzer_sec_view', _secViewMode); } catch (_) {}
     var host = document.getElementById('section-breakdown-host');
     if (!host || !_secLastBrk) return;
-    host.innerHTML = _renderSectionBreakdownHTML(_secLastBrk, CONFIG.passingPercentage);
+    host.innerHTML = _renderSectionBreakdownHTML(_secLastBrk, CONFIG.sectionPassingPercentage || CONFIG.passingPercentage);
   }
   // Expose the toggle so onclick handlers in the rendered HTML can reach it.
   window.setSecView = setSecView;
@@ -4183,7 +4201,8 @@ function showSection(sectionId) {
   // (2-column grid of bigger tiles), controlled by _secViewMode.
   function _renderSectionBreakdownHTML(brk, passingPct) {
     if (!brk.length) return '';
-    var pass = passingPct || 70;
+    var pass = passingPct || 0;
+    var hasPass = pass > 0;
     // Rank ordering for display: sort by percentage descending so the
     // "strongest" sections lead. (The internal canonical order is preserved
     // elsewhere — this only affects the visual ranking on the result screen.)
@@ -4195,14 +4214,14 @@ function showSection(sectionId) {
       + '<div class="sec-block-hd">'
       +   '<div class="sec-block-title">By section</div>'
       +   '<div class="sec-block-meta">'
-      +     '<span class="sec-threshold">Pass mark ' + pass + '%</span>'
+      +     (hasPass ? '<span class="sec-threshold">Pass mark ' + pass + '%</span>' : '')
       +     '<div class="sec-view-toggle">'
       +       '<button type="button" class="' + (isList ? 'on' : '') + '" onclick="setSecView(\'list\')" title="List view">' + ICO_LIST + 'List</button>'
       +       '<button type="button" class="' + (!isList ? 'on' : '') + '" onclick="setSecView(\'cards\')" title="Cards view">' + ICO_CARDS + 'Cards</button>'
       +     '</div>'
       +   '</div>'
       + '</div>'
-      + '<div class="sec-block-sub">Dotted line marks the ' + pass + '% pass mark · ranked by mastery</div>';
+      + '<div class="sec-block-sub">' + (hasPass ? 'Dotted line marks the ' + pass + '% pass mark · ranked by mastery' : 'Ranked by mastery') + '</div>';
 
     if (isList) {
       html += '<div class="sec-list">';
@@ -4219,12 +4238,12 @@ function showSection(sectionId) {
           +   '</div>'
           +   '<div class="sec-bar">'
           +     '<div class="sec-bar-fill tier-' + tier + '" style="width:' + b.pct + '%"></div>'
-          +     '<div class="sec-bar-mark" style="left:' + pass + '%"></div>'
+          +     (hasPass ? '<div class="sec-bar-mark" style="left:' + pass + '%"></div>' : '')
           +   '</div>'
           + '</div>'
           + '<div class="sec-end">'
           +   '<div class="sec-pct tier-' + tier + '">' + b.pct + '%</div>'
-          +   '<span class="sec-chip tier-' + tier + '">' + _secTierLabel(tier) + '</span>'
+          +   (tier === 'neutral' ? '' : '<span class="sec-chip tier-' + tier + '">' + _secTierLabel(tier) + '</span>')
           + '</div>'
           + '</div>';
       });
@@ -4237,7 +4256,7 @@ function showSection(sectionId) {
         html += '<div class="sec-card">'
           + '<div class="sec-card-hd">'
           +   '<span class="sec-name' + (b.key === '__unsectioned__' ? ' ungrouped' : '') + '">' + name + '</span>'
-          +   '<span class="sec-chip tier-' + tier + '">' + _secTierLabel(tier) + '</span>'
+          +   (tier === 'neutral' ? '' : '<span class="sec-chip tier-' + tier + '">' + _secTierLabel(tier) + '</span>')
           + '</div>'
           + '<div class="sec-card-pct">'
           +   '<span class="sec-pct tier-' + tier + '">' + b.pct + '%</span>'
@@ -4255,7 +4274,8 @@ function showSection(sectionId) {
   // Build the weakest-section callout HTML. Returns '' if no section is below the
   // passing threshold (nothing actionable to highlight).
   function _renderWeakestCalloutHTML(brk, passingPct) {
-    var pass = passingPct || 70;
+    if (!passingPct) return ''; // no threshold, no "weakest" concept
+    var pass = passingPct;
     var weak = null;
     brk.forEach(function(b) { if (b.total > 0 && b.pct < pass && (!weak || b.pct < weak.pct)) weak = b; });
     if (!weak) return '';
@@ -4337,18 +4357,23 @@ function showSection(sectionId) {
     // In practice mode the learner has already passed — the header always reflects
     // the OFFICIAL pass state, never the practice attempt's pass/fail.
     const _headerPassed = IS_PRACTICE_MODE ? true : passed;
-    const iconColor = _headerPassed ? '#76B900' : '#890C58';
+    // With no pass threshold set, every attempt "passes" — but that's misleading.
+    // Show a neutral "Quiz complete" state instead of a green celebration.
+    const _noPassMark = !CONFIG.passingPercentage;
+    const _neutral = _noPassMark && !IS_PRACTICE_MODE;
+    const iconColor = _neutral ? '#4b5563' : (_headerPassed ? '#76B900' : '#890C58');
     const iconWrap = document.getElementById('result-icon-wrap');
-    if (iconWrap) { iconWrap.className = 'result-icon-wrap ' + (_headerPassed ? 'pass' : 'fail'); }
+    if (iconWrap) { iconWrap.className = 'result-icon-wrap ' + (_neutral ? 'neutral' : (_headerPassed ? 'pass' : 'fail')); }
     const svg = document.getElementById('result-icon-svg');
     if (svg) { svg.querySelectorAll('path').forEach(function(p) { p.setAttribute('stroke', iconColor); }); }
     const iconPath = document.getElementById('result-icon-path');
-    if (iconPath) { iconPath.setAttribute('d', _headerPassed ? 'M20 6L9 17l-5-5' : 'M18 6L6 18M6 6l12 12'); }
+    if (iconPath) { iconPath.setAttribute('d', _neutral ? 'M20 6L9 17l-5-5' : (_headerPassed ? 'M20 6L9 17l-5-5' : 'M18 6L6 18M6 6l12 12')); }
     const titleElement = document.getElementById('result-title');
     const passMsg = (CONFIG.passMessage && CONFIG.passMessage.trim()) ? CONFIG.passMessage.trim() : 'You passed!';
     const failMsg = (CONFIG.failMessage && CONFIG.failMessage.trim()) ? CONFIG.failMessage.trim() : 'Not Quite There';
-    titleElement.textContent = _headerPassed ? passMsg : failMsg;
-    titleElement.className = `result-title ${_headerPassed ? 'pass' : 'fail'}`;
+    const completeMsg = (CONFIG.completeMessage && CONFIG.completeMessage.trim()) ? CONFIG.completeMessage.trim() : 'Quiz complete';
+    titleElement.textContent = _neutral ? completeMsg : (_headerPassed ? passMsg : failMsg);
+    titleElement.className = 'result-title ' + (_neutral ? 'neutral' : (_headerPassed ? 'pass' : 'fail'));
     const scoreValEl = document.getElementById('result-score-val');
     const timeTakenSeconds = Math.floor(sessionTime / 1000);
     if (IS_PRACTICE_MODE) {
@@ -4400,7 +4425,7 @@ function showSection(sectionId) {
                           : (CONFIG.quizType === 'custom') ? ('Congratulations, you have passed the ' + _customExitLabel + '.')
                           : 'Congratulations, you have passed the knowledge check.';
       var defaultFailExit = canRetry().allowed ? 'Please try again.' : '';
-      var exitMsg = _headerPassed ? ((CONFIG.passExitMessage && CONFIG.passExitMessage.trim()) ? CONFIG.passExitMessage.trim() : defaultPassExit) : ((CONFIG.failExitMessage && CONFIG.failExitMessage.trim()) ? CONFIG.failExitMessage.trim() : defaultFailExit);
+      var exitMsg = _neutral ? '' : (_headerPassed ? ((CONFIG.passExitMessage && CONFIG.passExitMessage.trim()) ? CONFIG.passExitMessage.trim() : defaultPassExit) : ((CONFIG.failExitMessage && CONFIG.failExitMessage.trim()) ? CONFIG.failExitMessage.trim() : defaultFailExit));
       exitEl.textContent = exitMsg;
     }
     var reviewBtn = document.getElementById('review-btn');
@@ -4492,7 +4517,7 @@ function showSection(sectionId) {
         if (isPreview && brk.length < 2) brk = _mockSectionBreakdown(true);
         if (brk.length >= 2) {
           _secLastBrk = brk;
-          brkHost.innerHTML = _renderSectionBreakdownHTML(brk, CONFIG.passingPercentage);
+          brkHost.innerHTML = _renderSectionBreakdownHTML(brk, CONFIG.sectionPassingPercentage || CONFIG.passingPercentage);
         }
       }
     }
@@ -4548,7 +4573,7 @@ function showSection(sectionId) {
     var sectionContainers = {};
     if (grouping && brk.length >= 2) {
       brk.forEach(function(b) {
-        var tier = _secTier(b.pct, CONFIG.passingPercentage);
+        var tier = _secTier(b.pct, CONFIG.sectionPassingPercentage || CONFIG.passingPercentage);
         var name = b.name.replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; });
         var group = document.createElement('div');
         group.className = 'rev-sec-group';
@@ -5081,6 +5106,12 @@ function showSection(sectionId) {
         // Populate synthetic answers so the section breakdown and answer review
         // have realistic per-question data in the preview.
         try { _populatePreviewAnswers(pct); } catch (_) {}
+        // Seed lastAttempt* from the (synthetic) current attempt so showResults'
+        // "official" tab swap doesn't wipe currentQuestions, which would empty
+        // the section breakdown.
+        lastAttemptQuestionIds = currentQuestions.map(q => q.id);
+        lastAttemptAnswers = Object.assign({}, userAnswers);
+        lastAttemptOptionsOrder = _collectOptionsOrderMap(currentQuestions);
         document.getElementById('start-screen').classList.add('hidden');
         showResults({ percentage: pct, correct: correct, incorrect: total - correct }, passed, passed ? 1800000 : 900000);
       }
@@ -5259,9 +5290,11 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .result-icon-wrap { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
 .result-icon-wrap.pass { background: #e8f5c8; }
 .result-icon-wrap.fail { background: #f8d7e8; }
+.result-icon-wrap.neutral { background: #eef0f3; }
 .result-title { font-size: 30px; font-weight: 800; text-align: center; margin-bottom: 10px; letter-spacing: -0.5px; }
 .result-title.fail { color: #890C58; }
 .result-title.pass { color: #76B900; }
+.result-title.neutral { color: #1a1a1a; }
 .exit-message { text-align: center; color: #1a1a1a; font-size: 19px; font-weight: 500; line-height: 1.6; margin-bottom: 20px; max-width: 700px; }
 .cert-link-row { margin-top: -4px; margin-bottom: 24px; width: 100%; text-align: center; }
 @keyframes cert-shimmer { 0% { background-position: -250% center; } 100% { background-position: 250% center; } }
@@ -5417,6 +5450,8 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .sec-bar-fill{position:absolute;left:0;top:0;bottom:0;background:#76B900;transition:width .25s}
 .sec-bar-fill.tier-strong,.sec-bar-fill.tier-pass{background:#76B900}
 .sec-bar-fill.tier-fail{background:#EF9100}
+.sec-bar-fill.tier-neutral{background:#6B6B6B}
+.sec-pct.tier-neutral{color:#1A1A1A}
 .sec-bar-mark{position:absolute;top:-3px;bottom:-3px;width:0;border-left:2px dotted #A7A7A7;pointer-events:none}
 .sec-end{text-align:right;min-width:0}
 .sec-pct{font-size:17px;font-weight:700;color:#1A1A1A;font-variant-numeric:tabular-nums;line-height:1}
@@ -5482,8 +5517,12 @@ const APP = {
     randomizeOptions: true,
     passMessage: '',
     failMessage: '',
+    completeMessage: '',
     passExitMessage: '',
     failExitMessage: '',
+    startRecommendation: '',
+    hideStartRecommendation: false,
+    sectionPassingPercentage: 0,
     showAnswerReview: false,
     showCorrectAnswers: false,
     minAttemptsBeforeReview: 0,
@@ -5896,7 +5935,7 @@ async function loadScormPackage(file) {
     maxAttempts: 0, cooldownDays: 0, timeLimitMinutes: 0, questionsPerAttempt: 0,
     passingPercentage: 70, randomizeQuestions: true,
     allowBlankAnswers: true, warnOnBlankAnswers: true,
-    passMessage: '', failMessage: '', passExitMessage: '', failExitMessage: '',
+    passMessage: '', failMessage: '', completeMessage: '', passExitMessage: '', failExitMessage: '', startRecommendation: '',
     showAnswerReview: false, showCorrectAnswers: false
   }, raw);
   // Read manifest once: extract title (if missing) + package identifier
@@ -8433,6 +8472,7 @@ const R_ICO = {
   after:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
   cert:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M8.5 12.5 7 21l5-2.6L17 21l-1.5-8.5"/></svg>',
   breakdown:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><rect x="5" y="11" width="3.5" height="9"/><rect x="10.25" y="6" width="3.5" height="14"/><rect x="15.5" y="14" width="3.5" height="6"/></svg>',
+  messages:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
   chev:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
   flag:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
   eye:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
@@ -8445,7 +8485,8 @@ const R_ACC = {
   during:{c:'#0d8473',bg:'#ddf3ef'},
   after:{c:'#be185d',bg:'#fde7f3'},
   cert:{c:'#a16207',bg:'#fbf0cf'},
-  breakdown:{c:'#7c3aed',bg:'#ede9fe'}
+  breakdown:{c:'#7c3aed',bg:'#ede9fe'},
+  messages:{c:'#0d8473',bg:'#ddf3ef'}
 };
 
 // Read a legacy checkbox's checked state (true/false)
@@ -8526,7 +8567,26 @@ function renderInspector() {
     + '<div class="r-sub" data-sub="certificate"><div class="r-fieldrow"><label>Certificate URL</label><input class="r-ti" type="url" id="r-cert-url" placeholder="https://…" oninput="document.getElementById(\'s-cert-url\').value=this.value;saveSettings()"></div><div class="r-fieldrow"><label>Link text</label><input class="r-ti" type="text" id="r-cert-text" placeholder="Click here to see your certificate" oninput="document.getElementById(\'s-cert-text\').value=this.value;saveSettings()"></div></div>';
 
   const rowsBreakdown = _rCtlRow('tog-section-breakdown', 'Show section breakdown on results', 'Bar + percentage per section after submitting', _rTogHtml('tog-section-breakdown'))
+    + _rCtlRow('tog-section-passing', 'Per-section pass mark', 'Threshold used for section tier chips (defaults to quiz pass mark)', _rStepHtml('s-section-passing', '%', 1, 100, 70) + _rTogHtml('tog-section-passing'))
     + _rCtlRow('tog-section-review', 'Group answer review by section', 'Answer review screen bands questions under their section', _rTogHtml('tog-section-review'));
+
+  // Messages group — mirrors the hidden `s-*` inputs so the sidebar can edit
+  // them directly. Changes flow through saveSettings (via the standard input
+  // event handlers below).
+  const _msgField = (id, legacyId, label, ph, multi) => {
+    const oninput = 'document.getElementById(\'' + legacyId + '\').value=this.value;saveSettings()';
+    const control = multi
+      ? '<textarea class="r-ti" id="' + id + '" rows="2" placeholder="' + escH(ph) + '" oninput="' + oninput + '"></textarea>'
+      : '<input type="text" class="r-ti" id="' + id + '" placeholder="' + escH(ph) + '" oninput="' + oninput + '">';
+    return '<div class="r-fieldrow"><label>' + escH(label) + '</label>' + control + '</div>';
+  };
+  const rowsMessages = _msgField('r-pass-title', 's-pass-title', 'Pass title', 'You passed!', false)
+    + _msgField('r-fail-title', 's-fail-title', 'Fail title', 'Not Quite There', false)
+    + _msgField('r-complete-title', 's-complete-title', 'Complete title (no pass mark)', 'Quiz complete', false)
+    + _msgField('r-pass-exit', 's-pass-exit', 'Pass exit message', 'Congratulations, you have passed the quiz.', true)
+    + _msgField('r-fail-exit', 's-fail-exit', 'Fail exit message', 'Please try again.', true)
+    + _msgField('r-start-recommendation', 's-start-recommendation', 'Start page text', 'It is highly recommended that you complete all the course activities before you begin the quiz.', true)
+    + _rCtlRow('tog-hide-start-text', 'Hide start-page text', 'Show no text at all on the start screen', _rTogHtml('tog-hide-start-text'));
 
   // Header: in Batch inspector mode, show the selected item's name with a small
   // "Quiz settings" eyebrow + a collapse button. In Quiz Builder mode, keep the
@@ -8549,6 +8609,7 @@ function renderInspector() {
     +   _rGroupHtml('breakdown', 'Section breakdown', rowsBreakdown)
     +   _rGroupHtml('during', 'Submit behavior', rowsDuring)
     +   _rGroupHtml('after', 'Review on fail', rowsAfter)
+    +   _rGroupHtml('messages', 'Messages', rowsMessages)
     +   _rGroupHtml('cert', 'Certificate', rowsCert)
     + '</div>'
     + '<div class="r-insp-ft"><div class="r-pv"><button class="r-lnk" onclick="testInBrowser(null)">' + R_ICO.eye + ' Start</button><button class="r-lnk" onclick="previewScreen(\'pass\')">Pass</button><button class="r-lnk" onclick="previewScreen(\'fail\')">Fail</button></div><button class="r-lnk r-adv" onclick="openAdvancedSettings()">Advanced…</button></div>';
@@ -8558,6 +8619,14 @@ function renderInspector() {
   const certText = document.getElementById('s-cert-text');
   if (certUrl) document.getElementById('r-cert-url').value = certUrl.value;
   if (certText) document.getElementById('r-cert-text').value = certText.value;
+  // Mirror the hidden message inputs into the sidebar's fields.
+  [['s-pass-title','r-pass-title'], ['s-fail-title','r-fail-title'], ['s-complete-title','r-complete-title'],
+   ['s-pass-exit','r-pass-exit'], ['s-fail-exit','r-fail-exit'], ['s-start-recommendation','r-start-recommendation']]
+    .forEach(function(p) {
+      const src = document.getElementById(p[0]);
+      const dst = document.getElementById(p[1]);
+      if (src && dst) dst.value = src.value;
+    });
 
   _rWireInspector();
   _rSyncSubs();
@@ -12350,8 +12419,11 @@ function readSettingsToForm() {
   if (_gi('s-confirm-submit')) _gi('s-confirm-submit').checked = s.confirmBeforeSubmit !== false;
   if (_gi('s-pass-title')) _gi('s-pass-title').value = s.passMessage || '';
   if (_gi('s-fail-title')) _gi('s-fail-title').value = s.failMessage || '';
+  if (_gi('s-complete-title')) _gi('s-complete-title').value = s.completeMessage || '';
   if (_gi('s-pass-exit')) { _gi('s-pass-exit').value = s.passExitMessage || ''; _gi('s-pass-exit').placeholder = (s.quizType === 'topic_quiz') ? 'Congratulations, you have passed the knowledge check.' : (s.quizType === 'course_final_exam') ? 'Congratulations, you have passed the final exam.' : (s.quizType === 'gpu_genius_fast_track') ? 'Congratulations, you have passed the GPU Genius Fast Track Exam.' : 'Congratulations, you have passed the course completion quiz.'; }
   if (_gi('s-fail-exit')) _gi('s-fail-exit').value = s.failExitMessage || '';
+  if (_gi('s-start-recommendation')) _gi('s-start-recommendation').value = s.startRecommendation || '';
+  if (_gi('tog-hide-start-text')) _gi('tog-hide-start-text').checked = !!s.hideStartRecommendation;
   if (_gi('tog-review')) { _gi('tog-review').checked = !!s.showAnswerReview; toggleSettingInput('review', !!s.showAnswerReview); }
   if (_gi('s-show-correct')) _gi('s-show-correct').checked = !!s.showCorrectAnswers;
   const minAttReview = s.minAttemptsBeforeReview || 0;
@@ -12368,6 +12440,9 @@ function readSettingsToForm() {
   if (_gi('tog-practice')) _gi('tog-practice').checked = s.allowPractice !== false;
   if (_gi('tog-section-breakdown')) _gi('tog-section-breakdown').checked = !!s.sectionBreakdownOnResult;
   if (_gi('tog-section-review')) _gi('tog-section-review').checked = !!s.sectionReviewGrouping;
+  const secPass = parseInt(s.sectionPassingPercentage, 10) || 0;
+  if (_gi('tog-section-passing')) _gi('tog-section-passing').checked = secPass > 0;
+  if (_gi('s-section-passing')) _gi('s-section-passing').value = secPass > 0 ? secPass : (s.passingPercentage || 70);
   if (_gi('s-cert-url')) _gi('s-cert-url').value = s.certificateUrl || 'https://www.nvidia.com/en-us/training/academy/certificates/';
   if (_gi('s-cert-text')) _gi('s-cert-text').value = s.certificateLinkText || '';
   // AI Assistant is configured server-side via env vars — no per-user form to populate.
@@ -12425,8 +12500,12 @@ function saveSettings() {
     confirmBeforeSubmit: document.getElementById('s-confirm-submit').checked,
     passMessage: document.getElementById('s-pass-title').value.trim(),
     failMessage: document.getElementById('s-fail-title').value.trim(),
+    completeMessage: (document.getElementById('s-complete-title') ? document.getElementById('s-complete-title').value.trim() : ''),
     passExitMessage: document.getElementById('s-pass-exit').value.trim(),
     failExitMessage: document.getElementById('s-fail-exit').value.trim(),
+    startRecommendation: (document.getElementById('s-start-recommendation') ? document.getElementById('s-start-recommendation').value.trim() : ''),
+    hideStartRecommendation: !!(document.getElementById('tog-hide-start-text') && document.getElementById('tog-hide-start-text').checked),
+    sectionPassingPercentage: (document.getElementById('tog-section-passing') && document.getElementById('tog-section-passing').checked) ? Math.max(1, parseInt(document.getElementById('s-section-passing').value, 10) || 70) : 0,
     showAnswerReview: document.getElementById('tog-review').checked,
     showCorrectAnswers: document.getElementById('s-show-correct').checked,
     minAttemptsBeforeReview: document.getElementById('tog-min-attempts-review').checked ? Math.max(1, parseInt(document.getElementById('s-min-attempts-review').value) || 2) : 0,
@@ -12524,7 +12603,11 @@ function buildQuizHTML(settings, questions, isTest, useRemote) {
     allowBlankAnswers: settings.allowBlankAnswers, warnOnBlankAnswers: settings.warnOnBlankAnswers,
     confirmBeforeSubmit: settings.confirmBeforeSubmit !== false,
     passMessage: settings.passMessage || '', failMessage: settings.failMessage || '',
+    completeMessage: settings.completeMessage || '',
     passExitMessage: settings.passExitMessage || '', failExitMessage: settings.failExitMessage || '',
+    startRecommendation: settings.startRecommendation || '',
+    hideStartRecommendation: !!settings.hideStartRecommendation,
+    sectionPassingPercentage: parseInt(settings.sectionPassingPercentage, 10) || 0,
     showAnswerReview: !!settings.showAnswerReview,
     showCorrectAnswers: !!settings.showCorrectAnswers,
     minAttemptsBeforeReview: settings.minAttemptsBeforeReview || 0,
@@ -12615,7 +12698,9 @@ function buildQuizHTML(settings, questions, isTest, useRemote) {
     + '            <p class="start-practice-sub">You already passed. Nothing you do here is saved to your record.</p>\n'
     + '          </div>\n'
     + '        </div>\n'
-    + '        <p class="recommendation" id="start-recommendation">It is highly recommended that you complete all the course activities before you begin the ' + n + '.</p>\n'
+    + (settings.hideStartRecommendation
+        ? ''
+        : '        <p class="recommendation" id="start-recommendation">' + escH((settings.startRecommendation && settings.startRecommendation.trim()) ? settings.startRecommendation.trim() : ('It is highly recommended that you complete all the course activities before you begin the ' + n + '.')) + '</p>\n')
     + '        <div id="start-attempt-timer-row" class="start-attempt-timer-row" aria-live="polite"><span class="detail-label">Time remaining</span><span class="detail-value" id="start-screen-timer">--:--</span></div>\n'
     + '        <div class="details-grid" id="start-details-grid">\n'
     + '          <div class="detail-item"><span class="detail-label">Number of attempts:</span><span class="detail-value" id="start-attempts">' + escH(attDisp) + '</span></div>\n'
@@ -13120,7 +13205,14 @@ function closeTestModal() {
   clearScormLog();
   var cb = document.getElementById('toggle-show-answers');
   if (cb) cb.checked = false;
+  // If the preview was launched from the confirm-download flow, hop back to
+  // it so the learner doesn't lose their place.
+  if (_previewReturnToConfirmDownload) {
+    _previewReturnToConfirmDownload = false;
+    if (typeof _openConfirmDownloadModal === 'function') _openConfirmDownloadModal();
+  }
 }
+var _previewReturnToConfirmDownload = false;
 
 function toggleAnswerHints(on) {
   var ifr = document.getElementById('test-ifr');
@@ -13866,8 +13958,12 @@ function batchSettings(item) {
     confirmBeforeSubmit: s.confirmBeforeSubmit !== false,
     passMessage:         s.passMessage || '',
     failMessage:         s.failMessage || '',
+    completeMessage:     s.completeMessage || '',
     passExitMessage:     s.passExitMessage || '',
     failExitMessage:     s.failExitMessage || '',
+    startRecommendation: s.startRecommendation || '',
+    hideStartRecommendation: !!s.hideStartRecommendation,
+    sectionPassingPercentage: parseInt(s.sectionPassingPercentage, 10) || 0,
     showAnswerReview:    s.showAnswerReview || false,
     showCorrectAnswers:  s.showCorrectAnswers || false,
     showCertificateLink: s.showCertificateLink || false,
@@ -14285,7 +14381,7 @@ async function processBatchFiles(files) {
     const id = uuid();
     const name = file.name.toLowerCase();
     const baseTitle = file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
-    const defaultSettings = () => Object.assign({}, APP.settings, { title: baseTitle, passMessage:'', failMessage:'', passExitMessage:'', failExitMessage:'' });
+    const defaultSettings = () => Object.assign({}, APP.settings, { title: baseTitle, passMessage:'', failMessage:'', completeMessage:'', passExitMessage:'', failExitMessage:'', startRecommendation:'', hideStartRecommendation:false, sectionPassingPercentage:0 });
     try {
       let questions, settings;
       if (name.endsWith('.zip')) {
