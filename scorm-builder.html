@@ -502,7 +502,7 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .app-hdr{display:none !important}
 
 /* Shell: left rail + work area, full viewport height */
-.r-shell{display:flex;height:100vh;overflow:hidden;background:var(--bg)}
+.r-shell{display:flex;height:100vh;overflow:hidden;background:var(--bg);position:relative}
 
 /* Left rail navigation */
 .r-rail{width:212px;flex:none;background:#fbfbfc;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 12px}
@@ -547,11 +547,29 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 #tab-test-scorm .ts-iframe-wrap{flex:1;min-height:0;display:flex}
 #tab-test-scorm .ts-ifr{border:none;flex:1;width:100%;height:100%}
 
+/* Rail pin toggle — visible only when the rail is in collapsed (narrow) mode */
+.r-rail .r-rail-pin{display:none;background:none;border:1px solid var(--border);border-radius:6px;padding:4px;color:var(--muted);cursor:pointer;margin:6px 0;align-self:flex-end}
+.r-rail .r-rail-pin:hover{background:#f3f4f6;color:var(--text)}
+.r-rail .r-rail-pin svg{width:14px;height:14px;display:block;transition:transform .15s}
+.r-rail.r-rail-pinned .r-rail-pin svg{transform:rotate(180deg)}
 @media(max-width:980px){
-  .r-rail{width:62px}
-  .r-rail-logo span,.r-nav span,.r-rail-lbl,.r-rail-user .r-nm,.r-rail-user .r-rl{display:none}
+  .r-rail{width:62px;transition:width .15s ease,box-shadow .15s ease}
+  .r-rail-logo span,.r-nav span,.r-rail-lbl,.r-rail-user .r-nm,.r-rail-user .r-rl,.r-rail .r-whatsnew span{display:none}
   .r-nav{justify-content:center}
   .r-rail-logo{justify-content:center;padding-left:0}
+  .r-rail .r-rail-pin{display:inline-flex;align-items:center;justify-content:center;align-self:center}
+  /* Only the pin button opens/closes the rail (no hover). When pinned, the
+     rail overlays the canvas so main content doesn't shift. */
+  .r-rail.r-rail-pinned{width:212px;position:absolute;top:0;bottom:0;left:0;z-index:100;box-shadow:0 6px 24px rgba(16,24,40,.14)}
+  .r-rail.r-rail-pinned .r-rail-logo span,
+  .r-rail.r-rail-pinned .r-nav span,
+  .r-rail.r-rail-pinned .r-rail-lbl,
+  .r-rail.r-rail-pinned .r-rail-user .r-nm,
+  .r-rail.r-rail-pinned .r-rail-user .r-rl,
+  .r-rail.r-rail-pinned .r-whatsnew span{display:inline}
+  .r-rail.r-rail-pinned .r-nav{justify-content:flex-start}
+  .r-rail.r-rail-pinned .r-rail-logo{justify-content:flex-start;padding-left:8px}
+  .r-rail.r-rail-pinned .r-rail-pin{align-self:flex-end}
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -592,7 +610,7 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-canvas .sel-row .selinfo{color:var(--green-600);font-weight:700}
 .r-canvas .sel-row .bulk{margin-left:auto;display:flex;gap:8px}
 .r-canvas .qlist{display:flex;flex-direction:column;gap:0}
-.r-shell .qc{background:#fff;border:1px solid var(--g100);border-radius:10px;padding:11px 14px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--sh-card);transition:border-color .12s,box-shadow .12s;margin-bottom:6px}
+.r-shell .qc{background:#fff;border:1px solid var(--g100);border-radius:10px;padding:11px 14px;display:flex;flex-wrap:nowrap;align-items:flex-start;gap:12px;box-shadow:var(--sh-card);transition:border-color .12s,box-shadow .12s;margin-bottom:6px;max-width:100%;overflow:hidden}
 .r-shell .qc:hover{border-color:#cfd4dc;box-shadow:0 2px 8px rgba(16,24,40,.08)}
 .r-shell .qc.sel{border-color:#cdd5de;box-shadow:inset 3px 0 0 var(--green),0 1px 3px rgba(16,24,40,.07)}
 /* Drop indicator while dragging: a green bar above or below the target card */
@@ -605,7 +623,7 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-shell .qc .qcheck{flex:none;cursor:pointer;margin-top:2px}
 .r-shell .qc .grip{color:#c7ccd4;cursor:grab;flex:none;font-size:14px;line-height:1;user-select:none;margin-top:3px}
 .r-shell .qc .num{min-width:22px;height:22px;border-radius:6px;background:var(--green-lt);color:var(--green-600);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
-.r-shell .qc .main{flex:1;min-width:0;text-align:left}
+.r-shell .qc .main{flex:1;min-width:0;max-width:100%;overflow:hidden;text-align:left}
 .r-shell .qc .qt{font-size:14px;font-weight:500;color:var(--text);line-height:1.45;word-break:break-word;margin:0 0 6px 0;text-align:left}
 .r-shell .qc .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-start}
 /* Image / CLI badges on the collapsed card — hidden while the card is open */
@@ -619,10 +637,17 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-shell .qc.open .qbody{display:block}
 .r-shell .qc.open .meta{margin-top:11px}
 .r-shell .qc.open .qt{display:none}
-.r-shell .qc .qbody-full{font-size:13.5px;line-height:1.55;color:var(--text);margin-bottom:10px}
+.r-shell .qc .qbody-full{font-size:13.5px;line-height:1.55;color:var(--text);margin-bottom:10px;max-width:100%;overflow-wrap:break-word;word-break:break-word}
 .r-shell .qc .qbody-full p{margin:0 0 6px}
 .r-shell .qc .qbody-full pre,.r-shell .qc .qbody-full code{font-family:Consolas,'Courier New',monospace}
 .r-shell .qc .qbody-full pre{white-space:pre-wrap;word-break:break-word;overflow-x:auto;background:#fff;color:#111;border:1.5px solid #111;border-radius:6px;padding:10px 13px;margin:8px 0;font-size:12.5px;line-height:1.55}
+/* Defensive clamps for arbitrary HTML the author embedded in the question.
+   Author-embedded inline `<img width="1011">` or block `<div style="border:...">`
+   nodes were pushing the card's flex row wider than its container and blowing
+   out the number-badge layout. Keep them inside the card no matter what. */
+.r-shell .qc .qbody-full img{max-width:100%;height:auto;box-sizing:border-box}
+.r-shell .qc .qbody-full div,.r-shell .qc .qbody-full table{max-width:100%;box-sizing:border-box;overflow-x:auto}
+.r-shell .qc .qbody-full table{display:block}
 .r-shell .qc .exp svg{transition:transform .15s}
 .r-shell .qc.open .exp svg{transform:rotate(180deg)}
 .r-shell .iconbtn{width:30px;height:30px;border:1px solid transparent;border-radius:7px;background:none;display:flex;align-items:center;justify-content:center;color:#9aa0aa;cursor:pointer;transition:.12s}
@@ -1380,8 +1405,9 @@ body.bank-tab-active .r-topbar{display:none}
 
 <div class="r-shell">
   <!-- ── LEFT RAIL NAV ── -->
-  <aside class="r-rail">
+  <aside class="r-rail" id="r-rail">
     <div class="r-rail-logo"><img src="assets/favicon_io/android-chrome-192x192.png" alt=""><span>Quizz<span class="r-dot">er</span></span></div>
+    <button class="r-rail-pin" onclick="toggleRailPin()" title="Open sidebar" aria-label="Open sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
     <div class="r-rail-lbl">Workspace</div>
     <div class="r-rail-grp">
       <button class="r-nav r-nav-on" data-tab="questions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12"/><path d="M4 10h16"/><path d="M4 15h10"/><path d="M4 20h7"/></svg><span>Quiz builder</span></button>
@@ -1392,7 +1418,7 @@ body.bank-tab-active .r-topbar{display:none}
     </div>
     <div class="r-rail-sp"></div>
     <button class="r-whatsnew" onclick="openWelcome()" title="What's new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span>What's new</span></button>
-    <div class="r-rail-user"><div class="r-av">U</div><div><div class="r-nm">SCORM Quizzer</div><div class="r-rl">Local</div></div></div>
+    <div class="r-rail-user"><div class="r-av">U</div><div><div class="r-nm">SCORM Quizzer</div></div></div>
   </aside>
 
   <!-- ── WORK AREA (top bar + tab content) ── -->
@@ -5597,9 +5623,19 @@ function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').r
 function _safeQHtml(html) {
   if (html == null) return '';
   const allowed = /^(p|br|strong|em|b|i|u|span|div|ul|ol|li|a|h[1-6]|sub|sup|blockquote|code|pre|img|table|thead|tbody|tr|td|th)$/i;
-  return String(html).replace(/<\/?([a-z][a-z0-9]*)(?:\s[^>]*)?\/?>/gi, function(match, tagName) {
+  const filtered = String(html).replace(/<\/?([a-z][a-z0-9]*)(?:\s[^>]*)?\/?>/gi, function(match, tagName) {
     return allowed.test(tagName) ? match : match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
   });
+  // Author-supplied question HTML sometimes has unclosed formatting tags
+  // (e.g., <p><strong>text</p> with no </strong>). Because we later inject
+  // many cards' HTML in one innerHTML batch, HTML5's adoption-agency
+  // algorithm re-opens those tags in every following sibling — which pulled
+  // subsequent question cards into a <strong> context and broke their
+  // layout. Parse in isolation and re-serialize so the returned string is
+  // guaranteed to be balanced.
+  const wrap = document.createElement('div');
+  wrap.innerHTML = filtered;
+  return wrap.innerHTML;
 }
 function stripHtml(h) { const d = document.createElement('div'); d.innerHTML = h; return d.textContent || ''; }
 function focusQuizTitleInput() {
@@ -14915,6 +14951,24 @@ function welSetTab(tab) {
   document.querySelectorAll('#modal-welcome .wel-tab').forEach(function(b) { b.classList.toggle('on', b.dataset.weltab === tab); });
   document.querySelectorAll('#modal-welcome .wel-panel').forEach(function(p) { p.classList.toggle('on', p.dataset.welpanel === tab); });
 }
+
+// Rail pin toggle — persists across sessions so the user's preference sticks.
+function toggleRailPin() {
+  const rail = document.getElementById('r-rail');
+  if (!rail) return;
+  const on = rail.classList.toggle('r-rail-pinned');
+  try { localStorage.setItem('quizzer_rail_pinned', on ? '1' : '0'); } catch (_) {}
+  const btn = rail.querySelector('.r-rail-pin');
+  if (btn) btn.setAttribute('title', on ? 'Close sidebar' : 'Open sidebar');
+}
+try {
+  if (localStorage.getItem('quizzer_rail_pinned') === '1') {
+    document.addEventListener('DOMContentLoaded', function() {
+      const rail = document.getElementById('r-rail');
+      if (rail) rail.classList.add('r-rail-pinned');
+    });
+  }
+} catch (_) {}
 
 function openWelcome() {
   // Reset the "Don't show again" checkbox each time the modal opens so it
