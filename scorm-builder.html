@@ -8612,7 +8612,7 @@ function renderInspector() {
   // them directly. Changes flow through saveSettings (via the standard input
   // event handlers below).
   const _msgField = (id, legacyId, label, ph, multi) => {
-    const oninput = 'document.getElementById(\'' + legacyId + '\').value=this.value;saveSettings()';
+    const oninput = 'document.getElementById(\'' + legacyId + '\').value=this.value;saveSettings();if(typeof _rRefreshChips===\'function\')_rRefreshChips();';
     const control = multi
       ? '<textarea class="r-ti" id="' + id + '" rows="2" placeholder="' + escH(ph) + '" oninput="' + oninput + '"></textarea>'
       : '<input type="text" class="r-ti" id="' + id + '" placeholder="' + escH(ph) + '" oninput="' + oninput + '">';
@@ -8837,6 +8837,7 @@ function advSyncText(advId, legacyId) {
   if (adv && lg) {
     lg.value = adv.value;
     if (typeof saveSettings === 'function') saveSettings();
+    if (typeof _rRefreshChips === 'function') _rRefreshChips();
   }
 }
 
