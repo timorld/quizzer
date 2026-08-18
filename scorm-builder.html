@@ -4397,7 +4397,7 @@ function showSection(sectionId) {
     const titleElement = document.getElementById('result-title');
     const passMsg = (CONFIG.passMessage && CONFIG.passMessage.trim()) ? CONFIG.passMessage.trim() : 'You passed!';
     const failMsg = (CONFIG.failMessage && CONFIG.failMessage.trim()) ? CONFIG.failMessage.trim() : 'Not Quite There';
-    const completeMsg = (CONFIG.completeMessage && CONFIG.completeMessage.trim()) ? CONFIG.completeMessage.trim() : 'Quiz complete';
+    const completeMsg = (CONFIG.completeMessage && CONFIG.completeMessage.trim()) ? CONFIG.completeMessage.trim() : (_qN + ' complete');
     titleElement.textContent = _neutral ? completeMsg : (_headerPassed ? passMsg : failMsg);
     titleElement.className = 'result-title ' + (_neutral ? 'neutral' : (_headerPassed ? 'pass' : 'fail'));
     const scoreValEl = document.getElementById('result-score-val');
@@ -4583,10 +4583,12 @@ function showSection(sectionId) {
     var list = document.getElementById('review-list');
     if (!list) return;
     list.innerHTML = '';
-    // When best score tracking is off, passed learners always see correct answers in review.
-    // When it's on, use the showCorrectAnswers setting as-is.
+    // When review-on-fail is off, the review is only ever shown to passed
+    // learners, so auto-reveal correct answers for them regardless of the
+    // explicit toggle. Once review-on-fail is on, both pass and fail can see
+    // the review, so reveal must be governed purely by the explicit toggle.
     var origShowCorrect = CONFIG.showCorrectAnswers;
-    CONFIG.showCorrectAnswers = origShowCorrect || hasPassed;
+    CONFIG.showCorrectAnswers = origShowCorrect || (hasPassed && !CONFIG.showAnswerReview);
     // The "Correct answer revealed" legend swatch only applies when the blue
     // reveal color is actually used — hide it otherwise.
     var revealItem = document.querySelector('#review-legend .rl-reveal-item');
@@ -9202,6 +9204,13 @@ function _rRefreshChips() {
   if (s.showCertificateLink) {
     chips.push(_rChipHtml('cert', 'Certificate link', true));
   }
+  // Custom messages — only render when at least one result-screen message
+  // has been edited away from its default (empty) value.
+  const _hasCustomMsg = [s.passMessage, s.failMessage, s.completeMessage, s.passExitMessage, s.failExitMessage]
+    .some(m => m && m.trim());
+  if (_hasCustomMsg) {
+    chips.push(_rChipHtml('messages', 'Custom messages', true));
+  }
   sm.innerHTML = chips.join('');
   // Rebind clicks on the new chip elements
   document.querySelectorAll('.r-chip[data-chip]').forEach(el => {
@@ -13053,6 +13062,9 @@ function _openConfirmDownloadModal() {
   const _reviewValue = 'Available on pass · ' + (s.showAnswerReview ? 'shown on fail' : 'hidden on fail');
   rows.push(_cdlRow('Answer review', _reviewValue, true));
   if (s.showCertificateLink) rows.push(_cdlRow('Certificate link', 'Shown on pass', true));
+  const _cdlHasCustomMsg = [s.passMessage, s.failMessage, s.completeMessage, s.passExitMessage, s.failExitMessage]
+    .some(m => m && m.trim());
+  if (_cdlHasCustomMsg) rows.push(_cdlRow('Messages', 'Custom messages', true));
   document.getElementById('cdl-summary').innerHTML = rows.join('');
 
   // Suspend-data ceiling check (SCORM 1.2 only). If the payload would exceed
