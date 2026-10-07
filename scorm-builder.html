@@ -2525,10 +2525,12 @@ body.bank-tab-active .r-topbar{display:none}
         <button type="button" class="btn btn-outline btn-sm" onclick="_previewReturnToConfirmDownload=true;closeModal('modal-confirm-download');previewScreen('pass')" title="Preview the pass result screen"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Pass</button>
         <button type="button" class="btn btn-outline btn-sm" onclick="_previewReturnToConfirmDownload=true;closeModal('modal-confirm-download');previewScreen('fail')" title="Preview the fail result screen"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Fail</button>
       </div>
-      <button class="btn btn-outline" onclick="closeModal('modal-confirm-download')">Cancel</button>
-      <button class="btn" id="cdl-download-anyway" style="display:none">Download as SCORM 1.2 anyway</button>
-      <button class="btn btn-primary" id="cdl-download">Download SCORM</button>
-      <button class="btn btn-primary" id="cdl-upgrade-2004" style="display:none">Use SCORM 2004 &amp; Download</button>
+      <div class="cdl-actions" style="display:flex;gap:8px;align-items:center;flex-wrap:nowrap;margin-left:auto">
+        <button class="btn btn-outline" onclick="closeModal('modal-confirm-download')">Cancel</button>
+        <button class="btn" id="cdl-download-anyway" style="display:none">Download as SCORM 1.2 anyway</button>
+        <button class="btn btn-primary" id="cdl-download">Download SCORM</button>
+        <button class="btn btn-primary" id="cdl-upgrade-2004" style="display:none">Use SCORM 2004 &amp; Download</button>
+      </div>
     </div>
   </div>
 </div>
