@@ -1387,6 +1387,11 @@ body.bank-tab-active .r-topbar{display:none}
 .r-insp-ft .r-lnk svg{width:13px;height:13px}
 .r-insp-ft .r-adv{margin-left:auto;border-color:transparent;background:none;color:var(--blue,#0074df)}
 .r-insp-ft .r-adv:hover{text-decoration:underline;background:none}
+.r-push{flex:none;padding:10px 16px 0;background:#fff}
+.r-push-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--green-600);background:var(--green-lt);border:1px solid var(--green);border-radius:8px;padding:9px 12px;cursor:pointer;transition:background .12s,color .12s,box-shadow .12s}
+.r-push-btn:hover{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(118,185,0,.28)}
+.r-push-btn svg{width:15px;height:15px}
+.r-push-btn:disabled{opacity:.45;cursor:not-allowed;background:#f3f4f6;border-color:var(--g150);color:var(--muted);box-shadow:none}
 </style>
 <style>
 #app-loader{position:fixed;inset:0;background:#f0f2f5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;z-index:99999;transition:opacity .3s ease}
@@ -8650,6 +8655,7 @@ function renderInspector() {
     +   _rGroupHtml('messages', 'Messages', rowsMessages)
     +   _rGroupHtml('cert', 'Certificate', rowsCert)
     + '</div>'
+    + ((_isBatchInsp || (typeof _activeBatchId !== 'undefined' && _activeBatchId && BATCH.some(b => b.id === _activeBatchId))) ? '<div class="r-push"><button type="button" class="r-push-btn" onclick="batchPushSettingsToAll()" title="Copy this quiz\'s settings to every other quiz in the batch"' + (BATCH.length < 2 ? ' disabled' : '') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>Apply settings to all quizzes</button></div>' : '')
     + '<div class="r-insp-ft"><div class="r-pv"><button class="r-lnk" onclick="testInBrowser(null)">' + R_ICO.eye + ' Start</button><button class="r-lnk" onclick="previewScreen(\'pass\')">Pass</button><button class="r-lnk" onclick="previewScreen(\'fail\')">Fail</button></div><button class="r-lnk r-adv" onclick="openAdvancedSettings()">Advanced…</button></div>';
 
   // Populate the cert URL/text inputs (their values can't be in the HTML string above)
@@ -14052,6 +14058,36 @@ function _mountInspectorToBatch(itemId) {
   if (typeof renderInspector === 'function') renderInspector();
 }
 
+// Copy the inspected quiz's settings onto every other batch item after an
+// in-app confirmation. Per-quiz identity (title, package id, sections and
+// their quotas) is left alone; everything else is deep-copied so items never
+// share references.
+const BATCH_PUSH_EXCLUDE = ['title', 'manifestIdentifier', 'preserveIdentifier', 'sections', 'sectionQuotas', 'sectionSplitMode'];
+async function batchPushSettingsToAll() {
+  // Source is the inspected item (Batch tab) or the batch quiz open in the
+  // Quiz Builder; in both cases APP.settings holds its live values.
+  const srcId = _inspectorOwner === 'batch' ? _inspectorBatchId : _activeBatchId;
+  const srcItem = BATCH.find(b => b.id === srcId);
+  if (!srcItem) return;
+  const src = { id: srcItem.id, filename: srcItem.filename, settings: APP.settings };
+  const targets = BATCH.filter(b => b.id !== src.id);
+  if (!targets.length) { toast('No other quizzes in the batch', 'err'); return; }
+  const ok = await cdlg({
+    title: 'Apply settings to all quizzes?',
+    msg: 'The settings from "' + (src.settings.title || src.filename) + '" will overwrite the settings of the other ' + targets.length + ' quiz' + (targets.length !== 1 ? 'zes' : '') + ' in this batch. Titles, package identifiers and sections are kept. This cannot be undone.',
+    confirmText: 'Apply to ' + targets.length,
+    cancelText: 'Cancel'
+  });
+  if (!ok) return;
+  const copy = {};
+  Object.keys(src.settings).forEach(k => { if (!BATCH_PUSH_EXCLUDE.includes(k)) copy[k] = JSON.parse(JSON.stringify(src.settings[k] === undefined ? null : src.settings[k])); });
+  targets.forEach(t => {
+    Object.assign(t.settings, JSON.parse(JSON.stringify(copy)));
+    _refreshBatchRowChips(t.id);
+  });
+  toast('Settings applied to ' + targets.length + ' quiz' + (targets.length !== 1 ? 'zes' : ''), 'ok');
+}
+
 // Manual collapse/expand of the batch inspector panel.
 function toggleBatchInspector() {
   const split = document.querySelector('#tab-batch .r-batch-split');
@@ -14430,7 +14466,7 @@ async function processBatchFiles(files) {
     const id = uuid();
     const name = file.name.toLowerCase();
     const baseTitle = file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
-    const defaultSettings = () => Object.assign({}, APP.settings, { title: baseTitle, passMessage:'', failMessage:'', completeMessage:'', passExitMessage:'', failExitMessage:'', startRecommendation:'', hideStartRecommendation:false, sectionPassingPercentage:0 });
+    const defaultSettings = () => Object.assign(JSON.parse(JSON.stringify(APP.settings)), { title: baseTitle, passMessage:'', failMessage:'', completeMessage:'', passExitMessage:'', failExitMessage:'', startRecommendation:'', hideStartRecommendation:false, sectionPassingPercentage:0 });
     try {
       let questions, settings;
       if (name.endsWith('.zip')) {
