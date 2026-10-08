@@ -998,6 +998,7 @@ body.bank-tab-active .r-topbar{display:none}
 .r-shell .minichip.tag-knowledge{background:#eef9e7;border-color:#cce5ba;color:#3f7d20}
 .r-shell .minichip.tag-final{background:#fdecec;border-color:#f5cccc;color:#b73838}
 .r-shell .minichip.tag-genius{background:linear-gradient(135deg,rgba(168,85,247,.10),rgba(118,185,0,.10));border-color:rgba(168,85,247,.30);color:#7c3aed}
+.r-shell .minichip.tag-batch,#tab-history .minichip.tag-batch{background:#f3f0ff;border-color:#ddd6fe;color:#6d28d9;margin-left:6px;vertical-align:1px}
 .r-shell .minichip.tag-custom{background:#f3f4f6;border-color:#e5e7eb;color:#4b5563}
 #tab-batch .berr{color:var(--danger);font-size:12px;margin:0 0 8px;padding:0 18px}
 #tab-batch .bsettings{background:#fbfbfc;border:1px solid var(--g100);border-radius:11px;padding:14px 16px;margin-top:-6px}
@@ -13688,7 +13689,7 @@ async function fetchHistory() {
   return APP.history;
 }
 
-async function saveToHistory(settings, questions, zipBytes) {
+async function saveToHistory(settings, questions, zipBytes, source) {
   let zipB64 = '';
   try {
     const u8 = zipBytes instanceof Uint8Array ? zipBytes : new Uint8Array(zipBytes);
@@ -13707,6 +13708,7 @@ async function saveToHistory(settings, questions, zipBytes) {
     questions: questions,
     zipB64: zipB64
   };
+  if (source) entry.source = source;
   await API.post('/api/history', entry);
   APP.history.unshift(entry);
 }
@@ -13805,7 +13807,7 @@ function renderHistory() {
     const fname = (h.title || 'quiz').replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '.zip';
     return '<div class="hrow' + (checked ? ' sel' : '') + '" id="hcard-' + h.id + '">'
       +   '<input type="checkbox" class="hck"' + (checked ? ' checked' : '') + ' onchange="toggleHistItem(\'' + h.id + '\',this.checked)" onclick="event.stopPropagation()" aria-label="Select package">'
-      +   '<div class="hname" title="' + escH(h.title) + '">' + escH(h.title) + ' <span style="color:#9aa0aa;font-weight:500">·</span> <span style="color:#9aa0aa;font-weight:500;font-size:12px">' + escH(fname) + '</span></div>'
+      +   '<div class="hname" title="' + escH(h.title) + '">' + escH(h.title) + ' <span style="color:#9aa0aa;font-weight:500">·</span> <span style="color:#9aa0aa;font-weight:500;font-size:12px">' + escH(fname) + '</span>' + (h.source === 'batch' ? ' <span class="minichip tag-batch" title="Downloaded from the Batch tab">Batch</span>' : '') + '</div>'
       +   '<div class="hcol c-type"><span class="minichip ' + tag[0] + '">' + escH(tag[1]) + '</span></div>'
       +   '<div class="hcol c-q">' + h.questionCount + ' Q' + (h.questionCount === 1 ? '' : 's') + '</div>'
       +   '<div class="hcol c-date">' + _histDateLabel(h.date) + '</div>'
@@ -14412,6 +14414,7 @@ async function batchDownloadOne(id) {
     a.download = settings.title.replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '_' + (function(){ var d=new Date(),mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return d.getFullYear()+'-'+mn[d.getMonth()]+'-'+String(d.getDate()).padStart(2,'0'); })() + (_useRemotePlayer() ? '_remote' : '') + '.zip';
     a.click();
     URL.revokeObjectURL(url);
+    saveToHistory(settings, item.questions, zipBytes, 'batch');
     toast(escH(settings.title) + ' downloaded', 'ok');
   } catch(e) { toast('Failed: ' + e.message, 'err'); }
 }
@@ -14429,6 +14432,7 @@ async function batchDownloadAll() {
   btn.disabled = true; btn.textContent = '⏳ Building…';
 
   const bundle = new JSZip();
+  const builtForHistory = [];
   let done = 0;
   for (const item of BATCH) {
     try {
@@ -14436,6 +14440,7 @@ async function batchDownloadAll() {
       const zipBytes = await buildScormZip(settings, item.questions);
       const entryName = settings.title.replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '_' + (function(){ var d=new Date(),mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return d.getFullYear()+'-'+mn[d.getMonth()]+'-'+String(d.getDate()).padStart(2,'0'); })() + (_useRemotePlayer() ? '_remote' : '') + '.zip';
       bundle.file(entryName, zipBytes);
+      builtForHistory.push({ settings, questions: item.questions, zipBytes });
       done++;
       btn.textContent = '⏳ ' + done + '/' + BATCH.length + '…';
     } catch(e) { toast('Failed for "' + escH(item.settings.title) + '": ' + e.message, 'err'); }
@@ -14455,6 +14460,8 @@ async function batchDownloadAll() {
         } catch(e) { if (e.name === 'AbortError') { btn.disabled = false; btn.textContent = '\u2193 Download All'; return; } }
       }
       if (!saved) { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url); }
+      // One history entry per package, stamped with the moment of this download.
+      for (const h of builtForHistory) await saveToHistory(h.settings, h.questions, h.zipBytes, 'batch');
       toast(done + ' package' + (done !== 1 ? 's' : '') + ' bundled into ' + filename, 'ok');
     } catch(e) { toast('Bundle failed: ' + e.message, 'err'); }
   }
