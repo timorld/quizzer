@@ -217,21 +217,7 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .m-close:hover{color:var(--text);background:#f3f4f6}
 .m-body{padding:22px 24px}
 .m-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
-/* Confirm-download modal — settings summary card */
-.cdl-body{padding:22px 24px 24px}
-.cdl-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-.cdl-quiz-title{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.3px;margin:0 0 18px;line-height:1.25}
-.cdl-summary{border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:16px}
-.cdl-row{display:grid;grid-template-columns:150px 1fr auto;gap:14px;align-items:center;padding:10px 4px;border-top:1px solid #eef0f3}
-.cdl-row:first-child{border-top:none}
-.cdl-row-label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.cdl-row-value{font-size:13.5px;font-weight:600;color:var(--text);word-break:break-word}
-.cdl-row-value.dim{color:var(--muted);font-weight:500}
-.cdl-row-value.warn{color:#b45309;font-weight:700}
-.cdl-row-ic{width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;flex:none;background:var(--green-lt);color:var(--green-600)}
-.cdl-row-ic svg{width:12px;height:12px}
-.cdl-row-ic.off{background:var(--g100);color:var(--muted)}
-.cdl-row-ic.warn{background:#fef3c7;color:#b45309}
+/* Confirm-download modal — SCORM 1.2 size warning */
 .cdl-warn{margin-top:4px;border:1px solid #fed7aa;background:#fff7ed;border-radius:9px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 .cdl-warn.hidden{display:none}
 .cdl-warn-hd{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;line-height:1.5;color:#1a1a1a}
@@ -242,6 +228,62 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .cdl-tip{display:flex;gap:11px;align-items:flex-start;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;line-height:1.5;color:#14532d}
 .cdl-tip svg{width:19px;height:19px;flex:none;stroke:#15803d;margin-top:1px}
 .cdl-tip strong{color:#14532d}
+/* Download confirm dialog (design handoff) */
+.cdl-modal{max-width:580px!important;border-radius:14px;box-shadow:0 12px 32px rgba(16,24,40,.16);overflow:hidden}
+.cdl-modal .m-hdr{padding:18px 22px}
+.cdl-modal .m-title{font-size:16px;font-weight:800;letter-spacing:-.2px}
+.cdl-modal .dl-x{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.cdl-modal .dl-x:hover{background:#f3f4f6;color:var(--text)}
+.cdl-modal .dl-x svg{width:16px;height:16px}
+.dl-bd{padding:20px 22px 22px}
+.dl-quiz{padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:#fbfcfd;margin-bottom:20px}
+.dl-qmeta{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.dl-tag{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:3px 9px;border-radius:20px}
+.dl-qn{font-size:12px;color:var(--muted)}
+.dl-qt{font-size:17px;font-weight:700;letter-spacing:-.2px;color:var(--text);text-wrap:pretty}
+.dl-sechd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.dl-elabel{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#9aa0aa}
+.dl-link{border:none;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:600;color:#0074df;cursor:pointer}
+.dl-link:hover{color:#0060c7;text-decoration:underline}
+.dl-hint{font-size:12px;color:var(--muted)}
+.dl-list{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.dl-row{display:grid;grid-template-columns:26px 130px minmax(0,1fr);align-items:center;gap:12px;padding:9px 14px;border-top:1px solid var(--border)}
+.dl-row:first-child{border-top:none}
+.dl-ic{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center}
+.dl-ic svg{width:14px;height:14px}
+.dl-l{font-size:13px;color:var(--muted)}
+.dl-v{font-size:13px;font-weight:600;color:var(--text)}
+.dl-row.off .dl-ic{color:#9aa0aa!important;background:#f3f4f6!important}
+.dl-row.off .dl-v{font-weight:400;color:#9aa0aa}
+.dl-bd .cdl-warn{margin-top:12px}
+.dl-prev{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:12px 0 22px}
+.dl-pl{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.dl-pl svg{width:15px;height:15px}
+.dl-pb{display:flex;gap:6px}
+.dl-pb .btn{box-shadow:none;padding:6px 11px;font-size:12px;font-weight:500;border:1px solid #ccc}
+.dl-fxs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.dl-fx{display:flex;align-items:flex-start;gap:11px;padding:12px;border:1px solid #ccc;border-radius:10px;cursor:pointer;transition:border-color .15s,background .15s}
+.dl-fx:hover{border-color:#c4c9d1}
+.dl-fx.on{border-color:var(--green);background:var(--green-lt);box-shadow:0 0 0 1px var(--green) inset}
+.dl-ft{flex:none;width:38px;height:44px;border-radius:5px;border:1.5px solid;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;font-size:9.5px;font-weight:800;letter-spacing:.04em;background:#fff}
+.dl-ft.w{color:#0060c7;border-color:#7fb4f0}
+.dl-ft.a{color:#4b5563;border-color:#c4c9d1}
+.dl-fm{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.dl-fn{font-size:13.5px;font-weight:700;color:var(--text)}
+.dl-fd{font-size:12px;line-height:1.45;color:var(--muted)}
+.dl-cb{flex:none;width:18px;height:18px;border-radius:4px;border:1.5px solid #c4c9d1;background:#fff;display:flex;align-items:center;justify-content:center;color:transparent}
+.dl-cb svg{width:11px;height:11px}
+.dl-fx.on .dl-cb{background:var(--green);border-color:var(--green);color:#fff}
+.dl-fa{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;align-self:stretch}
+.dl-solo{width:24px;height:24px;margin:-3px;border-radius:5px;border:none;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;order:2;padding:0}
+.dl-solo:hover{color:var(--text);background:rgba(0,0,0,.06)}
+.dl-solo svg{width:14px;height:14px}
+.cdl-modal .m-footer{padding:14px 22px;align-items:center;background:#fbfcfd;flex-wrap:wrap}
+.dl-sum{font-size:12.5px;color:var(--muted);margin-right:auto}
+.dl-actions{display:flex;gap:9px;align-items:center;flex-wrap:nowrap}
+.dl-actions .btn svg{width:15px;height:15px}
+.dl-actions .btn{padding:8px 14px;box-shadow:none}
+.dl-actions .btn-primary{box-shadow:0 1px 2px rgba(118,185,0,.3)}
 .type-row{display:flex;gap:10px;margin-bottom:8px}
 .type-opt{flex:1;padding:11px;border:2px solid var(--border);cursor:pointer;text-align:center;font-size:13px;font-weight:600;transition:border-color .15s,background .15s;border-radius:var(--radius-sm);user-select:none}
 .type-opt.sel{border-color:var(--green);background:var(--green-lt);color:var(--green-dk)}
@@ -2496,14 +2538,14 @@ body.bank-tab-active .r-topbar{display:none}
   </div>
 </div>
 
-<!-- CONFIRM DOWNLOAD MODAL — settings summary + optional SCORM 1.2 size warning -->
+<!-- CONFIRM DOWNLOAD MODAL — settings summary, learner previews, optional Word/AIKEN extras, SCORM 1.2 size warning -->
 <div class="m-overlay" id="modal-confirm-download">
-  <div class="modal cdl-modal" style="max-width:600px">
-    <div class="m-hdr"><span class="m-title">Confirm download</span><button class="m-close" onclick="closeModal('modal-confirm-download')">&#x2715;</button></div>
-    <div class="m-body cdl-body">
-      <div class="cdl-eyebrow">Quiz</div>
-      <div class="cdl-quiz-title" id="cdl-quiz-title">—</div>
-      <div class="cdl-summary" id="cdl-summary"></div>
+  <div class="modal cdl-modal">
+    <div class="m-hdr"><span class="m-title">Download SCORM package</span><button class="dl-x" onclick="closeModal('modal-confirm-download')" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="dl-bd">
+      <div class="dl-quiz"><div class="dl-qmeta"><span class="dl-tag" id="cdl-type-tag"></span><span class="dl-qn" id="cdl-qcount"></span></div><div class="dl-qt" id="cdl-quiz-title">—</div></div>
+      <div class="dl-sechd"><span class="dl-elabel">Settings in this package</span><button type="button" class="dl-link" onclick="_cdlEditSettings()">Edit settings</button></div>
+      <div class="dl-list" id="cdl-summary"></div>
       <!-- Optional amber suspend_data callout (SCORM 1.2 + payload > 4096) -->
       <div class="cdl-warn hidden" id="cdl-suspend-warn">
         <div class="cdl-warn-hd">
@@ -2518,15 +2560,17 @@ body.bank-tab-active .r-topbar{display:none}
           <div><strong>Easiest fix:</strong> switch to <strong>SCORM 2004</strong> (~64,000 char limit) — click the green button below.</div>
         </div>
       </div>
+      <div class="dl-prev"><span class="dl-pl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Preview as learner</span><div class="dl-pb">
+        <button type="button" class="btn" onclick="_previewReturnToConfirmDownload=true;closeModal('modal-confirm-download');testInBrowser(null)">Start screen</button>
+        <button type="button" class="btn" onclick="_previewReturnToConfirmDownload=true;closeModal('modal-confirm-download');previewScreen('pass')">Pass result</button>
+        <button type="button" class="btn" onclick="_previewReturnToConfirmDownload=true;closeModal('modal-confirm-download');previewScreen('fail')">Fail result</button>
+      </div></div>
+      <div class="dl-sechd"><span class="dl-elabel">Also download</span><span class="dl-hint">Optional · saved alongside the .zip</span></div>
+      <div class="dl-fxs" id="cdl-extras"></div>
     </div>
-    <div class="m-footer" style="flex-wrap:wrap;gap:8px">
-      <div class="cdl-previews" style="display:flex;gap:6px;margin-right:auto">
-        <span style="font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);align-self:center;margin-right:4px">Preview</span>
-        <button type="button" class="btn btn-outline btn-sm" onclick="_previewReturnToConfirmDownload=true;closeModal('modal-confirm-download');testInBrowser(null)" title="Preview the start screen"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Start</button>
-        <button type="button" class="btn btn-outline btn-sm" onclick="_previewReturnToConfirmDownload=true;closeModal('modal-confirm-download');previewScreen('pass')" title="Preview the pass result screen"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Pass</button>
-        <button type="button" class="btn btn-outline btn-sm" onclick="_previewReturnToConfirmDownload=true;closeModal('modal-confirm-download');previewScreen('fail')" title="Preview the fail result screen"><img class="btn-icon" src="assets/svg/eye 1.svg" alt=""> Fail</button>
-      </div>
-      <div class="cdl-actions" style="display:flex;gap:8px;align-items:center;flex-wrap:nowrap;margin-left:auto">
+    <div class="m-footer">
+      <span class="dl-sum" id="cdl-sum"></span>
+      <div class="dl-actions">
         <button class="btn btn-outline" onclick="closeModal('modal-confirm-download')">Cancel</button>
         <button class="btn" id="cdl-download-anyway" style="display:none">Download as SCORM 1.2 anyway</button>
         <button class="btn btn-primary" id="cdl-download">Download SCORM</button>
@@ -3512,12 +3556,13 @@ function showSection(sectionId) {
     // Update note text based on remaining attempts
     if (noteTextEl && CONFIG.maxAttempts && attemptCount > 0) {
       const remaining = CONFIG.maxAttempts - attemptCount;
-      const cooldownSuffix = CONFIG.cooldownDays > 0 ? ' If you do not pass, you will be able to retake the ' + _qn + ' after ' + CONFIG.cooldownDays + ' day' + (CONFIG.cooldownDays !== 1 ? 's' : '') + '.' : '';
+      const hl = t => '<span class="note-hl">' + t + '</span>';
+      const cooldownSuffix = CONFIG.cooldownDays > 0 ? ' If you do not pass, you will be able to retake the ' + _qn + ' after ' + hl(CONFIG.cooldownDays + ' day' + (CONFIG.cooldownDays !== 1 ? 's' : '')) + '.' : '';
       if (remaining === 1) {
-        noteTextEl.textContent = 'Note that you have 1 more attempt to pass the ' + _qn + '.' + cooldownSuffix;
+        noteTextEl.innerHTML = 'Note that you have ' + hl('1 more attempt') + ' to pass the ' + _qn + '.' + cooldownSuffix;
         noteTextEl.classList.remove('hidden');
       } else if (remaining > 1) {
-        noteTextEl.textContent = 'Note that you have ' + remaining + ' more attempts to pass the ' + _qn + '.' + cooldownSuffix;
+        noteTextEl.innerHTML = 'Note that you have ' + hl(remaining + ' more attempts') + ' to pass the ' + _qn + '.' + cooldownSuffix;
         noteTextEl.classList.remove('hidden');
       } else {
         noteTextEl.classList.add('hidden');
@@ -5310,6 +5355,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .detail-label { font-size: 12px; font-weight: 600; color: #666666; white-space: nowrap; }
 .detail-value { font-size: 15px; font-weight: 700; color: #76B900; }
 .note-text { font-size: 14px; font-weight: 400; color: #000000; line-height: 1.7; margin-bottom: 24px; padding: 12px 16px; background: #f7f8f8; border-left: 3px solid #890C58; }
+.note-hl { background: #ffe58f; font-weight: 700; padding: 1px 6px; border-radius: 4px; white-space: nowrap; }
 .start-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .start-btn { background-color: #76B900; color: #ffffff; border: 1px solid #76B900; padding: 10px 48px; font-family: inherit; font-size: 14px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; transition: background-color 0.2s ease; }
 .start-btn:hover { background-color: #5A8F00; border-color: #5A8F00; }
@@ -12702,11 +12748,14 @@ function saveSettings() {
 }
 
 // ── SCORM GENERATION ──────────────────────────────────────
+// Start-screen note as HTML: the attempt count and cooldown days are wrapped in
+// .note-hl so they stand out. Only numbers and fixed words go in, so no escaping.
 function getNoteText(s) {
   if (!s.maxAttempts) return '';
-  const attText = s.maxAttempts === 1 ? '1 attempt' : s.maxAttempts + ' attempts';
+  const hl = t => '<span class="note-hl">' + t + '</span>';
+  const attText = hl(s.maxAttempts === 1 ? '1 attempt' : s.maxAttempts + ' attempts');
   const n = (s.quizType === 'course_final_exam' || s.quizType === 'gpu_genius_fast_track' || (s.quizType === 'custom' && s.customQuizMode === 'exam')) ? 'exam' : 'quiz';
-  if (s.cooldownDays > 0) return 'Note that you will have ' + attText + ' to pass the ' + n + '. If you do not pass, you will be able to retake the ' + n + ' after ' + s.cooldownDays + ' day' + (s.cooldownDays !== 1 ? 's' : '') + '.';
+  if (s.cooldownDays > 0) return 'Note that you will have ' + attText + ' to pass the ' + n + '. If you do not pass, you will be able to retake the ' + n + ' after ' + hl(s.cooldownDays + ' day' + (s.cooldownDays !== 1 ? 's' : '')) + '.';
   return 'Note that you will have ' + attText + ' to pass the ' + n + '.';
 }
 
@@ -12864,7 +12913,7 @@ function buildQuizHTML(settings, questions, isTest, useRemote) {
     + '          <div class="detail-item"><span class="detail-label">' + (isExam ? 'Duration:' : 'Quiz duration:') + '</span><span class="detail-value" id="start-duration">' + escH(durDisp) + '</span></div>\n'
     + '          <div class="detail-item"><span class="detail-label">Number of questions:</span><span class="detail-value" id="start-question-count">\u2014</span></div>\n'
     + '        </div>\n'
-    + (noteText ? '        <p class="note-text" id="start-note-text">' + escH(noteText) + '</p>\n' : '')
+    + (noteText ? '        <p class="note-text" id="start-note-text">' + noteText + '</p>\n' : '')
     + '        <div class="start-wrapper" id="start-wrapper">\n'
     + '          <button class="start-btn" type="button" id="start-quiz-btn">Start ' + N + '</button>\n'
     + '          <p id="start-no-attempts-message" class="start-no-attempts-message hidden" aria-live="polite"></p>\n'
@@ -13120,63 +13169,141 @@ async function generateAndDownload() {
   _openConfirmDownloadModal();
 }
 
-// Builds a human-readable label for a setting value + returns whether the
-// setting is "on" (green icon) vs "off" (grey icon). Kept close to the
-// at-a-glance chip vocabulary so the summary reads consistently.
-function _cdlRow(label, value, on) {
-  const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-  const DASH  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-  const icCls = on === 'warn' ? 'warn' : (on ? '' : 'off');
-  const valCls = on === 'warn' ? 'warn' : (on ? '' : 'dim');
-  return '<div class="cdl-row">'
-    + '<span class="cdl-row-label">' + escH(label) + '</span>'
-    + '<span class="cdl-row-value ' + valCls + '">' + escH(value) + '</span>'
-    + '<span class="cdl-row-ic ' + icCls + '">' + (on ? CHECK : DASH) + '</span>'
+// ── Download confirm dialog ──
+const CDL_ICO = {
+  pkg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+  scoring:'<circle cx="12" cy="8" r="6"/><path d="M15.5 13l1.5 8-5-3-5 3 1.5-8"/>',
+  attempts:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+  practice:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  timing:'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>',
+  pool:'<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  sections:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  cert:'<circle cx="12" cy="8" r="5"/><path d="M8.5 12.5 7 21l5-2.6L17 21l-1.5-8.5"/>',
+  msg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>'
+};
+const _cdlSvg = (p, w) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (w || 1.8) + '" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+const CDL_TYPE_TAG = {
+  course_completion: { label: 'Completion', c: '#1d4ed8', bg: '#eaf3ff' },
+  topic_quiz: { label: 'Knowledge check', c: '#3f7d20', bg: '#eef9e7' },
+  course_final_exam: { label: 'Final exam', c: '#b73838', bg: '#fdecec' },
+  gpu_genius_fast_track: { label: 'GPU Genius', c: '#7c3aed', bg: '#f3edff' },
+  custom: { label: 'Custom', c: '#4b5563', bg: '#f3f4f6' }
+};
+// Optional extra downloads; the ticks persist across opens of the dialog.
+const CDL_EXTRAS = { word: false, aiken: false };
+
+// One settings row: tinted icon chip · muted label · value. `on` false greys it out.
+function _cdlRow(icon, acc, label, value, on) {
+  const a = R_ACC[acc] || R_ACC.scoring;
+  return '<div class="dl-row' + (on === false ? ' off' : '') + '">'
+    + '<span class="dl-ic" style="color:' + a.c + ';background:' + a.bg + '">' + _cdlSvg(CDL_ICO[icon]) + '</span>'
+    + '<span class="dl-l">' + escH(label) + '</span>'
+    + '<span class="dl-v">' + escH(value) + '</span>'
     + '</div>';
 }
 
-// Populate + open the "Confirm download" modal with a summary of the current
-// quiz settings and (if applicable) the SCORM 1.2 suspend_data warning + a
-// one-click SCORM 2004 upgrade.
+function _cdlRenderExtras() {
+  const fx = (id, tag, cls, name, desc) => '<div class="dl-fx' + (CDL_EXTRAS[id] ? ' on' : '') + '" data-dlx="' + id + '" role="checkbox" aria-checked="' + CDL_EXTRAS[id] + '" tabindex="0">'
+    + '<span class="dl-ft ' + cls + '">' + tag + '</span>'
+    + '<span class="dl-fm"><span class="dl-fn">' + name + '</span><span class="dl-fd">' + desc + '</span></span>'
+    + '<span class="dl-fa"><button type="button" class="dl-solo" data-solo="' + id + '" title="Download ' + name + ' only" aria-label="Download ' + name + ' only">' + _cdlSvg(CDL_ICO.download, 2) + '</button><span class="dl-cb">' + _cdlSvg(CDL_ICO.check, 3) + '</span></span>'
+    + '</div>';
+  const host = document.getElementById('cdl-extras');
+  host.innerHTML = fx('word', 'DOC', 'w', 'Word document', 'Printable copy for SME review or sign-off.')
+    + fx('aiken', 'TXT', 'a', 'AIKEN file', 'Plain-text questions and settings for re-import or another LMS.');
+  host.querySelectorAll('[data-solo]').forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    _cdlDownloadExtra(b.dataset.solo);
+  });
+  host.querySelectorAll('[data-dlx]').forEach(el => {
+    const flip = () => {
+      const id = el.dataset.dlx;
+      CDL_EXTRAS[id] = !CDL_EXTRAS[id];
+      el.classList.toggle('on', CDL_EXTRAS[id]);
+      el.setAttribute('aria-checked', CDL_EXTRAS[id]);
+      _cdlUpdateFooter();
+    };
+    el.onclick = flip;
+    el.onkeydown = e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } };
+  });
+}
+
+function _cdlDownloadExtra(id) {
+  if (id === 'word') downloadWordDoc();
+  else if (id === 'aiken') downloadQuestionBank();
+}
+
+// Footer summary + main button label ("Download SCORM" → "Download N files").
+function _cdlUpdateFooter() {
+  const k = (CDL_EXTRAS.word ? 1 : 0) + (CDL_EXTRAS.aiken ? 1 : 0);
+  document.getElementById('cdl-sum').textContent = ['SCORM .zip', CDL_EXTRAS.word && 'Word .doc', CDL_EXTRAS.aiken && 'AIKEN .txt'].filter(Boolean).join(' + ');
+  const dl = document.getElementById('cdl-download');
+  const base = _useRemotePlayer() ? 'Download Remote SCORM' : 'Download SCORM';
+  dl.innerHTML = _cdlSvg(CDL_ICO.download, 2) + ' ' + (k ? 'Download ' + (k + 1) + ' files' : base);
+}
+
+// SCORM package first, then any ticked extras.
+async function _cdlDownloadAll() {
+  closeModal('modal-confirm-download');
+  await _doDownload();
+  if (CDL_EXTRAS.word) _cdlDownloadExtra('word');
+  if (CDL_EXTRAS.aiken) _cdlDownloadExtra('aiken');
+}
+
+// "Edit settings" → back to the Quiz Builder with the settings inspector open.
+function _cdlEditSettings() {
+  closeModal('modal-confirm-download');
+  const tabBtn = document.querySelector('.tab-btn[data-tab="questions"]');
+  if (tabBtn && !tabBtn.classList.contains('active')) tabBtn.click();
+  const split = document.querySelector('#tab-questions .r-split');
+  if (split) split.classList.remove('inspector-collapsed');
+}
+
+// Populate + open the download confirm dialog: settings summary, learner
+// previews, optional extras and (if applicable) the SCORM 1.2 suspend_data
+// warning + a one-click SCORM 2004 upgrade.
 function _openConfirmDownloadModal() {
   const s = APP.settings || {};
   const n = APP.questions.length;
   document.getElementById('cdl-quiz-title').textContent = s.title || 'Untitled quiz';
-  // Human-readable quiz type
-  const qtLabel = ({
-    course_completion: 'Completion quiz',
-    course_final_exam: 'Final exam',
-    gpu_genius_fast_track: 'GPU Genius Fast Track',
-    knowledge_check: 'Knowledge check',
-    topic_quiz: 'Topic quiz',
-    custom: (s.customQuizTypeName || 'Custom') + (s.customQuizMode === 'exam' ? ' (exam)' : ' (quiz)')
-  })[s.quizType] || 'Completion quiz';
+  const tag = Object.assign({}, CDL_TYPE_TAG[s.quizType] || CDL_TYPE_TAG.course_completion);
+  if (s.quizType === 'custom') tag.label = (s.customQuizTypeName || 'Custom') + (s.customQuizMode === 'exam' ? ' · exam' : '');
+  const tagEl = document.getElementById('cdl-type-tag');
+  tagEl.textContent = tag.label;
+  tagEl.style.color = tag.c;
+  tagEl.style.background = tag.bg;
+  document.getElementById('cdl-qcount').textContent = n + ' question' + (n === 1 ? '' : 's');
+
   const is2004 = s.scormVersion === 'scorm2004';
   const rows = [];
-  rows.push(_cdlRow('Quiz type', qtLabel, true));
-  rows.push(_cdlRow('SCORM version', is2004 ? 'SCORM 2004 (4th Ed.)' : 'SCORM 1.2', true));
-  rows.push(_cdlRow('Passing score', s.passingPercentage ? s.passingPercentage + '% to pass' : 'No pass mark', !!s.passingPercentage));
-  rows.push(_cdlRow('Attempts', s.maxAttempts ? s.maxAttempts + ' tries' + (s.cooldownDays ? ' · ' + s.cooldownDays + 'd cooldown' : '') : 'Unlimited', true));
-  rows.push(_cdlRow('Practice mode', s.allowPractice !== false ? 'Available after pass · no LMS write' : 'Off', s.allowPractice !== false));
-  rows.push(_cdlRow('Time limit', s.timeLimitMinutes ? s.timeLimitMinutes + ' minutes per attempt' : 'No time limit', !!s.timeLimitMinutes));
+  rows.push(_cdlRow('pkg', 'attempts', 'Standard', is2004 ? 'SCORM 2004 · 4th Ed.' : 'SCORM 1.2'));
+  rows.push(_cdlRow('scoring', 'scoring', 'Passing score', s.passingPercentage ? s.passingPercentage + '% to pass' : 'No pass mark', !!s.passingPercentage));
+  rows.push(_cdlRow('attempts', 'attempts', 'Attempts', s.maxAttempts ? s.maxAttempts + (s.maxAttempts === 1 ? ' attempt' : ' attempts') + (s.cooldownDays ? ' · ' + s.cooldownDays + '-day cooldown' : '') : 'Unlimited'));
+  rows.push(_cdlRow('practice', 'during', 'Practice mode', s.allowPractice !== false ? 'Available after pass · no LMS write' : 'Off', s.allowPractice !== false));
+  rows.push(_cdlRow('timing', 'timing', 'Time limit', s.timeLimitMinutes ? s.timeLimitMinutes + ' min per attempt' : 'No time limit', !!s.timeLimitMinutes));
   const poolLabel = (s.questionsPerAttempt && s.questionsPerAttempt < n)
-    ? s.questionsPerAttempt + ' of ' + n + ' questions'
+    ? s.questionsPerAttempt + ' of ' + n + ' per attempt'
     : 'All ' + n + ' question' + (n === 1 ? '' : 's');
-  rows.push(_cdlRow('Question pool', poolLabel + (s.randomizeQuestions !== false ? ' · shuffled' : ' · in order'), true));
+  rows.push(_cdlRow('pool', 'pool', 'Question pool', poolLabel + (s.randomizeQuestions !== false ? ' · shuffled' : ' · in order')));
   const secCount = (s.sections || []).length;
   if (secCount) {
-    rows.push(_cdlRow('Sections', secCount + (secCount === 1 ? ' section' : ' sections') + (s.sectionBreakdownOnResult ? ' · breakdown on results' : ''), true));
+    rows.push(_cdlRow('sections', 'breakdown', 'Sections', secCount + (secCount === 1 ? ' section' : ' sections') + (s.sectionBreakdownOnResult ? ' · breakdown on results' : '')));
   }
   // Answer review — reviews are ALWAYS available after a pass (with correct
   // answers revealed by default). The "Show answer review" toggle only
   // controls whether learners can review after a fail.
-  const _reviewValue = 'Available on pass · ' + (s.showAnswerReview ? 'shown on fail' : 'hidden on fail');
-  rows.push(_cdlRow('Answer review', _reviewValue, true));
-  if (s.showCertificateLink) rows.push(_cdlRow('Certificate link', 'Shown on pass', true));
+  rows.push(_cdlRow('eye', 'after', 'Answer review', 'Available on pass · ' + (s.showAnswerReview ? 'shown on fail' : 'hidden on fail')));
+  rows.push(_cdlRow('cert', 'cert', 'Certificate', s.showCertificateLink ? 'Link shown on pass' : 'Off', !!s.showCertificateLink));
   const _cdlHasCustomMsg = [s.passMessage, s.failMessage, s.completeMessage, s.passExitMessage, s.failExitMessage]
     .some(m => m && m.trim());
-  if (_cdlHasCustomMsg) rows.push(_cdlRow('Messages', 'Custom messages', true));
+  if (_cdlHasCustomMsg) rows.push(_cdlRow('msg', 'messages', 'Messages', 'Custom messages'));
   document.getElementById('cdl-summary').innerHTML = rows.join('');
+
+  _cdlRenderExtras();
+  _cdlUpdateFooter();
 
   // Suspend-data ceiling check (SCORM 1.2 only). If the payload would exceed
   // 4096 chars, surface the warning + swap in the "Use SCORM 2004" upgrade
@@ -13198,19 +13325,18 @@ function _openConfirmDownloadModal() {
     dlBtn.style.display = 'none';
     dlAnywayBtn.style.display = '';
     upgradeBtn.style.display = '';
-    dlAnywayBtn.onclick = () => { closeModal('modal-confirm-download'); _doDownload(); };
+    dlAnywayBtn.onclick = () => _cdlDownloadAll();
     upgradeBtn.onclick = () => {
       APP.settings.scormVersion = 'scorm2004';
       const sel = document.getElementById('adv-scorm-version');
       if (sel) sel.value = 'scorm2004';
-      closeModal('modal-confirm-download');
-      _doDownload();
+      _cdlDownloadAll();
     };
   } else {
     dlBtn.style.display = '';
     dlAnywayBtn.style.display = 'none';
     upgradeBtn.style.display = 'none';
-    dlBtn.onclick = () => { closeModal('modal-confirm-download'); _doDownload(); };
+    dlBtn.onclick = () => _cdlDownloadAll();
   }
   showModal('modal-confirm-download');
 }
