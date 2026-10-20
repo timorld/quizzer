@@ -280,6 +280,10 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .dl-solo svg{width:14px;height:14px}
 .cdl-modal .m-footer{padding:14px 22px;align-items:center;background:#fbfcfd;flex-wrap:wrap}
 .dl-sum{font-size:12.5px;color:var(--muted);margin-right:auto}
+.dl-note{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:11px 14px;border-radius:10px;background:#eaf3ff;color:#1e3a5f;font-size:12.5px;line-height:1.5}
+.dl-note[hidden]{display:none}
+.dl-note svg{flex:none;width:16px;height:16px;margin-top:1px;color:#0074df}
+.dl-note strong{color:#0b2a4a}
 .dl-actions{display:flex;gap:9px;align-items:center;flex-wrap:nowrap}
 .dl-actions .btn svg{width:15px;height:15px}
 .dl-actions .btn{padding:8px 14px;box-shadow:none}
@@ -2567,6 +2571,7 @@ body.bank-tab-active .r-topbar{display:none}
       </div></div>
       <div class="dl-sechd"><span class="dl-elabel">Also download</span><span class="dl-hint">Optional · saved alongside the .zip</span></div>
       <div class="dl-fxs" id="cdl-extras"></div>
+      <div class="dl-note" id="cdl-multi-note" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>Your browser may ask for permission to download multiple files. Choose <strong>Allow</strong> so every file is saved.</span></div>
     </div>
     <div class="m-footer">
       <span class="dl-sum" id="cdl-sum"></span>
@@ -13243,6 +13248,8 @@ function _cdlUpdateFooter() {
   const dl = document.getElementById('cdl-download');
   const base = _useRemotePlayer() ? 'Download Remote SCORM' : 'Download SCORM';
   dl.innerHTML = _cdlSvg(CDL_ICO.download, 2) + ' ' + (k ? 'Download ' + (k + 1) + ' files' : base);
+  // More than one file at once can trigger the browser's multiple-downloads prompt.
+  document.getElementById('cdl-multi-note').hidden = !k;
 }
 
 // SCORM package first, then any ticked extras.
