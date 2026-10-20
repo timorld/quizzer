@@ -87,8 +87,25 @@ app.use(express.json({ limit: '100mb' }));
 app.use(express.static(path.join(__dirname, '..'))); // serve scorm-builder.html + ASSETS/ locally
 
 // ── HISTORY ENDPOINTS ─────────────────────────────────────
+// The list only carries what the History table shows; the package (zipB64),
+// questions and full settings are fetched per entry via /api/history/:id.
 app.get('/api/history', (req, res) => {
-  res.json(readHistory());
+  res.json(readHistory().map(h => ({
+    id: h.id,
+    date: h.date,
+    title: h.title,
+    questionCount: h.questionCount,
+    passingPct: h.passingPct,
+    source: h.source,
+    hasZip: !!h.zipB64,
+    settings: { quizType: h.settings && h.settings.quizType, customQuizMode: h.settings && h.settings.customQuizMode }
+  })));
+});
+
+app.get('/api/history/:id', (req, res) => {
+  const entry = readHistory().find(h => h.id === req.params.id);
+  if (!entry) return res.status(404).json({ error: 'Not found' });
+  res.json(entry);
 });
 
 app.post('/api/history', (req, res) => {

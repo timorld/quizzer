@@ -13902,7 +13902,7 @@ function renderHistory() {
     + '</div>';
 
   const dataRows = filtered.map(h => {
-    const canDl = !!h.zipB64;
+    const canDl = !!(h.zipB64 || h.hasZip);
     const checked = histSelected.has(h.id);
     const tag = _histTypeChip(h.settings && h.settings.quizType, h.settings && h.settings.customQuizMode);
     const fname = (h.title || 'quiz').replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '.zip';
@@ -13953,7 +13953,7 @@ async function deleteSelected() {
 async function downloadSelected() {
   const ids = [...histSelected];
   if (!ids.length) return;
-  const entries = ids.map(id => APP.history.find(h => h.id === id)).filter(h => h && h.zipB64);
+  const entries = (await Promise.all(ids.map(fetchHistEntryFull))).filter(h => h && h.zipB64);
   if (!entries.length) { toast('No downloadable zip data in selection', 'err'); return; }
 
   // Single selection: download as a regular zip without bundling
@@ -14019,6 +14019,17 @@ async function downloadSelected() {
 
 function loadHistEntry(id) { return APP.history.find(h => h.id === id) || null; }
 
+// The History list holds summaries only. Fetch the full entry (package, questions,
+// settings) the first time it's needed and keep it on the cached row.
+async function fetchHistEntryFull(id) {
+  const h = loadHistEntry(id);
+  if (!h) return null;
+  if (h.zipB64 !== undefined && h.questions) return h;
+  const full = await API.get('/api/history/' + encodeURIComponent(id));
+  if (!full) return null;
+  return Object.assign(h, full);
+}
+
 async function deleteHistEntry(id) {
   const h = loadHistEntry(id);
   if (!h) return;
@@ -14032,8 +14043,8 @@ async function deleteHistEntry(id) {
   toast('Entry deleted');
 }
 
-function dlHistEntry(id) {
-  const h = loadHistEntry(id);
+async function dlHistEntry(id) {
+  const h = await fetchHistEntryFull(id);
   if (!h || !h.zipB64) { toast('Zip data not available','err'); return; }
   try {
     const bin = atob(h.zipB64);
@@ -14055,8 +14066,10 @@ async function loadHistEntryToEditor(id) {
   if (!h) { toast('Entry not found','err'); return; }
   const ok = await cdlg({ title: 'Load to Editor', msg: 'Load "' + h.title + '" into the editor? This replaces your current questions and settings.', confirmText: 'Load', cancelText: 'Cancel' });
   if (!ok) return;
-  APP.questions = h.questions;
-  Object.assign(APP.settings, h.settings);
+  const full = await fetchHistEntryFull(id);
+  if (!full || !full.questions) { toast('Could not load this entry', 'err'); return; }
+  APP.questions = full.questions;
+  Object.assign(APP.settings, full.settings);
   readSettingsToForm();
   updateBadges();
   toast('Loaded into editor', 'ok');
