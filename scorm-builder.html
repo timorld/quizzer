@@ -2837,6 +2837,8 @@ body.bank-tab-active .r-topbar{display:none}
       <pre id="aiken-example-pre" style="background:#f7f8f8;padding:16px;font-size:13px;border:1px solid #ddd;white-space:pre-wrap;line-height:1.7;border-radius:3px;max-height:340px;overflow-y:auto"></pre>
       <p style="font-size:13px;color:var(--muted);margin-top:12px">
         <strong>Title:</strong> <code>TITLE: Your Quiz Name</code> - as the very first line<br>
+        <strong>Comments:</strong> a line starting with <code>#</code> is ignored (except inside code blocks).<br>
+        <strong>Settings:</strong> put them at the top as comments, e.g. <code># @passing_percentage: 80</code>, <code># @max_attempts: 2</code>, <code># @quiz_type: knowledge</code>. The app applies them on import; other tools just see comments.<br>
         <strong>Numbered questions:</strong> e.g. <code>1.</code> or <code>1)</code><br>
         <strong>Images:</strong> <code>IMAGE: filename.png</code> on its own line. Place it <em>before</em> the options to render above the question, or <em>after</em> the options to render below. (To import with images, bundle the .txt and image files in a .zip.)<br>
         <strong>Code blocks:</strong> wrap with <code>##CODE##</code> and <code>##/CODE##</code>.
@@ -5709,6 +5711,15 @@ document.querySelectorAll('.r-nav[data-tab]').forEach(btn => btn.addEventListene
 
 // ── AIKEN EXAMPLE ─────────────────────────────────────────
 const AIKEN_EXAMPLE = `TITLE: General Knowledge Trivia
+# Lines starting with # are comments. The "# @key: value" lines below are quiz
+# settings that SCORM Quizzer reads on import; other tools ignore them.
+# @quiz_type: knowledge
+# @passing_percentage: 70
+# @max_attempts: 0
+# @time_limit_minutes: 0
+# @randomize_questions: yes
+# @show_answer_review: yes
+# @show_certificate_link: no
 
 1. Which planet is known as the Red Planet?
 A. Venus
@@ -5762,12 +5773,95 @@ function downloadAikenExample() {
 document.getElementById('aiken-example-pre').textContent = AIKEN_EXAMPLE;
 
 // ── AIKEN HELPERS ─────────────────────────────────────────
+// Settings that can be stored in an AIKEN header as "# @snake_case_key: value" comment lines
+// (keys are the camelCase names below; either spelling is read).
+// Keys match the app's settings names (case-insensitive). Numbers of 0 switch
+// the matching option off (e.g. @maxAttempts: 0 = unlimited).
+const AIKEN_SETTING_TYPES = {
+  quizType: 'quizType',
+  passingPercentage: 'num', maxAttempts: 'num', cooldownDays: 'num', timeLimitMinutes: 'num',
+  questionsPerAttempt: 'num', sectionPassingPercentage: 'num', minAttemptsBeforeReview: 'num',
+  randomizeQuestions: 'bool', randomizeOptions: 'bool', allowBlankAnswers: 'bool', warnOnBlankAnswers: 'bool',
+  confirmBeforeSubmit: 'bool', showAnswerReview: 'bool', showCorrectAnswers: 'bool', showCertificateLink: 'bool',
+  partialCreditMultiSelect: 'bool', allowPractice: 'bool', hideStartRecommendation: 'bool',
+  sectionBreakdownOnResult: 'bool', sectionReviewGrouping: 'bool', scormVersion: 'scormVersion',
+  certificateUrl: 'str', certificateLinkText: 'str', passMessage: 'str', failMessage: 'str', completeMessage: 'str',
+  passExitMessage: 'str', failExitMessage: 'str', startRecommendation: 'str', customQuizTypeName: 'str',
+  customQuizMode: 'quizMode'
+};
+const AIKEN_QUIZ_TYPE_ALIASES = {
+  course_completion: 'course_completion', completion: 'course_completion',
+  topic_quiz: 'topic_quiz', knowledge: 'topic_quiz', 'knowledge check': 'topic_quiz', knowledge_check: 'topic_quiz',
+  course_final_exam: 'course_final_exam', final: 'course_final_exam', exam: 'course_final_exam', 'final exam': 'course_final_exam',
+  gpu_genius_fast_track: 'gpu_genius_fast_track', genius: 'gpu_genius_fast_track',
+  custom: 'custom'
+};
+
+// camelCase app key -> snake_case name used in AIKEN files (camelCase is still accepted on import).
+const _aikenKeyName = k => k.replace(/[A-Z]/g, c => '_' + c.toLowerCase());
+
+function _parseAikenSettingLine(line, out) {
+  const m = line.match(/^@\s*([A-Za-z_]+)\s*[:=]\s*(.*)$/);
+  if (!m) return;
+  const norm = x => x.toLowerCase().replace(/_/g, '');
+  const key = Object.keys(AIKEN_SETTING_TYPES).find(k => norm(k) === norm(m[1]));
+  if (!key) return;
+  const raw = m[2].trim();
+  const kind = AIKEN_SETTING_TYPES[key];
+  if (kind === 'num') {
+    const n = parseInt(raw, 10);
+    if (isFinite(n) && n >= 0) out[key] = n;
+  } else if (kind === 'bool') {
+    if (/^(true|yes|on|1)$/i.test(raw)) out[key] = true;
+    else if (/^(false|no|off|0)$/i.test(raw)) out[key] = false;
+  } else if (kind === 'quizType') {
+    const t = AIKEN_QUIZ_TYPE_ALIASES[raw.toLowerCase()];
+    if (t) out[key] = t;
+  } else if (kind === 'scormVersion') {
+    if (/^(scorm12|1\.2|scorm 1\.2)$/i.test(raw)) out[key] = 'scorm12';
+    else if (/^(scorm2004|2004|scorm 2004)$/i.test(raw)) out[key] = 'scorm2004';
+  } else if (kind === 'quizMode') {
+    if (/^(quiz|exam)$/i.test(raw)) out[key] = raw.toLowerCase();
+  } else {
+    out[key] = raw;
+  }
+}
+
+// Strips comments and reads the optional header. Returns { title, settings, text }.
+// Comments: a line starting with "#" (but not "##CODE##") is ignored, except
+// inside ##CODE## blocks. Settings live in the header as comment lines of the
+// form "# @key: value", so other AIKEN readers treat them as plain comments.
 function extractAikenTitle(text) {
-  const lines = text.replace(/\r\n/g,'\n').split('\n');
-  const firstNonEmpty = lines.findIndex(l => l.trim());
-  if (firstNonEmpty < 0 || !/^TITLE:\s*/i.test(lines[firstNonEmpty])) return { title: '', text };
-  const title = lines[firstNonEmpty].replace(/^TITLE:\s*/i, '').trim();
-  return { title, text: lines.filter((_, i) => i !== firstNonEmpty).join('\n') };
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const isComment = t => /^#(?!#)/.test(t);
+  let title = '';
+  const settings = {};
+  let consumed = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (!t) continue;
+    if (/^#\s*@/.test(t)) { _parseAikenSettingLine(t.replace(/^#\s*/, ''), settings); consumed = i + 1; continue; }
+    if (isComment(t)) { consumed = i + 1; continue; }
+    if (/^TITLE:\s*/i.test(t) && !title) { title = t.replace(/^TITLE:\s*/i, '').trim(); consumed = i + 1; continue; }
+    break;
+  }
+  let inCode = false;
+  const body = lines.slice(consumed).filter(l => {
+    const t = l.trim();
+    if (t === '##CODE##') inCode = true;
+    else if (t === '##/CODE##') inCode = false;
+    return inCode || !isComment(t);
+  });
+  return { title, settings, text: body.join('\n') };
+}
+
+// Applies settings read from an AIKEN header to the quiz being edited.
+function _applyAikenSettings(settings) {
+  if (!settings || !Object.keys(settings).length) return false;
+  Object.assign(APP.settings, settings);
+  readSettingsToForm();
+  saveSettings();
+  return true;
 }
 
 // ── AIKEN PARSER ──────────────────────────────────────────
@@ -6018,7 +6112,7 @@ function showImportResult(msg, isError) {
 async function handleAikenFile(file) {
   try {
     const raw = await file.text();
-    const { title: aikenTitle, text } = extractAikenTitle(raw);
+    const { title: aikenTitle, settings: aikenSettings, text } = extractAikenTitle(raw);
     const imported = parseAiken(text);
     if (!imported.length) {
       if (await _offerAIConversion(raw, file.name)) return;
@@ -6030,10 +6124,12 @@ async function handleAikenFile(file) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
     }
     pushQHistory();
+    const _hadQs = APP.questions.length > 0;
     APP.questions = replace ? imported : [...APP.questions, ...imported];
     if (aikenTitle && (replace || !APP.settings.title) && !IMPORT_FORCE_APPEND) { _setQuizTitle(aikenTitle); }
+    const _appliedSet = (replace || !_hadQs) && !IMPORT_FORCE_APPEND && _applyAikenSettings(aikenSettings);
     updateBadges();
-    showImportResult('&#10003; Imported <strong>' + imported.length + ' questions</strong> from &ldquo;' + escH(file.name) + '&rdquo;. ' + (replace ? 'Replaced existing questions.' : 'Appended to existing questions.'));
+    showImportResult('&#10003; Imported <strong>' + imported.length + ' questions</strong> from &ldquo;' + escH(file.name) + '&rdquo;. ' + (_appliedSet ? 'Applied quiz settings from the file. ' : '') + (replace ? 'Replaced existing questions.' : 'Appended to existing questions.'));
     toast(imported.length + ' questions imported', 'ok');
     document.querySelector('.tab-btn[data-tab="questions"]').click();
   } catch(e) { showImportResult('&#10007; Error: ' + escH(e.message), true); toast('Import failed','err'); }
@@ -6094,7 +6190,7 @@ async function handleAikenWithImages(txtFile, imgFiles) {
       reader.readAsDataURL(f);
     })));
     const rawTxt = await txtFile.text();
-    const { title: aikenTitle, text } = extractAikenTitle(rawTxt);
+    const { title: aikenTitle, settings: aikenSettings, text } = extractAikenTitle(rawTxt);
     const imported = parseAiken(text, imageMap);
     if (!imported.length) { showImportResult('&#9888; No valid questions found. Check the AIKEN format — see the example.', true); return; }
     if (await _bankImportQuestions(imported, txtFile.name)) return;
@@ -6103,10 +6199,12 @@ async function handleAikenWithImages(txtFile, imgFiles) {
       replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' imported questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
     }
     pushQHistory();
+    const _hadQs = APP.questions.length > 0;
     APP.questions = replace ? imported : [...APP.questions, ...imported];
     if (aikenTitle && (replace || !APP.settings.title) && !IMPORT_FORCE_APPEND) { _setQuizTitle(aikenTitle); }
+    const _appliedSet = (replace || !_hadQs) && !IMPORT_FORCE_APPEND && _applyAikenSettings(aikenSettings);
     updateBadges();
-    showImportResult('&#10003; Imported <strong>' + imported.length + ' questions</strong> with ' + imgFiles.length + ' image file' + (imgFiles.length !== 1 ? 's' : '') + '.');
+    showImportResult('&#10003; Imported <strong>' + imported.length + ' questions</strong> with ' + imgFiles.length + ' image file' + (imgFiles.length !== 1 ? 's' : '') + '.' + (_appliedSet ? ' Applied quiz settings from the file.' : ''));
     toast(imported.length + ' questions imported', 'ok');
     document.querySelector('.tab-btn[data-tab="questions"]').click();
   } catch(e) { showImportResult('&#10007; Error: ' + escH(e.message), true); toast('Import failed','err'); }
@@ -6118,7 +6216,7 @@ async function handleQBankZipFile(file) {
     const txtPath = Object.keys(zip.files).find(n => n.endsWith('.txt') && !zip.files[n].dir);
     if (!txtPath) throw new Error('No .txt file found in ZIP');
     const rawTxt = await zip.files[txtPath].async('string');
-    const { title: aikenTitle, text } = extractAikenTitle(rawTxt);
+    const { title: aikenTitle, settings: aikenSettings, text } = extractAikenTitle(rawTxt);
     const imageMap = {};
     const mimeMap = { png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', gif:'image/gif', webp:'image/webp', svg:'image/svg+xml' };
     for (const path of Object.keys(zip.files).filter(n => /\.(png|jpe?g|gif|webp|svg)$/i.test(n) && !zip.files[n].dir)) {
@@ -6138,6 +6236,7 @@ async function handleQBankZipFile(file) {
     }
     APP.questions = IMPORT_FORCE_APPEND ? [...APP.questions, ...imported] : imported;
     if (aikenTitle && !IMPORT_FORCE_APPEND) { _setQuizTitle(aikenTitle); }
+    if (!IMPORT_FORCE_APPEND) _applyAikenSettings(aikenSettings);
     renderQuestions();
     updateBadges();
     showImportResult('&#10003; Imported <strong>' + imported.length + ' questions</strong> from &ldquo;' + escH(file.name) + '&rdquo;.');
@@ -6736,7 +6835,7 @@ async function importAIConverted() {
   const outputEl = document.getElementById('ai-output-text');
   const text = (outputEl.value || '').trim();
   if (!text) { toast('Nothing to import', 'err'); return; }
-  const { title: aikenTitle, text: cleanText } = extractAikenTitle(text);
+  const { title: aikenTitle, settings: aikenSettings, text: cleanText } = extractAikenTitle(text);
   // Pass the extracted image map so questions with IMAGE: lines get their image data attached
   const imageMap = _aiImageMap && Object.keys(_aiImageMap).length ? _aiImageMap : undefined;
   const imported = parseAiken(cleanText, imageMap);
@@ -6747,10 +6846,12 @@ async function importAIConverted() {
     replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' converted questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
   }
   pushQHistory();
+  const _hadQs = APP.questions.length > 0;
   APP.questions = replace ? imported : [...APP.questions, ...imported];
   if (aikenTitle && (replace || !APP.settings.title)) {
     _setQuizTitle(aikenTitle);
   }
+  if (replace || !_hadQs) _applyAikenSettings(aikenSettings);
   updateBadges();
   toast(imported.length + ' question' + (imported.length !== 1 ? 's' : '') + ' imported', 'ok');
   closeModal('modal-ai-convert');
@@ -14488,10 +14589,11 @@ async function processBatchFiles(files) {
         if (!questions.length) throw new Error('No multichoice questions found in XML');
         settings = defaultSettings();
       } else if (name.endsWith('.txt')) {
-        const text = await file.text();
-        questions = parseAiken(text);
+        const hdr = extractAikenTitle(await file.text());
+        questions = parseAiken(hdr.text);
         if (!questions.length) throw new Error('No valid questions found in AIKEN file');
-        settings = defaultSettings();
+        settings = Object.assign(defaultSettings(), hdr.settings);
+        if (hdr.title) settings.title = hdr.title;
       } else {
         throw new Error('Unsupported file type');
       }
@@ -14673,6 +14775,26 @@ function _stripHtml(html) {
   const d = document.createElement('div'); d.innerHTML = html; return (d.textContent || d.innerText || '').trim();
 }
 
+// Header block for AIKEN downloads: the title plus every quiz setting as
+// "# @key: value" comment lines, so the app restores them on import while other
+// AIKEN readers just see comments.
+function _aikenHeaderText() {
+  const st = APP.settings || {};
+  const lines = [];
+  if (st.title) lines.push('TITLE: ' + st.title);
+  lines.push('# SCORM Quizzer quiz settings (comment lines are ignored by other AIKEN readers).');
+  Object.keys(AIKEN_SETTING_TYPES).forEach(k => {
+    const kind = AIKEN_SETTING_TYPES[k];
+    let v = st[k];
+    if (kind === 'str') { v = (v || '').toString().replace(/\s*\n\s*/g, ' ').trim(); if (!v) return; }
+    else if (kind === 'num') v = parseInt(v, 10) || 0;
+    else if (kind === 'bool') v = ['randomizeQuestions', 'allowBlankAnswers', 'warnOnBlankAnswers', 'confirmBeforeSubmit', 'allowPractice'].includes(k) ? v !== false : !!v;
+    else if (v === undefined || v === null || v === '') return;
+    lines.push('# @' + _aikenKeyName(k) + ': ' + v);
+  });
+  return lines.join('\n') + '\n\n';
+}
+
 function _quizFileBase() {
   const title = (APP.settings.title || 'question-bank').replace(/[^a-z0-9]+/gi, '-').toLowerCase().replace(/^-+|-+$/g, '');
   const type  = APP.settings.quizType === 'course_completion' ? 'completion-quiz'
@@ -14790,8 +14912,7 @@ async function doDownloadZipBundle() {
     parts = APP.questions.map((q, qi) => _zipBlock(q, qi));
   }
   const base      = _quizFileBase();
-  const titleLine = APP.settings.title ? 'TITLE: ' + APP.settings.title + '\n\n' : '';
-  zip.file(base + '.txt', titleLine + parts.join('\n\n'));
+  zip.file(base + '.txt', _aikenHeaderText() + parts.join('\n\n'));
   const blob = await zip.generateAsync({ type: 'blob' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -14800,7 +14921,6 @@ async function doDownloadZipBundle() {
 }
 
 function doDownloadAikenBank() {
-  const titleLine = APP.settings.title ? 'TITLE: ' + APP.settings.title + '\n\n' : '';
   const sections  = (APP.settings.sections || []).slice();
   const hasSections = sections.length > 0 || APP.questions.some(q => q.section);
   let parts;
@@ -14818,7 +14938,7 @@ function doDownloadAikenBank() {
   }
   const base = _quizFileBase();
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([titleLine + parts.join('\n\n')], { type: 'text/plain' }));
+  a.href = URL.createObjectURL(new Blob([_aikenHeaderText() + parts.join('\n\n')], { type: 'text/plain' }));
   a.download = base + '.txt';
   a.click();
 }
@@ -14858,6 +14978,32 @@ function downloadWordDoc() {
                  : 'Knowledge Check';
   const timeStr  = s.timeLimitMinutes ? s.timeLimitMinutes + ' minutes' : 'No limit';
   const attStr   = s.maxAttempts ? s.maxAttempts + (s.cooldownDays ? ' (cooldown: ' + s.cooldownDays + ' day' + (s.cooldownDays !== 1 ? 's' : '') + ')' : '') : 'Unlimited';
+
+  const yn = v => v ? 'Yes' : 'No';
+  const settingsRows = [
+    ['Quiz type', typeName],
+    ['Passing score', s.passingPercentage ? s.passingPercentage + '%' : 'No pass mark'],
+    ['Time limit', timeStr],
+    ['Max attempts', attStr],
+    ['Questions per attempt', s.questionsPerAttempt ? String(s.questionsPerAttempt) : 'All'],
+    ['Randomize questions', yn(s.randomizeQuestions !== false)],
+    ['Randomize answer options', yn(s.randomizeOptions)],
+    ['Allow blank answers', yn(s.allowBlankAnswers !== false)],
+    ['Warn on blank answers', yn(s.warnOnBlankAnswers !== false)],
+    ['Confirm before submit', yn(s.confirmBeforeSubmit !== false)],
+    ['Answer review', s.showAnswerReview ? 'On' + (s.showCorrectAnswers ? ' (shows correct answers)' : '') + (s.minAttemptsBeforeReview ? ', after ' + s.minAttemptsBeforeReview + ' attempts' : '') : 'Off'],
+    ['Certificate link', s.showCertificateLink ? 'On' + (s.certificateUrl ? ' (' + s.certificateUrl + ')' : '') : 'Off'],
+    ['Partial credit (multi-select)', yn(s.partialCreditMultiSelect)],
+    ['Practice mode', yn(s.allowPractice !== false)]
+  ];
+  settingsRows.push(['Section pass mark', s.sectionPassingPercentage ? s.sectionPassingPercentage + '%' : 'Off']);
+  settingsRows.push(['Section breakdown on result', yn(s.sectionBreakdownOnResult)]);
+  settingsRows.push(['Group review by section', yn(s.sectionReviewGrouping)]);
+  settingsRows.push(['SCORM version', s.scormVersion === 'scorm2004' ? 'SCORM 2004' : 'SCORM 1.2']);
+  const messageRows = [
+    ['Pass message', s.passMessage], ['Fail message', s.failMessage], ['Completion message', s.completeMessage],
+    ['Pass exit message', s.passExitMessage], ['Fail exit message', s.failExitMessage], ['Start page text', s.hideStartRecommendation ? '(hidden)' : s.startRecommendation]
+  ].filter(r => r[1]);
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -14935,12 +15081,9 @@ function downloadWordDoc() {
     + '<h1>' + escH(s.title) + '</h1>'
     + '<div class="subtitle">' + typeName + '</div>'
     + '<div class="settings-box">'
-    + '<div class="setting-row"><span class="setting-label">Passing score:</span> ' + (s.passingPercentage || 70) + '%</div>'
-    + '<div class="setting-row"><span class="setting-label">Time limit:</span> ' + timeStr + '</div>'
-    + '<div class="setting-row"><span class="setting-label">Max attempts:</span> ' + attStr + '</div>'
-    + '<div class="setting-row"><span class="setting-label">Randomize questions:</span> ' + (s.randomizeQuestions !== false ? 'Yes' : 'No') + '</div>'
-    + (s.questionsPerAttempt ? '<div class="setting-row"><span class="setting-label">Questions per attempt:</span> ' + s.questionsPerAttempt + '</div>' : '')
+    + settingsRows.map(r => '<div class="setting-row"><span class="setting-label">' + escH(r[0]) + ':</span> ' + escH(r[1]) + '</div>').join('')
     + '</div>'
+    + (messageRows.length ? '<div class="settings-box" style="grid-template-columns:1fr">' + messageRows.map(r => '<div class="setting-row"><span class="setting-label">' + escH(r[0]) + ':</span> ' + escH(r[1]) + '</div>').join('') + '</div>' : '')
     + '<h2>Questions (' + APP.questions.length + ')</h2>'
     + questionsHtml
     + '</body></html>';
