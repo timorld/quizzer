@@ -7165,7 +7165,7 @@ function _aiShow(step) {
   const cancel = document.getElementById('ai-cancel-btn');
   const note = document.getElementById('ai-foot-note');
   cancel.textContent = step === 'done' ? 'Close' : 'Cancel';
-  note.textContent = step === 'pick' || step === 'work' ? 'Long documents take about a minute.' : '';
+  if (step !== 'work' || !_aiTicker) note.textContent = step === 'pick' || step === 'work' ? 'Long documents take about a minute.' : '';
   if (step === 'pick') { btn.textContent = 'Convert'; _aiSyncConvertBtn(); }
   else if (step === 'done') { btn.hidden = false; btn.disabled = false; btn.textContent = 'Go to questions'; }
   else if (step === 'err') { btn.hidden = false; btn.disabled = false; btn.textContent = 'Try again'; }
@@ -7205,6 +7205,7 @@ function _aiPrimaryAction() {
 
 function closeAIConvertModal() {
   _aiRun++;
+  _aiStopTicker();
   closeModal('modal-ai-convert');
 }
 
@@ -7270,6 +7271,29 @@ function _aiFileSize(n) {
   return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
 }
 
+// While the AI works the bar creeps toward the next milestone, based on how
+// long a part usually takes, and the footer shows the elapsed time, so a long
+// wait never looks frozen.
+const _AI_SECS_PER_ROUND = 35;
+let _aiTicker = null;
+function _aiStartTicker(run, nParts) {
+  _aiStopTicker();
+  const t0 = Date.now();
+  const expected = _AI_SECS_PER_ROUND * Math.ceil(Math.max(1, nParts) / _AI_PARALLEL);
+  _aiTicker = setInterval(() => {
+    if (run !== _aiRun) { _aiStopTicker(); return; }
+    const secs = (Date.now() - t0) / 1000;
+    const done = _aiTickerDone / Math.max(1, nParts);
+    const est = 1 - Math.exp(-secs / expected * 1.6);
+    const frac = 0.12 + 0.8 * Math.min(0.97, Math.max(done, est));
+    document.getElementById('ai-bar-fill').style.width = Math.round(frac * 100) + '%';
+    const m = Math.floor(secs / 60), sec = Math.floor(secs % 60);
+    document.getElementById('ai-foot-note').textContent = 'Working… ' + m + ':' + String(sec).padStart(2, '0') + (secs > expected * 1.5 ? ' — taking longer than usual' : '');
+  }, 250);
+}
+let _aiTickerDone = 0;
+function _aiStopTicker() { if (_aiTicker) clearInterval(_aiTicker); _aiTicker = null; }
+
 async function runAIConversion() {
   if (!_aiPending) return;
   const run = ++_aiRun;
@@ -7278,11 +7302,17 @@ async function runAIConversion() {
   _aiSetWork(label, [_aiFileSize(size), imgCount ? imgCount + ' image' + (imgCount !== 1 ? 's' : '') : ''].filter(Boolean).join(' · '));
   _aiShow('work');
   _aiProgress('ai', 0.12);
+  _aiTickerDone = 0;
+  let tickerStarted = false;
   try {
     const res = await callAIConvert(text, _aiImageMap, (done, n) => {
       if (run !== _aiRun) return;
-      _aiProgress('ai', 0.12 + 0.78 * (n ? done / n : 0), n > 1 ? '· ' + done + ' of ' + n + ' parts' : '');
+      if (!tickerStarted) { tickerStarted = true; _aiStartTicker(run, n); }
+      _aiTickerDone = done;
+      document.querySelectorAll('.ai-steps li')[1].className = 'on';
+      document.getElementById('ai-parts').textContent = n > 1 ? '· ' + done + ' of ' + n + ' parts' : '';
     });
+    _aiStopTicker();
     if (run !== _aiRun) return;
     _aiProgress('add', 0.95);
     const out = await _aiImportAiken(res.text);
@@ -7292,6 +7322,7 @@ async function runAIConversion() {
     _aiProgress('add', 1);
     _aiShowDone(out, res.warnings);
   } catch (e) {
+    _aiStopTicker();
     if (run !== _aiRun) return;
     document.getElementById('ai-err-msg').innerHTML = escH(e.message) + _adminContactHtml('Quizzer AI conversion error: ' + e.message);
     _aiShow('err');
