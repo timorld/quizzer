@@ -1593,7 +1593,7 @@ body.bank-tab-active .r-topbar{display:none}
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 3 L13.8 9.2 L20 11 L13.8 12.8 L12 19 L10.2 12.8 L4 11 L10.2 9.2 Z"/></svg>
         If needed, your file will be converted using AI
       </button>
-      <input type="file" id="file-auto" accept=".txt,.xml,.zip,.docx,.pptx,.md">
+      <input type="file" id="file-auto" accept=".txt,.xml,.zip,.docx,.pptx,.md,.pdf,.png,.jpg,.jpeg,.webp">
     </div>
     <div style="text-align:center;margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="openEditor(null)">+ Add Question</button>
@@ -2511,19 +2511,19 @@ body.bank-tab-active .r-topbar{display:none}
   <div class="modal" style="max-width:760px">
     <div class="m-hdr"><span class="m-title">✨ Convert with AI</span><button class="m-close" onclick="closeModal('modal-ai-convert')">&#x2715;</button></div>
     <div class="m-body">
-      <p style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:14px">Paste raw text or drop a file (.txt / .docx). The AI will convert it to AIKEN format. Review the output and import when you're happy with it.</p>
+      <p style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:14px">Paste text or drop a file — Word, PowerPoint, PDF, an image or plain text. The AI reads the structure, including answers marked by highlight, colour or bold, and text inside images. Review the output and import when you're happy with it.</p>
       <div style="display:grid;grid-template-columns:1fr;gap:12px">
         <div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Input</label>
             <div style="display:flex;gap:8px">
               <label class="btn btn-sm btn-outline-dark" style="cursor:pointer">
-                <input type="file" id="ai-file-input" accept=".txt,.docx,.pptx,.xml" style="display:none">📎 Drop file
+                <input type="file" id="ai-file-input" accept=".txt,.docx,.pptx,.xml,.pdf,.png,.jpg,.jpeg,.webp,.gif" style="display:none">📎 Drop file
               </label>
               <button class="btn btn-sm btn-outline-dark" onclick="document.getElementById('ai-input-text').value=''">Clear</button>
             </div>
           </div>
-          <textarea id="ai-input-text" class="form-textarea" placeholder="Paste quiz text here, or drop a .txt / .docx file above…" style="width:100%;min-height:140px;max-height:240px;font-family:Consolas,'Courier New',monospace;font-size:13px;resize:vertical"></textarea>
+          <textarea id="ai-input-text" class="form-textarea" placeholder="Paste quiz text here, or drop a file (.docx, .pptx, .pdf, image, .txt)…" style="width:100%;min-height:140px;max-height:240px;font-family:Consolas,'Courier New',monospace;font-size:13px;resize:vertical"></textarea>
         </div>
         <div style="text-align:center"><button class="btn btn-primary" id="ai-convert-btn" onclick="runAIConversion()">Convert to AIKEN ↓</button></div>
         <div>
@@ -2606,7 +2606,7 @@ body.bank-tab-active .r-topbar{display:none}
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 3 L13.8 9.2 L20 11 L13.8 12.8 L12 19 L10.2 12.8 L4 11 L10.2 9.2 Z"/></svg>
           If needed, your file will be converted using AI
         </button>
-        <input type="file" id="file-import-more" accept=".txt,.xml,.zip,.docx,.pptx,.md">
+        <input type="file" id="file-import-more" accept=".txt,.xml,.zip,.docx,.pptx,.md,.pdf,.png,.jpg,.jpeg,.webp">
       </div>
     </div>
   </div>
@@ -6439,7 +6439,7 @@ const _AIKEN_CONVERSION_PROMPT =
   '- Number every question sequentially starting at 1, using "1." or "1)" format.\n' +
   '- Preserve question text faithfully — do not paraphrase.\n' +
   '- Skip introductory text, page numbers, section titles, instructions, and non-question content.\n' +
-  '- The input may contain "[IMAGE: filename.ext]" markers (brackets included). These are REAL embedded images from the source file. You MUST preserve every such marker by emitting "IMAGE: filename.ext" (without the brackets) IN THE CORRECT POSITION WITHIN THE QUESTION BLOCK (see "IMAGE PLACEMENT RULES" below). NEVER drop image markers. NEVER invent image filenames that were not in the input. NEVER place image markers at the bottom of the output or in a separate section.\n' +
+  '- The input may contain "[IMAGE: filename.ext]" markers (brackets included). These are REAL embedded images from the source file. Except for images that are pictures of question text (see ATTACHED IMAGES), you MUST preserve every such marker by emitting "IMAGE: filename.ext" (without the brackets) IN THE CORRECT POSITION WITHIN THE QUESTION BLOCK (see "IMAGE PLACEMENT RULES" below). NEVER drop image markers. NEVER invent image filenames that were not in the input. NEVER place image markers at the bottom of the output or in a separate section.\n' +
   '- If you cannot determine the correct answer for a question, prepend "(verify answer) " to the question text and pick a plausible default.\n\n' +
   '========= IMAGE PLACEMENT RULES (READ CAREFULLY) =========\n' +
   'When a question has an image, the "IMAGE: filename" line MUST go INSIDE that question\'s block, on its own line, BETWEEN the question text and the first option line ("A.").\n' +
@@ -6537,34 +6537,131 @@ const _AIKEN_CONVERSION_PROMPT =
   '========= NON-NATIVE TYPES (map to native ones) =========\n' +
   '- TRUE / FALSE → single-choice with options "A. True" and "B. False".\n' +
   '- FILL IN THE BLANK → single-choice with 3-4 plausible candidate answers as options.\n\n' +
+  '========= FORMATTING MARKERS =========\n' +
+  '- Text from Word and PowerPoint files keeps its formatting as [FMT ...]text[/FMT], e.g. "[FMT highlight=yellow]Paris[/FMT]" or "[FMT color=#FF0000 bold]Paris[/FMT]".\n' +
+  '- Lines starting with "•" were list items in the original (auto-numbered or bulleted; the letters or numbers were not part of the text). Under a question they are normally its options, in order A, B, C…\n' +
+  '- Source files often mark the correct answer(s) with formatting instead of an answer key: highlight, coloured text, bold, underline or shading. Work out which formatting does this by looking across the whole input: it is the formatting found on exactly one option per question (or on the stated number of options for "select two/three" questions) and not on the other options. Use it to write the ANSWER lines.\n' +
+  '- An explicit answer key in the text (e.g. "Answer: B", "Correct answer: …") always wins over formatting.\n' +
+  '- If the source groups questions under topic headings, output a "SECTION: name" line before each group, for EVERY such heading, consistently. Headings are short lines between questions that are not question text or options. Text in white (color=#FFFFFF) was hidden in the original and is usually such a heading. Do not invent sections when the source has no headings. A heading at the very top that names the whole quiz is the TITLE, not a SECTION.\n' +
+  '- If nothing in the source identifies the answer of a question, still output the question with your best answer, and put the comment line "# CHECK: answer not marked in source" on the line directly above the question.\n' +
+  '- NEVER output [FMT] markers or "•" bullets. Output clean AIKEN text.\n\n' +
+  '========= ATTACHED IMAGES =========\n' +
+  '- Images may be attached after the text. Each one is introduced by its filename.\n' +
+  '- Copy text from images exactly as written, character for character. Do not "correct" product names, acronyms, commands or numbers (e.g. OSFP and OSPF are different terms).\n' +
+  '- If an attached image is a picture of question text (a screenshot or scan of a question and its options), transcribe it into normal AIKEN and do NOT output an IMAGE: line for it. Highlights, circles, ticks or coloured text in the picture mark the correct answer(s) the same way formatting does.\n' +
+  '- If an image is a figure, diagram or screenshot the learner must look at to answer, keep its "IMAGE: filename" line in that question as described above.\n' +
+  '- "[PAGE IMAGE: name]" markers are renders of PDF pages, attached so you can see the layout and which answers are highlighted or marked. NEVER output IMAGE: lines for them. Take spelling from the extracted text when there is any; use the page image to find the marked answers.\n\n' +
   '========= REMEMBER =========\n' +
   '- Match how the source structures each question to the right TYPE. A matching question becomes ONE matching block, not several single-choice questions.\n' +
   '- Use TYPE: MATCHING / SEQUENCING / HOTSPOT directives — they are required for the parser to recognize those types.\n' +
   '- Output AIKEN text only. No JSON, no explanations.\n';
 
-async function callAIConvert(rawText) {
-  // Routes through the server-side proxy at /api/ai-convert. The key lives in
-  // an env var on the server, not in the browser.
-  const r = await fetch('/api/ai-convert', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      messages: [
-        { role: 'system', content: _AIKEN_CONVERSION_PROMPT },
-        { role: 'user',   content: 'Convert the following text to AIKEN format:\n\n' + rawText }
-      ],
-      max_tokens: 8000
-    })
+// Image types the model accepts as input.
+const _AI_VISION_MIME = /^data:image\/(png|jpe?g|gif|webp);base64,/i;
+const _AI_MAX_IMAGES_PER_CALL = 8;
+// Parts are kept small so each AI call finishes well inside the proxy's
+// 60-second timeout; several run at once.
+const _AI_CHUNK_CHARS = 6000;
+const _AI_PARALLEL = 3;
+
+// One AI call: the text plus any images it references, attached in order.
+async function _callAIOnce(text, imageMap) {
+  const content = [{ type: 'text', text: 'Convert the following text to AIKEN format:\n\n' + text }];
+  const names = [];
+  const re = /\[(?:PAGE )?IMAGE:\s*([^\]]+)\]/g;
+  let m;
+  while ((m = re.exec(text))) {
+    const n = m[1].trim();
+    const data = imageMap && (imageMap[n] || imageMap[n.toLowerCase()]);
+    if (data && _AI_VISION_MIME.test(data) && !names.includes(n)) names.push(n);
+  }
+  names.slice(0, _AI_MAX_IMAGES_PER_CALL).forEach(n => {
+    content.push({ type: 'text', text: 'Attached image: ' + n });
+    content.push({ type: 'image_url', image_url: { url: imageMap[n] || imageMap[n.toLowerCase()] } });
   });
+  const body = JSON.stringify({
+    messages: [
+      { role: 'system', content: _AIKEN_CONVERSION_PROMPT },
+      { role: 'user', content: names.length ? content : content[0].text }
+    ],
+    max_tokens: 16000
+  });
+  // One retry when the proxy times out or the connection drops.
+  let r;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      r = await fetch('/api/ai-convert', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+    } catch (e) {
+      if (attempt) throw new Error('Could not reach the AI service: ' + e.message);
+      continue;
+    }
+    if (![502, 503, 504].includes(r.status)) break;
+  }
   if (!r.ok) {
     let errMsg = 'AI service error (HTTP ' + r.status + ')';
     try { const j = await r.json(); if (j && j.error) errMsg = j.error; } catch(_) {}
     throw new Error(errMsg);
   }
   const data = await r.json();
-  const content = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '';
-  if (!content.trim()) throw new Error('Empty response from model. Try again, or notify your administrator if this persists.');
-  return content.trim();
+  const choice = data && data.choices && data.choices[0];
+  const out = (choice && choice.message && choice.message.content || '').trim();
+  if (!out) throw new Error('Empty response from model. Try again, or notify your administrator if this persists.');
+  return { text: out, truncated: !!(choice && choice.finish_reason === 'length'), skippedImages: Math.max(0, names.length - _AI_MAX_IMAGES_PER_CALL) };
+}
+
+// Splits long input into pieces of roughly maxChars, cutting where a new
+// question starts (a non-list line right after list items) so a question and
+// its options stay together. Each piece keeps at most a few attached images.
+function _aiSplitChunks(text, maxChars) {
+  const lines = text.split('\n');
+  const chunks = [];
+  let cur = [], len = 0, imgs = 0, lastCut = -1;
+  const isImg = l => /^\[(?:PAGE )?IMAGE:/.test(l.trim());
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    const prev = cur.length ? cur[cur.length - 1].trim() : '';
+    const boundary = cur.length && (/^\[PAGE \d+\]/.test(l.trim()) || (/^(•|[A-H][.)]\s|ANSWER)/i.test(prev) && !/^(•|[A-H][.)]\s|ANSWER|\[)/i.test(l.trim()) && l.trim()) || (!prev && l.trim()));
+    if (boundary) lastCut = cur.length;
+    cur.push(l); len += l.length + 1;
+    if (isImg(l)) imgs++;
+    if ((len > maxChars || imgs > _AI_MAX_IMAGES_PER_CALL) && cur.length > 1) {
+      const cut = lastCut > 0 ? lastCut : cur.length - 1;
+      chunks.push(cur.slice(0, cut).join('\n'));
+      cur = cur.slice(cut);
+      len = cur.reduce((n, x) => n + x.length + 1, 0);
+      imgs = cur.filter(isImg).length;
+      lastCut = -1;
+    }
+  }
+  if (cur.join('').trim()) chunks.push(cur.join('\n'));
+  return chunks;
+}
+
+// Converts text (with optional [FMT] markers and image references) to AIKEN.
+// Long input is sent in parts and the results are joined. onProgress(i, n) is
+// called before each part.
+async function callAIConvert(rawText, imageMap, onProgress) {
+  const chunks = _aiSplitChunks(rawText, _AI_CHUNK_CHARS);
+  const results = new Array(chunks.length);
+  let next = 0, done = 0;
+  if (onProgress) onProgress(0, chunks.length);
+  const worker = async () => {
+    while (next < chunks.length) {
+      const i = next++;
+      results[i] = await _callAIOnce(chunks[i], imageMap);
+      done++;
+      if (onProgress) onProgress(done, chunks.length);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(_AI_PARALLEL, chunks.length) }, worker));
+  const warnings = [];
+  const parts = results.map((res, i) => {
+    if (res.truncated) warnings.push('part ' + (i + 1) + ' may be cut off');
+    if (res.skippedImages) warnings.push(res.skippedImages + ' image(s) in part ' + (i + 1) + ' were not sent');
+    // Only the first part may set the quiz title.
+    return i > 0 ? res.text.split('\n').filter(l => !/^TITLE:/i.test(l.trim())).join('\n').trim() : res.text;
+  });
+  return { text: parts.join('\n\n'), warnings };
 }
 
 // Holds images extracted from a .docx so they can be passed to parseAiken on import.
@@ -6576,6 +6673,16 @@ let _aiImageMap = {};
 // preserve question/image associations in the AIKEN output.
 async function _extractTextFromFile(file) {
   const name = file.name.toLowerCase();
+  if (/\.(png|jpe?g|gif|webp)$/.test(name)) {
+    const dataUrl = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(file); });
+    _aiImageMap = { [file.name]: dataUrl };
+    return '[IMAGE: ' + file.name + ']';
+  }
+  if (name.endsWith('.pdf')) {
+    const { text, images } = await _extractPdfForAI(file);
+    _aiImageMap = images;
+    return text;
+  }
   if (name.endsWith('.docx')) {
     const { text, images } = await _extractDocxWithImages(file);
     _aiImageMap = images;
@@ -6588,6 +6695,144 @@ async function _extractTextFromFile(file) {
   }
   _aiImageMap = {};
   return await file.text();
+}
+
+// ── PDF for AI import ──
+// pdf.js is loaded on first use. Each page contributes its text plus a JPEG
+// render, so the model can see highlights and other marks the text loses.
+let _pdfjsPromise = null;
+function _loadPdfJs() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if (!_pdfjsPromise) {
+    _pdfjsPromise = new Promise((resolve, reject) => {
+      const sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      sc.onload = () => {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        resolve(window.pdfjsLib);
+      };
+      sc.onerror = () => { _pdfjsPromise = null; reject(new Error('Could not load the PDF reader')); };
+      document.head.appendChild(sc);
+    });
+  }
+  return _pdfjsPromise;
+}
+
+const _PDF_MAX_PAGES = 40;
+async function _extractPdfForAI(file) {
+  const pdfjs = await _loadPdfJs();
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  const lines = [];
+  const images = {};
+  const pages = Math.min(pdf.numPages, _PDF_MAX_PAGES);
+  for (let i = 1; i <= pages; i++) {
+    const page = await pdf.getPage(i);
+    const tc = await page.getTextContent();
+    let text = '';
+    tc.items.forEach(it => { text += it.str + (it.hasEOL ? '\n' : ''); });
+    const viewport = page.getViewport({ scale: 1.5 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    const imgName = 'page-' + i + '.jpg';
+    images[imgName] = canvas.toDataURL('image/jpeg', 0.8);
+    lines.push('[PAGE ' + i + ']');
+    text.split('\n').map(l => l.trim()).filter(Boolean).forEach(l => lines.push(l));
+    lines.push('[PAGE IMAGE: ' + imgName + ']');
+  }
+  if (pdf.numPages > pages) lines.push('(Only the first ' + pages + ' of ' + pdf.numPages + ' pages were included.)');
+  return { text: lines.join('\n'), images };
+}
+
+// ── Formatting-aware text for AI import ──
+// Runs that carry formatting which might mark a correct answer are wrapped as
+// [FMT highlight=yellow bold]text[/FMT]. Near-black text colours are ignored
+// (they are just the document's body colour).
+function _fmtColorIsPlain(hex) {
+  const m = (hex || '').match(/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  return !m || [m[1], m[2], m[3]].every(h => parseInt(h, 16) < 0x70);
+}
+function _fmtJoin(segs) {
+  const out = [];
+  segs.forEach(seg => {
+    if (!seg.t) return;
+    const last = out[out.length - 1];
+    if (last && (last.f === seg.f || !seg.t.trim())) last.t += seg.t;
+    else if (last && !last.t.trim()) { last.t += seg.t; last.f = seg.f; }
+    else out.push({ t: seg.t, f: seg.f });
+  });
+  return out.map(x => x.f && x.t.trim() ? '[FMT ' + x.f + ']' + x.t + '[/FMT]' : x.t).join('').replace(/\s+/g, ' ').trim();
+}
+function _xChild(el, ns, name) {
+  return el ? Array.from(el.children).find(c => c.namespaceURI === ns && c.localName === name) || null : null;
+}
+
+function _docxParaText(p, W) {
+  const val = el => el && (el.getAttributeNS(W, 'val') || el.getAttribute('w:val'));
+  const on = el => el && !/^(0|false|none)$/i.test(val(el) || '');
+  const pPr = _xChild(p, W, 'pPr');
+  const pShd = _xChild(pPr, W, 'shd');
+  const pFill = pShd && (pShd.getAttributeNS(W, 'fill') || pShd.getAttribute('w:fill'));
+  const paraFmt = pFill && !/^(auto|ffffff)$/i.test(pFill) ? 'shading=#' + pFill : '';
+  const segs = [];
+  Array.from(p.getElementsByTagNameNS(W, 'r')).forEach(r => {
+    let t = '';
+    Array.from(r.children).forEach(c => {
+      if (c.namespaceURI !== W) return;
+      if (c.localName === 't') t += c.textContent;
+      else if (c.localName === 'tab' || c.localName === 'br' || c.localName === 'cr') t += ' ';
+    });
+    if (!t) return;
+    const rPr = _xChild(r, W, 'rPr');
+    const f = paraFmt ? [paraFmt] : [];
+    if (rPr) {
+      const hl = _xChild(rPr, W, 'highlight');
+      if (hl && val(hl) && val(hl) !== 'none') f.push('highlight=' + val(hl));
+      const shd = _xChild(rPr, W, 'shd');
+      const fill = shd && (shd.getAttributeNS(W, 'fill') || shd.getAttribute('w:fill'));
+      if (fill && !/^(auto|ffffff)$/i.test(fill)) f.push('shading=#' + fill);
+      const col = val(_xChild(rPr, W, 'color'));
+      if (col && col !== 'auto' && !_fmtColorIsPlain(col)) f.push('color=#' + col.toUpperCase());
+      if (_xChild(rPr, W, 'b') && on(_xChild(rPr, W, 'b'))) f.push('bold');
+      if (_xChild(rPr, W, 'u') && on(_xChild(rPr, W, 'u'))) f.push('underline');
+      if (_xChild(rPr, W, 'strike') && on(_xChild(rPr, W, 'strike'))) f.push('strikethrough');
+    }
+    segs.push({ t, f: f.join(' ') });
+  });
+  const text = _fmtJoin(segs);
+  if (!text) return '';
+  const numPr = _xChild(pPr, W, 'numPr');
+  const style = val(_xChild(pPr, W, 'pStyle')) || '';
+  if (numPr || /list/i.test(style)) {
+    const lvl = parseInt(val(_xChild(numPr, W, 'ilvl')) || '0', 10) || 0;
+    return '  '.repeat(lvl) + '• ' + text;
+  }
+  return text;
+}
+
+function _pptxParaText(p, A) {
+  const segs = [];
+  Array.from(p.getElementsByTagNameNS(A, 'r')).forEach(r => {
+    const t = Array.from(r.getElementsByTagNameNS(A, 't')).map(x => x.textContent).join('');
+    if (!t) return;
+    const rPr = _xChild(r, A, 'rPr');
+    const f = [];
+    if (rPr) {
+      const hl = _xChild(rPr, A, 'highlight');
+      const hlc = hl && hl.getElementsByTagNameNS(A, 'srgbClr')[0];
+      if (hl) f.push('highlight=' + (hlc ? '#' + hlc.getAttribute('val') : 'yes'));
+      const fill = _xChild(rPr, A, 'solidFill');
+      const fc = fill && fill.getElementsByTagNameNS(A, 'srgbClr')[0];
+      if (fc && !_fmtColorIsPlain(fc.getAttribute('val'))) f.push('color=#' + fc.getAttribute('val').toUpperCase());
+      if (rPr.getAttribute('b') === '1') f.push('bold');
+      if (rPr.getAttribute('u') && rPr.getAttribute('u') !== 'none') f.push('underline');
+    }
+    segs.push({ t, f: f.join(' ') });
+  });
+  const text = _fmtJoin(segs);
+  if (!text) return '';
+  const pPr = _xChild(p, A, 'pPr');
+  return pPr && (_xChild(pPr, A, 'buAutoNum') || _xChild(pPr, A, 'buChar')) ? '• ' + text : text;
 }
 
 async function _extractDocxWithImages(file) {
@@ -6638,7 +6883,7 @@ async function _extractDocxWithImages(file) {
   const lines = [];
   const seenImages = new Set();
   Array.from(xmlDoc.getElementsByTagNameNS(NS, 'p')).forEach(p => {
-    const text = Array.from(p.getElementsByTagNameNS(NS, 't')).map(t => t.textContent).join('').trim();
+    const text = _docxParaText(p, NS);
     if (text) lines.push(text);
     // Modern image references: <a:blip r:embed="...">
     Array.from(p.getElementsByTagNameNS(ANS, 'blip')).forEach(blip => {
@@ -6785,7 +7030,7 @@ async function _extractPptxWithImages(file) {
     const slideXml = await zip.files[slidePath].async('string');
     const slideDoc = new DOMParser().parseFromString(slideXml, 'application/xml');
     Array.from(slideDoc.getElementsByTagNameNS(ANS, 'p')).forEach(p => {
-      const text = Array.from(p.getElementsByTagNameNS(ANS, 't')).map(t => t.textContent).join('').trim();
+      const text = _pptxParaText(p, ANS);
       if (text) lines.push(text);
     });
 
@@ -6869,10 +7114,16 @@ async function runAIConversion() {
   outputEl.value = '';
   if (importBtn) importBtn.disabled = true;
   try {
-    const aiken = await callAIConvert(raw);
-    outputEl.value = aiken;
-    statusEl.textContent = '✓ Done — review the AIKEN above and click Import when ready.';
-    statusEl.style.color = 'var(--green-dk)';
+    const res = await callAIConvert(raw, _aiImageMap, (i, n) => {
+      if (n > 1) statusEl.textContent = 'Calling AI… ' + i + ' of ' + n + ' parts done';
+    });
+    outputEl.value = res.text;
+    const checks = (res.text.match(/^#\s*CHECK/gim) || []).length;
+    const notes = [];
+    if (checks) notes.push(checks + ' question' + (checks !== 1 ? 's' : '') + ' marked "# CHECK" — the answer wasn\'t marked in the source');
+    res.warnings.forEach(w => notes.push(w));
+    statusEl.textContent = notes.length ? '⚠ Done — ' + notes.join('; ') + '. Review before importing.' : '✓ Done — review the AIKEN above and click Import when ready.';
+    statusEl.style.color = notes.length ? '#b45309' : 'var(--green-dk)';
     if (importBtn) importBtn.disabled = false;
   } catch (e) {
     statusEl.innerHTML = '✗ ' + escH(e.message) + _adminContactHtml('Quizzer AI conversion error: ' + e.message);
@@ -6962,6 +7213,15 @@ async function handleAutoFile(file) {
       if (await _offerAIConversion(text, file.name, images)) return;
       showImportResult('&#9888; PPTX files can only be imported via AI conversion. Add an API key in Settings → AI Assistant.', true);
     } catch (e) { showImportResult('&#10007; Could not read .pptx: ' + escH(e.message), true); }
+    return;
+  }
+  if (name.endsWith('.pdf') || /\.(png|jpe?g|gif|webp)$/.test(name)) {
+    // No native parser — PDFs and images are always converted with AI
+    try {
+      const text = await _extractTextFromFile(file);
+      if (await _offerAIConversion(text, file.name, _aiImageMap)) return;
+      showImportResult('&#9888; PDF and image files can only be imported with AI conversion.', true);
+    } catch (e) { showImportResult('&#10007; Could not read "' + escH(file.name) + '": ' + escH(e.message), true); }
     return;
   }
   if (name.endsWith('.ppt')) {
@@ -8509,7 +8769,7 @@ function renderAddRow() {
       +     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L13.8 9.2 L20 11 L13.8 12.8 L12 19 L10.2 12.8 L4 11 L10.2 9.2 Z"/></svg>'
       +     'If needed, your file will be converted using AI'
       +   '</button>'
-      +   '<input type="file" id="file-quiz-empty" accept=".txt,.xml,.zip,.docx,.pptx,.md">'
+      +   '<input type="file" id="file-quiz-empty" accept=".txt,.xml,.zip,.docx,.pptx,.md,.pdf,.png,.jpg,.jpeg,.webp">'
       + '</div>'
       + '<div class="r-empty-row">'
       +   '<button class="addbtn addbtn-prime" onclick="openEditor(null)">' + ICO_PEN + ' Write a question</button>'
