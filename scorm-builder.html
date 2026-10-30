@@ -286,6 +286,65 @@ body{font-family:'NVIDIA Sans','Segoe UI',-apple-system,BlinkMacSystemFont,Robot
 .dl-note strong{color:#0b2a4a}
 .dl-actions{display:flex;gap:9px;align-items:center;flex-wrap:nowrap}
 .dl-actions .btn svg{width:15px;height:15px}
+/* Import with AI dialog */
+.ai-modal{max-width:560px!important;border-radius:14px;box-shadow:0 12px 32px rgba(16,24,40,.16);overflow:hidden}
+.ai-modal .m-hdr{padding:18px 22px}
+.ai-hd{display:flex;align-items:center;gap:12px}
+.ai-spark{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#76b900,#8b5cf6);flex:none}
+.ai-spark svg{width:19px;height:19px}
+.ai-modal .m-title{font-size:16px;font-weight:800;letter-spacing:-.2px}
+.ai-sub{font-size:12.5px;color:var(--muted);margin-top:1px}
+.ai-modal .dl-x{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.ai-modal .dl-x:hover{background:#f3f4f6;color:var(--text)}
+.ai-modal .dl-x svg{width:16px;height:16px}
+.ai-bd{padding:22px}
+.ai-bd [hidden]{display:none!important}
+.ai-drop{display:flex;flex-direction:column;align-items:center;gap:8px;padding:30px 20px;border:1.5px dashed #c4c9d1;border-radius:12px;background:#fbfcfd;cursor:pointer;text-align:center;transition:border-color .15s,background .15s}
+.ai-drop:hover,.ai-drop.over{border-color:var(--green);background:var(--green-lt)}
+.ai-drop input{display:none}
+.ai-drop-ic{width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--green-600,#3f8500);box-shadow:0 1px 2px rgba(16,24,40,.06)}
+.ai-drop-ic svg{width:20px;height:20px}
+.ai-drop-t{font-size:14px;font-weight:600;color:var(--text)}
+.ai-browse{color:#0074df}
+.ai-drop-s{font-size:12px;color:var(--muted)}
+.ai-feats{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.ai-feats li{display:flex;align-items:center;gap:9px;font-size:13px;color:#374151}
+.ai-feats svg{width:14px;height:14px;flex:none;color:var(--green-600,#3f8500)}
+.ai-paste-toggle{margin-top:14px}
+.ai-ta{width:100%;min-height:140px;margin-top:10px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font:13px/1.5 inherit;font-family:inherit;resize:vertical;box-sizing:border-box}
+.ai-ta:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.15)}
+.ai-file{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:#fbfcfd}
+.ai-ftag{flex:none;width:38px;height:44px;border-radius:5px;border:1.5px solid #c4c9d1;background:#fff;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;font-size:9.5px;font-weight:800;letter-spacing:.04em;color:#4b5563;box-sizing:border-box}
+.ai-ftag.w{color:#0060c7;border-color:#7fb4f0}.ai-ftag.p{color:#c2410c;border-color:#fdba74}.ai-ftag.f{color:#b91c1c;border-color:#fca5a5}.ai-ftag.i{color:#7c3aed;border-color:#c4b5fd}
+.ai-fm{min-width:0}
+.ai-fn{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-fs{font-size:12px;color:var(--muted);margin-top:2px}
+.ai-bar{height:6px;border-radius:6px;background:#eef0f3;overflow:hidden;margin:18px 0 16px}
+.ai-bar span{display:block;height:100%;width:4%;border-radius:6px;background:linear-gradient(90deg,#76b900,#9bd33a,#76b900);background-size:200% 100%;animation:aiShimmer 1.4s linear infinite;transition:width .6s ease}
+@keyframes aiShimmer{from{background-position:200% 0}to{background-position:0 0}}
+.ai-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.ai-steps li{display:flex;align-items:center;gap:10px;font-size:13px;color:#9aa0aa}
+.ai-dot{width:18px;height:18px;border-radius:50%;border:1.5px solid #d1d5db;flex:none;box-sizing:border-box;position:relative}
+.ai-steps li.on{color:var(--text);font-weight:600}
+.ai-steps li.on .ai-dot{border-color:var(--green);border-top-color:transparent;animation:aiSpin .8s linear infinite}
+.ai-steps li.ok{color:#374151}
+.ai-steps li.ok .ai-dot{border:none;background:var(--green)}
+.ai-steps li.ok .ai-dot::after{content:'';position:absolute;left:6px;top:3px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+@keyframes aiSpin{to{transform:rotate(360deg)}}
+.ai-parts{font-weight:500;color:var(--muted)}
+.ai-done{display:flex;align-items:center;gap:14px;padding:16px;border-radius:12px;background:var(--green-lt);border:1px solid #cfe8a8}
+.ai-ok{width:40px;height:40px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.ai-ok svg{width:20px;height:20px}
+.ai-done-t{font-size:15px;font-weight:700;color:var(--text)}
+.ai-done-s{font-size:12.5px;color:#4b5563;margin-top:2px}
+.ai-check{margin-top:14px;padding:12px 14px;border-radius:10px;background:#fff7ed;border:1px solid #fed7aa;font-size:12.5px;color:#7c2d12}
+.ai-check strong{display:block;margin-bottom:6px;font-size:13px}
+.ai-check ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.ai-err{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:10px;background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d;font-size:13px;line-height:1.5}
+.ai-err svg{width:20px;height:20px;flex:none;color:#dc2626;margin-top:1px}
+.ai-err strong{display:block;margin-bottom:2px}
+.ai-modal .m-footer{padding:14px 22px;align-items:center;background:#fbfcfd}
+.ai-modal [hidden]{display:none!important}
 .dl-actions .btn{padding:8px 14px;box-shadow:none}
 .dl-actions .btn-primary{box-shadow:0 1px 2px rgba(118,185,0,.3)}
 .type-row{display:flex;gap:10px;margin-bottom:8px}
@@ -2508,36 +2567,47 @@ body.bank-tab-active .r-topbar{display:none}
 <!-- SUSPEND_DATA SIZE WARNING MODAL -->
 <!-- AI CONVERT MODAL -->
 <div class="m-overlay" id="modal-ai-convert">
-  <div class="modal" style="max-width:760px">
-    <div class="m-hdr"><span class="m-title">✨ Convert with AI</span><button class="m-close" onclick="closeModal('modal-ai-convert')">&#x2715;</button></div>
-    <div class="m-body">
-      <p style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:14px">Paste text or drop a file — Word, PowerPoint, PDF, an image or plain text. The AI reads the structure, including answers marked by highlight, colour or bold, and text inside images. Review the output and import when you're happy with it.</p>
-      <div style="display:grid;grid-template-columns:1fr;gap:12px">
-        <div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Input</label>
-            <div style="display:flex;gap:8px">
-              <label class="btn btn-sm btn-outline-dark" style="cursor:pointer">
-                <input type="file" id="ai-file-input" accept=".txt,.docx,.pptx,.xml,.pdf,.png,.jpg,.jpeg,.webp,.gif" style="display:none">📎 Drop file
-              </label>
-              <button class="btn btn-sm btn-outline-dark" onclick="document.getElementById('ai-input-text').value=''">Clear</button>
-            </div>
-          </div>
-          <textarea id="ai-input-text" class="form-textarea" placeholder="Paste quiz text here, or drop a file (.docx, .pptx, .pdf, image, .txt)…" style="width:100%;min-height:140px;max-height:240px;font-family:Consolas,'Courier New',monospace;font-size:13px;resize:vertical"></textarea>
-        </div>
-        <div style="text-align:center"><button class="btn btn-primary" id="ai-convert-btn" onclick="runAIConversion()">Convert to AIKEN ↓</button></div>
-        <div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">AIKEN Output</label>
-            <span id="ai-status" style="font-size:12px;color:var(--muted)"></span>
-          </div>
-          <textarea id="ai-output-text" class="form-textarea" placeholder="The AI-converted AIKEN will appear here. You can edit it before importing." style="width:100%;min-height:180px;max-height:340px;font-family:Consolas,'Courier New',monospace;font-size:13px;resize:vertical"></textarea>
-        </div>
+  <div class="modal ai-modal">
+    <div class="m-hdr"><div class="ai-hd"><span class="ai-spark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.4L19 10l-5.2 1.6L12 17l-1.8-5.4L5 10l5.2-1.6z"/><path d="M19 15l.7 2.1L22 18l-2.3.9L19 21l-.7-2.1L16 18l2.3-.9z"/></svg></span><div><div class="m-title">Import with AI</div><div class="ai-sub">Turn any quiz document into questions</div></div></div><button class="dl-x" onclick="closeAIConvertModal()" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="ai-bd">
+      <div id="ai-step-pick">
+        <label class="ai-drop" id="ai-drop">
+          <input type="file" id="ai-file-input" accept=".txt,.docx,.pptx,.xml,.md,.pdf,.png,.jpg,.jpeg,.webp,.gif">
+          <span class="ai-drop-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
+          <span class="ai-drop-t">Drop a file here or <span class="ai-browse">browse</span></span>
+          <span class="ai-drop-s">Word · PowerPoint · PDF · Image · Text</span>
+        </label>
+        <ul class="ai-feats">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Finds answers marked by highlight, colour or bold</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Reads text inside images and scanned pages</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Keeps sections, images and multi-answer questions</li>
+        </ul>
+        <button type="button" class="dl-link ai-paste-toggle" onclick="_aiTogglePaste()">Paste text instead</button>
+        <div id="ai-paste" hidden><textarea id="ai-input-text" class="ai-ta" placeholder="Paste your quiz questions here…" oninput="_aiSyncConvertBtn()"></textarea></div>
+      </div>
+      <div id="ai-step-work" hidden>
+        <div class="ai-file"><span class="ai-ftag" id="ai-ftag">DOC</span><div class="ai-fm"><div class="ai-fn" id="ai-fn"></div><div class="ai-fs" id="ai-fs"></div></div></div>
+        <div class="ai-bar"><span id="ai-bar-fill"></span></div>
+        <ol class="ai-steps">
+          <li data-s="read"><span class="ai-dot"></span>Reading the document</li>
+          <li data-s="ai"><span class="ai-dot"></span><span>Finding questions and answers <span class="ai-parts" id="ai-parts"></span></span></li>
+          <li data-s="add"><span class="ai-dot"></span>Adding to your quiz</li>
+        </ol>
+      </div>
+      <div id="ai-step-done" hidden>
+        <div class="ai-done"><span class="ai-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div><div class="ai-done-t" id="ai-done-t"></div><div class="ai-done-s" id="ai-done-s"></div></div></div>
+        <div class="ai-check" id="ai-check" hidden></div>
+      </div>
+      <div id="ai-step-err" hidden>
+        <div class="ai-err"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div><strong>Couldn't convert this file</strong><div id="ai-err-msg"></div></div></div>
       </div>
     </div>
     <div class="m-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-ai-convert')">Cancel</button>
-      <button class="btn btn-primary" id="ai-import-btn" onclick="importAIConverted()" disabled>Import Questions</button>
+      <span class="dl-sum" id="ai-foot-note">Long documents take about a minute.</span>
+      <div class="dl-actions">
+        <button class="btn btn-outline" id="ai-cancel-btn" onclick="closeAIConvertModal()">Cancel</button>
+        <button class="btn btn-primary" id="ai-convert-btn" onclick="_aiPrimaryAction()" hidden>Convert</button>
+      </div>
     </div>
   </div>
 </div>
@@ -7072,135 +7142,243 @@ async function _extractPptxWithImages(file) {
 async function _offerAIConversion(rawText, sourceLabel, imageMap) {
   const ok = await cdlg({
     title: 'Couldn\'t auto-detect questions',
-    msg: 'No questions could be parsed from "' + sourceLabel + '". Would you like to convert it with AI?',
+    msg: 'No questions could be read from "' + sourceLabel + '" directly. Convert it with AI? It reads highlights, colours and images to find the questions and answers.',
     confirmText: 'Convert with AI',
     cancelText: 'Cancel'
   });
   if (!ok) return false;
-  openAIConvertModal(rawText, imageMap);
+  openAIConvertModal(rawText, imageMap, sourceLabel);
   return true;
 }
 
-function openAIConvertModal(prefillText, prefillImageMap) {
-  const inputEl  = document.getElementById('ai-input-text');
-  const outputEl = document.getElementById('ai-output-text');
-  const importBtn = document.getElementById('ai-import-btn');
-  if (typeof prefillText === 'string' && prefillText.length > 0) inputEl.value = prefillText;
-  else if (!inputEl.value) inputEl.value = '';
-  outputEl.value = '';
-  if (importBtn) importBtn.disabled = true;
-  // Reset/seed the image map for this session
-  _aiImageMap = prefillImageMap && typeof prefillImageMap === 'object' ? prefillImageMap : {};
-  const statusEl = document.getElementById('ai-status');
-  if (statusEl) {
-    const imgCount = Object.keys(_aiImageMap).length;
-    statusEl.textContent = imgCount ? ('Loaded with ' + imgCount + ' image' + (imgCount !== 1 ? 's' : '') + ' — ready to convert') : '';
-    statusEl.style.color = 'var(--muted)';
+// ── Import with AI dialog ──
+// Steps: pick (drop zone / paste) → work (progress) → done (summary) or err.
+// A run counter lets Cancel abandon a conversion that is still in flight.
+let _aiRun = 0;
+let _aiPending = null; // { text, label } waiting to convert
+let _aiStep = 'pick';
+
+function _aiShow(step) {
+  _aiStep = step;
+  ['pick', 'work', 'done', 'err'].forEach(k => { document.getElementById('ai-step-' + k).hidden = k !== step; });
+  const btn = document.getElementById('ai-convert-btn');
+  const cancel = document.getElementById('ai-cancel-btn');
+  const note = document.getElementById('ai-foot-note');
+  cancel.textContent = step === 'done' ? 'Close' : 'Cancel';
+  note.textContent = step === 'pick' || step === 'work' ? 'Long documents take about a minute.' : '';
+  if (step === 'pick') { btn.textContent = 'Convert'; _aiSyncConvertBtn(); }
+  else if (step === 'done') { btn.hidden = false; btn.disabled = false; btn.textContent = 'Go to questions'; }
+  else if (step === 'err') { btn.hidden = false; btn.disabled = false; btn.textContent = 'Try again'; }
+  else btn.hidden = true;
+}
+
+function _aiSyncConvertBtn() {
+  if (_aiStep !== 'pick') return;
+  const btn = document.getElementById('ai-convert-btn');
+  const pasteOpen = !document.getElementById('ai-paste').hidden;
+  btn.hidden = !pasteOpen;
+  btn.disabled = !document.getElementById('ai-input-text').value.trim();
+}
+
+function _aiTogglePaste() {
+  const box = document.getElementById('ai-paste');
+  box.hidden = !box.hidden;
+  document.querySelector('.ai-paste-toggle').textContent = box.hidden ? 'Paste text instead' : 'Hide text box';
+  if (!box.hidden) document.getElementById('ai-input-text').focus();
+  _aiSyncConvertBtn();
+}
+
+function _aiPrimaryAction() {
+  if (_aiStep === 'pick') {
+    const text = document.getElementById('ai-input-text').value.trim();
+    if (!text) return;
+    _aiImageMap = {};
+    _aiPending = { text, label: 'Pasted text' };
+    runAIConversion();
+  } else if (_aiStep === 'err') {
+    if (_aiPending) runAIConversion(); else _aiShow('pick');
+  } else if (_aiStep === 'done') {
+    closeAIConvertModal();
+    document.querySelector('.tab-btn[data-tab="questions"]').click();
   }
-  _setupAIModalDropZone();
+}
+
+function closeAIConvertModal() {
+  _aiRun++;
+  closeModal('modal-ai-convert');
+}
+
+// Opens the dialog. With prefill text (a file already read by an import
+// handler) it starts converting straight away.
+function openAIConvertModal(prefillText, prefillImageMap, label) {
+  _aiRun++;
+  document.getElementById('ai-input-text').value = '';
+  document.getElementById('ai-paste').hidden = true;
+  document.querySelector('.ai-paste-toggle').textContent = 'Paste text instead';
+  _aiImageMap = prefillImageMap && typeof prefillImageMap === 'object' ? prefillImageMap : {};
+  _aiSetupDropZone();
   showModal('modal-ai-convert');
+  if (typeof prefillText === 'string' && prefillText.trim()) {
+    _aiPending = { text: prefillText, label: label || 'Document' };
+    runAIConversion();
+  } else {
+    _aiPending = null;
+    _aiShow('pick');
+  }
+}
+
+function _aiSetWork(label, sub) {
+  const ext = (label.match(/\.([a-z0-9]+)$/i) || [])[1] || 'txt';
+  const tag = document.getElementById('ai-ftag');
+  tag.textContent = ext.toUpperCase().slice(0, 4);
+  tag.className = 'ai-ftag ' + (/^docx?$/i.test(ext) ? 'w' : /^pptx?$/i.test(ext) ? 'p' : /^pdf$/i.test(ext) ? 'f' : /^(png|jpe?g|gif|webp)$/i.test(ext) ? 'i' : '');
+  document.getElementById('ai-fn').textContent = label;
+  document.getElementById('ai-fs').textContent = sub || '';
+}
+
+function _aiProgress(stage, frac, partsText) {
+  const order = ['read', 'ai', 'add'];
+  document.querySelectorAll('.ai-steps li').forEach(li => {
+    const i = order.indexOf(li.dataset.s), cur = order.indexOf(stage);
+    li.className = i < cur ? 'ok' : i === cur ? 'on' : '';
+  });
+  document.getElementById('ai-bar-fill').style.width = Math.max(4, Math.round(frac * 100)) + '%';
+  document.getElementById('ai-parts').textContent = partsText || '';
+}
+
+async function _aiStartFromFile(file) {
+  const run = ++_aiRun;
+  _aiSetWork(file.name, _aiFileSize(file.size));
+  _aiShow('work');
+  _aiProgress('read', 0.06);
+  try {
+    const text = await _extractTextFromFile(file);
+    if (run !== _aiRun) return;
+    if (!text.trim()) throw new Error('No text or images were found in this file.');
+    _aiPending = { text, label: file.name, size: file.size };
+    runAIConversion();
+  } catch (e) {
+    if (run !== _aiRun) return;
+    _aiPending = null;
+    document.getElementById('ai-err-msg').textContent = e.message;
+    _aiShow('err');
+  }
+}
+
+function _aiFileSize(n) {
+  if (!n) return '';
+  return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
 }
 
 async function runAIConversion() {
-  const inputEl  = document.getElementById('ai-input-text');
-  const outputEl = document.getElementById('ai-output-text');
-  const statusEl = document.getElementById('ai-status');
-  const convertBtn = document.getElementById('ai-convert-btn');
-  const importBtn  = document.getElementById('ai-import-btn');
-  const raw = (inputEl.value || '').trim();
-  if (!raw) { statusEl.textContent = 'Add some input text first.'; statusEl.style.color = '#dc2626'; return; }
-  convertBtn.disabled = true; convertBtn.textContent = '⏳ Converting…';
-  statusEl.textContent = 'Calling AI…'; statusEl.style.color = 'var(--muted)';
-  outputEl.value = '';
-  if (importBtn) importBtn.disabled = true;
+  if (!_aiPending) return;
+  const run = ++_aiRun;
+  const { text, label, size } = _aiPending;
+  const imgCount = Object.keys(_aiImageMap || {}).length;
+  _aiSetWork(label, [_aiFileSize(size), imgCount ? imgCount + ' image' + (imgCount !== 1 ? 's' : '') : ''].filter(Boolean).join(' · '));
+  _aiShow('work');
+  _aiProgress('ai', 0.12);
   try {
-    const res = await callAIConvert(raw, _aiImageMap, (i, n) => {
-      if (n > 1) statusEl.textContent = 'Calling AI… ' + i + ' of ' + n + ' parts done';
+    const res = await callAIConvert(text, _aiImageMap, (done, n) => {
+      if (run !== _aiRun) return;
+      _aiProgress('ai', 0.12 + 0.78 * (n ? done / n : 0), n > 1 ? '· ' + done + ' of ' + n + ' parts' : '');
     });
-    outputEl.value = res.text;
-    const checks = (res.text.match(/^#\s*CHECK/gim) || []).length;
-    const notes = [];
-    if (checks) notes.push(checks + ' question' + (checks !== 1 ? 's' : '') + ' marked "# CHECK" — the answer wasn\'t marked in the source');
-    res.warnings.forEach(w => notes.push(w));
-    statusEl.textContent = notes.length ? '⚠ Done — ' + notes.join('; ') + '. Review before importing.' : '✓ Done — review the AIKEN above and click Import when ready.';
-    statusEl.style.color = notes.length ? '#b45309' : 'var(--green-dk)';
-    if (importBtn) importBtn.disabled = false;
+    if (run !== _aiRun) return;
+    _aiProgress('add', 0.95);
+    const out = await _aiImportAiken(res.text);
+    if (run !== _aiRun) return;
+    if (!out) throw new Error('The AI response could not be turned into questions. Please try again.');
+    if (out.cancelled) { _aiShow('pick'); return; }
+    _aiProgress('add', 1);
+    _aiShowDone(out, res.warnings);
   } catch (e) {
-    statusEl.innerHTML = '✗ ' + escH(e.message) + _adminContactHtml('Quizzer AI conversion error: ' + e.message);
-    statusEl.style.color = '#dc2626';
-  } finally {
-    convertBtn.disabled = false; convertBtn.textContent = 'Convert to AIKEN ↓';
+    if (run !== _aiRun) return;
+    document.getElementById('ai-err-msg').innerHTML = escH(e.message) + _adminContactHtml('Quizzer AI conversion error: ' + e.message);
+    _aiShow('err');
   }
 }
 
-async function importAIConverted() {
-  const outputEl = document.getElementById('ai-output-text');
-  const text = (outputEl.value || '').trim();
-  if (!text) { toast('Nothing to import', 'err'); return; }
+// Questions the AI flagged with "# CHECK" (answer not marked in the source).
+function _aiCheckedQuestions(aiken) {
+  const lines = aiken.split('\n');
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (!/^#\s*CHECK/i.test(lines[i].trim())) continue;
+    for (let j = i + 1; j < lines.length; j++) {
+      const t = lines[j].trim();
+      if (!t || t.startsWith('#')) continue;
+      out.push(t.replace(/^\d+[.)]\s*/, ''));
+      break;
+    }
+  }
+  return out;
+}
+
+// Parses the AI's AIKEN and adds it to the quiz (or the question bank when
+// that import flow is active). Returns a summary, null on parse failure, or
+// { cancelled: true } when the replace/append prompt is dismissed.
+async function _aiImportAiken(text) {
   const { title: aikenTitle, settings: aikenSettings, text: cleanText } = extractAikenTitle(text);
-  // Pass the extracted image map so questions with IMAGE: lines get their image data attached
   const imageMap = _aiImageMap && Object.keys(_aiImageMap).length ? _aiImageMap : undefined;
   const imported = parseAiken(cleanText, imageMap);
-  if (!imported.length) { toast('Could not parse the AIKEN output — try regenerating or editing it', 'err'); return; }
-  if (await _bankImportQuestions(imported, 'AI conversion')) { closeModal('modal-ai-convert'); return; }
+  if (!imported.length) return null;
+  const sections = [...new Set(imported.map(q => q.section).filter(Boolean))];
+  const summary = { count: imported.length, sections, checks: _aiCheckedQuestions(text), title: '' };
+  if (await _bankImportQuestions(imported, 'AI conversion')) return Object.assign(summary, { bank: true });
   let replace = false;
   if (APP.questions.length > 0 && !IMPORT_FORCE_APPEND) {
-    replace = await cdlg({ title: 'Import Questions', msg: 'Replace all ' + APP.questions.length + ' existing question(s) with ' + imported.length + ' converted questions, or append them?', confirmText: 'Replace', cancelText: 'Append' });
+    replace = await cdlg({ title: 'Add ' + imported.length + ' questions', msg: 'Your quiz already has ' + APP.questions.length + ' question(s). Replace them with the converted questions, or add these to the end?', confirmText: 'Replace', cancelText: 'Add to end' });
   }
   pushQHistory();
   const _hadQs = APP.questions.length > 0;
   APP.questions = replace ? imported : [...APP.questions, ...imported];
-  if (aikenTitle && (replace || !APP.settings.title)) {
-    _setQuizTitle(aikenTitle);
-  }
+  // The file's title names the quiz when it starts the quiz (empty or replaced).
+  if (aikenTitle && (replace || !_hadQs || !APP.settings.title)) { _setQuizTitle(aikenTitle); summary.title = aikenTitle; }
   if (replace || !_hadQs) _applyAikenSettings(aikenSettings);
+  _ensureSectionsList();
   updateBadges();
-  toast(imported.length + ' question' + (imported.length !== 1 ? 's' : '') + ' imported', 'ok');
-  closeModal('modal-ai-convert');
-  document.querySelector('.tab-btn[data-tab="questions"]').click();
+  if (typeof renderQuestions === 'function') renderQuestions();
+  summary.replaced = replace;
+  return summary;
 }
 
-async function _loadFileIntoAIModal(file) {
-  const statusEl = document.getElementById('ai-status');
-  const inputEl  = document.getElementById('ai-input-text');
-  try {
-    const text = await _extractTextFromFile(file);
-    inputEl.value = text;
-    const imgCount = Object.keys(_aiImageMap).length;
-    if (statusEl) {
-      statusEl.textContent = 'Loaded "' + file.name + '"' + (imgCount ? (' with ' + imgCount + ' image' + (imgCount !== 1 ? 's' : '')) : '') + ' — ready to convert';
-      statusEl.style.color = 'var(--muted)';
-    }
-  } catch (err) {
-    if (statusEl) { statusEl.textContent = 'Failed to read file: ' + err.message; statusEl.style.color = '#dc2626'; }
-  }
+function _aiShowDone(out, warnings) {
+  const n = out.count;
+  document.getElementById('ai-done-t').textContent = n + ' question' + (n !== 1 ? 's' : '') + (out.bank ? ' added to the question bank' : ' added to your quiz');
+  const bits = [];
+  if (out.sections.length) bits.push(out.sections.length + ' section' + (out.sections.length !== 1 ? 's' : '') + ': ' + out.sections.join(', '));
+  if (out.title && !out.bank) bits.push('Title: ' + out.title);
+  document.getElementById('ai-done-s').textContent = bits.join(' · ') || 'Review them in the question list.';
+  const check = document.getElementById('ai-check');
+  const notes = out.checks.slice(0, 8).map(q => '<li>' + escH(q.length > 110 ? q.slice(0, 107) + '…' : q) + '</li>').join('')
+    + (out.checks.length > 8 ? '<li>…and ' + (out.checks.length - 8) + ' more</li>' : '');
+  const warn = (warnings || []).map(w => '<li>' + escH(w) + '</li>').join('');
+  check.hidden = !(out.checks.length || warn);
+  check.innerHTML = (out.checks.length ? '<strong>Check the answer for ' + out.checks.length + ' question' + (out.checks.length !== 1 ? 's' : '') + '</strong><ul>' + notes + '</ul>' : '')
+    + (warn ? '<strong' + (out.checks.length ? ' style="margin-top:10px"' : '') + '>Some content may be missing</strong><ul>' + warn + '</ul>' : '');
+  _aiShow('done');
+  if (out.bank) document.getElementById('ai-convert-btn').hidden = true;
+  toast(n + ' question' + (n !== 1 ? 's' : '') + ' imported', 'ok');
 }
 
-// Wire up the file input AND drag-and-drop on the modal input textarea
-function _setupAIModalDropZone() {
-  const ta = document.getElementById('ai-input-text');
-  if (ta && !ta.dataset.dropWired) {
-    ta.dataset.dropWired = '1';
-    const origBoxShadow = ta.style.boxShadow || '';
-    ta.addEventListener('dragover', e => { e.preventDefault(); ta.style.boxShadow = '0 0 0 2px var(--green)'; });
-    ta.addEventListener('dragleave', () => { ta.style.boxShadow = origBoxShadow; });
-    ta.addEventListener('drop', async e => {
-      e.preventDefault();
-      ta.style.boxShadow = origBoxShadow;
-      const f = e.dataTransfer.files && e.dataTransfer.files[0];
-      if (f) await _loadFileIntoAIModal(f);
-    });
-  }
-}
-
-(function() {
-  document.addEventListener('change', async function(e) {
-    if (!e.target || e.target.id !== 'ai-file-input') return;
-    const f = e.target.files[0]; if (!f) return;
-    await _loadFileIntoAIModal(f);
-    e.target.value = '';
+function _aiSetupDropZone() {
+  const dz = document.getElementById('ai-drop');
+  if (!dz || dz.dataset.wired) return;
+  dz.dataset.wired = '1';
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('over');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) _aiStartFromFile(f);
   });
-})();
+  document.getElementById('ai-file-input').addEventListener('change', e => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (f) _aiStartFromFile(f);
+  });
+}
 
 // Auto-detect file type and route to correct handler
 async function handleAutoFile(file) {
@@ -7219,8 +7397,7 @@ async function handleAutoFile(file) {
     // No native parser — PDFs and images are always converted with AI
     try {
       const text = await _extractTextFromFile(file);
-      if (await _offerAIConversion(text, file.name, _aiImageMap)) return;
-      showImportResult('&#9888; PDF and image files can only be imported with AI conversion.', true);
+      openAIConvertModal(text, _aiImageMap, file.name);
     } catch (e) { showImportResult('&#10007; Could not read "' + escH(file.name) + '": ' + escH(e.message), true); }
     return;
   }
@@ -9005,7 +9182,8 @@ function renderInspector() {
 
   const rowsTiming = _rCtlRow('tog-timelimit', 'Time limit', 'Per attempt', _rStepHtml('s-timelimit', 'min', 1, 999, 45) + _rTogHtml('tog-timelimit'))
     + '<div class="r-sub"><div class="r-ctl" style="padding-top:2px"><div class="lab"><div class="l">Pace by question</div><div class="d">Apply a per-question budget as the total time limit</div></div></div>'
-    + '<div style="display:flex;align-items:center;gap:8px;margin-top:2px">' + _rStepHtml('s-mins-per-q', 'min / question', 1, 60, 3) + '<button class="r-lnk" onclick="applyMinsPerQuestion()" style="margin-left:auto">Apply</button></div></div>';
+    + '<div style="display:flex;align-items:center;gap:8px;margin-top:2px">' + _rStepHtml('s-mins-per-q', 'min / question', 1, 60, 3) + '<button class="r-lnk" onclick="applyMinsPerQuestion()" style="margin-left:auto">Apply</button></div>'
+    + '<div class="d" id="r-pace-preview" style="font-size:12px;color:var(--muted);margin-top:8px"></div></div>';
 
   const rowsPool = '<div class="r-pool-total"><span class="l">Total questions in pool</span><span class="v" id="r-pool-total">0</span></div>'
     + _rCtlRow('tog-qcount', 'Questions per attempt', 'Randomly drawn from the pool', _rStepHtml('s-qcount', 'questions', 1, 999, 10) + _rTogHtml('tog-qcount'))
@@ -9589,6 +9767,7 @@ function _rUpdateRowStates() {
 
 // Refresh the "At a glance" chip summary
 function _rRefreshChips() {
+  _rPacePreview();
   const sm = document.getElementById('r-summary');
   if (!sm) return;
   const s = APP.settings;
@@ -12678,15 +12857,43 @@ async function addBankSelectionToQuiz() {
 }
 
 // ── SETTINGS ──────────────────────────────────────────────
-function applyMinsPerQuestion() {
+// Sets the time limit to (minutes per question × questions a learner sees).
+// Uses the inspected batch quiz's questions when the inspector is on the Batch
+// tab, and "Questions per attempt" when that is switched on.
+function _paceCalc() {
   const minsPerQ = parseInt(document.getElementById('s-mins-per-q').value) || 3;
-  const qCount = APP.questions.length;
-  if (!qCount) { toast('Add questions first', 'err'); return; }
-  const total = minsPerQ * qCount;
+  const batchItem = (_inspectorOwner === 'batch') ? BATCH.find(b => b.id === _inspectorBatchId) : null;
+  const pool = batchItem ? batchItem.questions.length : APP.questions.length;
+  const perAttempt = document.getElementById('tog-qcount').checked ? (parseInt(document.getElementById('s-qcount').value) || 0) : 0;
+  const qCount = perAttempt ? Math.min(perAttempt, pool) : pool;
+  return { minsPerQ, pool, perAttempt: !!perAttempt, qCount, total: Math.min(999, minsPerQ * qCount) };
+}
+
+// Live line under "Pace by question" showing what Apply would set.
+function _rPacePreview() {
+  const el = document.getElementById('r-pace-preview');
+  if (!el) return;
+  const c = _paceCalc();
+  el.textContent = c.pool
+    ? c.qCount + (c.perAttempt ? ' questions per attempt' : ' question' + (c.qCount !== 1 ? 's' : '')) + ' × ' + c.minsPerQ + ' min = ' + c.total + ' min'
+    : 'Add questions to calculate a time limit';
+}
+
+function applyMinsPerQuestion() {
+  const { minsPerQ, pool, qCount, total } = _paceCalc();
+  if (!pool) { toast('Add questions first', 'err'); return; }
   document.getElementById('tog-timelimit').checked = true;
   toggleSettingInput('timelimit', true);
   document.getElementById('s-timelimit').value = total;
-  toast(qCount + ' questions × ' + minsPerQ + ' min = ' + total + ' min', 'ok');
+  saveSettings();
+  // Reflect the new value in the inspector's stepper, toggle and chips.
+  const v = document.querySelector('.r-stepper[data-mirror="s-timelimit"] .v');
+  if (v) v.value = total;
+  if (typeof _rResyncToggles === 'function') _rResyncToggles();
+  if (typeof _rRefreshChips === 'function') _rRefreshChips();
+  if (typeof _rSyncSubs === 'function') _rSyncSubs();
+  if (typeof _rUpdateRowStates === 'function') _rUpdateRowStates();
+  toast(qCount + ' questions × ' + minsPerQ + ' min = ' + total + ' min time limit', 'ok');
 }
 
 function toggleAdvancedSettings() {
