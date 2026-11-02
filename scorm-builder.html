@@ -704,6 +704,18 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-canvas .search{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--g100);border-radius:7px;padding:6px 10px;color:var(--muted);font-size:13px;width:170px}
 .r-canvas .search svg{width:14px;height:14px}
 .r-canvas .search input{border:none;outline:none;font:inherit;font-size:13px;width:100%;background:none;color:var(--text)}
+.r-canvas .search:focus-within{border-color:var(--green);box-shadow:0 0 0 3px rgba(118,185,0,.15);width:260px}
+.r-canvas .search{transition:width .15s,border-color .15s,box-shadow .15s}
+.r-canvas .search.has-q{width:260px}
+.qs-ctl{display:flex;align-items:center;gap:1px;flex:none}
+.qs-ctl[hidden]{display:none}
+.qs-count{font-size:11.5px;color:var(--muted);margin-right:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.qs-count.none{color:#dc2626}
+.qs-btn{width:22px;height:22px;border:none;background:none;border-radius:5px;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.qs-btn:hover{background:#f3f4f6;color:var(--text)}
+.qs-btn svg{width:13px;height:13px}
+mark.qs-hit{background:#ffe58f;color:inherit;border-radius:2px;padding:0 1px}
+mark.qs-hit.qs-cur{background:#ff9632}
 .r-canvas .exp-tog{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:500;color:var(--g700);cursor:pointer;user-select:none;padding:0 2px}
 .r-canvas .tog{display:inline-block;vertical-align:middle;width:38px;height:22px;border-radius:11px;background:var(--g200);position:relative;flex:none;transition:background .15s}
 .r-canvas .tog.on{background:var(--green)}
@@ -1704,7 +1716,7 @@ body.bank-tab-active .r-topbar{display:none}
         <div class="sub" id="r-qsub">0 questions</div>
       </div>
       <div class="qbar-tools">
-        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg><input id="r-qsearch" placeholder="Search questions"></div>
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg><input id="r-qsearch" placeholder="Search questions" autocomplete="off" spellcheck="false"><span class="qs-ctl" id="r-qs-ctl" hidden><span class="qs-count" id="r-qs-count"></span><button type="button" class="qs-btn" onclick="qsStep(-1)" title="Previous match (Shift+Enter)" aria-label="Previous match"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></button><button type="button" class="qs-btn" onclick="qsStep(1)" title="Next match (Enter)" aria-label="Next match"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><button type="button" class="qs-btn" onclick="qsClear()" title="Clear search (Esc)" aria-label="Clear search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></span></div>
         <label class="exp-tog" onclick="toggleExpandQuestions(!Q_EXPANDED)"><span>Expand all</span><span class="tog" id="r-expand-tog"></span></label>
         <button class="btn btn-sm btn-danger" onclick="clearAll()">Clear All</button>
       </div>
@@ -6614,7 +6626,8 @@ const _AIKEN_CONVERSION_PROMPT =
   '- An explicit answer key in the text (e.g. "Answer: B", "Correct answer: …") always wins over formatting.\n' +
   '- If the source groups questions under topic headings, output a "SECTION: name" line before each group, for EVERY such heading, consistently. Headings are short lines between questions that are not question text or options. Text in white (color=#FFFFFF) was hidden in the original and is usually such a heading. Do not invent sections when the source has no headings. A heading at the very top that names the whole quiz is the TITLE, not a SECTION.\n' +
   '- If nothing in the source identifies the answer of a question, still output the question with your best answer, and put the comment line "# CHECK: answer not marked in source" on the line directly above the question.\n' +
-  '- NEVER output [FMT] markers or "•" bullets. Output clean AIKEN text.\n\n' +
+  '- Text between [BOX] and [/BOX] was shown in a box or in a monospace font in the original: command output, terminal sessions, configuration or code. Put it in the question as a code block: a line "##CODE##", then the box lines exactly as given (same characters and spacing, no blank lines), then a line "##/CODE##". The code block goes after the question text and before the first option. Do NOT merge box lines into the question sentence. Apply the same to command output in PDFs or images that is clearly set apart from the question text.\n' +
+  '- NEVER output [FMT] or [BOX] markers or "•" bullets. Output clean AIKEN text.\n\n' +
   '========= ATTACHED IMAGES =========\n' +
   '- Images may be attached after the text. Each one is introduced by its filename.\n' +
   '- Copy text from images exactly as written, character for character. Do not "correct" product names, acronyms, commands or numbers (e.g. OSFP and OSPF are different terms).\n' +
@@ -6837,6 +6850,63 @@ function _xChild(el, ns, name) {
   return el ? Array.from(el.children).find(c => c.namespaceURI === ns && c.localName === name) || null : null;
 }
 
+const _MONO_FONT = /courier|consolas|menlo|monaco|lucida console|source code|fira code|cascadia|monospace/i;
+
+// A paragraph's own runs — not those of paragraphs nested inside it (Word
+// stores a text box inside the paragraph it is anchored to).
+function _docxOwnRuns(p, W) {
+  return Array.from(p.getElementsByTagNameNS(W, 'r')).filter(r => {
+    let el = r.parentElement;
+    while (el && !(el.namespaceURI === W && el.localName === 'p')) el = el.parentElement;
+    return el === p;
+  });
+}
+// Word saves each text box twice: the real one and an mc:Fallback copy for old
+// versions. The copy is skipped so text isn't read twice.
+function _docxInFallback(el) {
+  for (let a = el.parentElement; a; a = a.parentElement) if (a.localName === 'Fallback') return true;
+  return false;
+}
+
+// True when a paragraph shows code or command output: inside a text box or a one-cell table
+// (a text box drawn as a table), set in a monospace font, or styled as code.
+function _docxIsBoxed(p, W) {
+  for (let a = p.parentElement; a; a = a.parentElement) {
+    if (a.namespaceURI === W && a.localName === 'txbxContent') return a;
+    if (a.namespaceURI === W && a.localName === 'tc') break;
+  }
+  let el = p.parentElement;
+  while (el && !(el.namespaceURI === W && el.localName === 'tbl')) el = el.parentElement;
+  if (el) {
+    const rows = Array.from(el.children).filter(c => c.namespaceURI === W && c.localName === 'tr');
+    if (rows.length === 1 && Array.from(rows[0].children).filter(c => c.namespaceURI === W && c.localName === 'tc').length === 1) return el;
+  }
+  const pPr = _xChild(p, W, 'pPr');
+  const style = pPr && _xChild(pPr, W, 'pStyle');
+  const sv = style && (style.getAttributeNS(W, 'val') || style.getAttribute('w:val')) || '';
+  if (/code|preformatted|source|console|terminal/i.test(sv)) return 'code';
+  const runs = _docxOwnRuns(p, W).filter(r => r.getElementsByTagNameNS(W, 't').length);
+  if (runs.length && runs.every(r => {
+    const f = r.getElementsByTagNameNS(W, 'rFonts')[0];
+    return f && _MONO_FONT.test(f.getAttributeNS(W, 'ascii') || f.getAttribute('w:ascii') || '');
+  })) return 'code';
+  return null;
+}
+
+// Raw text of a paragraph, spacing kept (for code / command output).
+function _docxRawText(p, W) {
+  let t = '';
+  _docxOwnRuns(p, W).forEach(r => {
+    Array.from(r.children).forEach(c => {
+      if (c.namespaceURI !== W) return;
+      if (c.localName === 't') t += c.textContent;
+      else if (c.localName === 'tab') t += '    ';
+      else if (c.localName === 'br' || c.localName === 'cr') t += '\n';
+    });
+  });
+  return t.replace(/\s+$/, '');
+}
+
 function _docxParaText(p, W) {
   const val = el => el && (el.getAttributeNS(W, 'val') || el.getAttribute('w:val'));
   const on = el => el && !/^(0|false|none)$/i.test(val(el) || '');
@@ -6845,7 +6915,7 @@ function _docxParaText(p, W) {
   const pFill = pShd && (pShd.getAttributeNS(W, 'fill') || pShd.getAttribute('w:fill'));
   const paraFmt = pFill && !/^(auto|ffffff)$/i.test(pFill) ? 'shading=#' + pFill : '';
   const segs = [];
-  Array.from(p.getElementsByTagNameNS(W, 'r')).forEach(r => {
+  _docxOwnRuns(p, W).forEach(r => {
     let t = '';
     Array.from(r.children).forEach(c => {
       if (c.namespaceURI !== W) return;
@@ -6952,9 +7022,21 @@ async function _extractDocxWithImages(file) {
 
   const lines = [];
   const seenImages = new Set();
+  let openBox = null; // the box ([BOX] … [/BOX]) currently being written
   Array.from(xmlDoc.getElementsByTagNameNS(NS, 'p')).forEach(p => {
-    const text = _docxParaText(p, NS);
-    if (text) lines.push(text);
+    if (_docxInFallback(p)) return;
+    const box = _docxIsBoxed(p, NS);
+    if (openBox && box !== openBox) { lines.push('[/BOX]'); openBox = null; }
+    if (box) {
+      const raw = _docxRawText(p, NS);
+      if (raw.trim()) {
+        if (!openBox) { lines.push('[BOX]'); openBox = box; }
+        raw.split('\n').forEach(l => lines.push(l));
+      }
+    } else {
+      const text = _docxParaText(p, NS);
+      if (text) lines.push(text);
+    }
     // Modern image references: <a:blip r:embed="...">
     Array.from(p.getElementsByTagNameNS(ANS, 'blip')).forEach(blip => {
       const rId = blip.getAttributeNS(RNS, 'embed') || blip.getAttribute('r:embed');
@@ -6966,6 +7048,8 @@ async function _extractDocxWithImages(file) {
       if (rId && rIdToFilename[rId]) { lines.push('[IMAGE: ' + rIdToFilename[rId] + ']'); seenImages.add(rIdToFilename[rId]); }
     });
   });
+
+  if (openBox) lines.push('[/BOX]');
 
   // Catch-all for images that live outside paragraphs (floating shapes, headers/footers, etc.)
   for (const filename of Object.keys(imageMap)) {
@@ -8946,6 +9030,137 @@ function _renderQuestionCardNew(q, i, displayNum) {
   + '</div>';
 }
 
+// ── In-quiz search (works like the browser's find) ──
+// Highlights every match in the question list, opens the question cards and
+// sections that contain one, and steps through matches with Enter / Shift+Enter.
+// Anything the search opened is closed again when it is cleared. Highlights
+// are re-applied after every renderQuestions().
+let _qsQuery = '';
+let _qsIndex = 0;
+
+function _qsText(q) {
+  const parts = [stripHtml(q.question || ''), q.codeBlock || ''];
+  (q.options || []).forEach(o => parts.push(stripHtml(o.text || '')));
+  (q.pairs || []).forEach(p => parts.push(p.left, p.right));
+  (q.steps || []).forEach(t => parts.push(t));
+  (q.hotspots || []).forEach(h => parts.push(h.label || ''));
+  if (q.section) parts.push(q.section);
+  return parts.join('\n').toLowerCase();
+}
+
+function _qsUnmark(list) {
+  list.querySelectorAll('mark.qs-hit').forEach(m => {
+    const t = document.createTextNode(m.textContent);
+    m.parentNode.replaceChild(t, m);
+    t.parentNode.normalize();
+  });
+}
+
+function _qsRestore(list) {
+  list.querySelectorAll('.qc.qs-opened').forEach(c => c.classList.remove('open', 'qs-opened'));
+  list.querySelectorAll('.qsection.qs-opened').forEach(sc => { sc.classList.add('closed'); sc.classList.remove('qs-opened'); });
+}
+
+function _qsApply(keepIndex) {
+  const list = document.getElementById('q-list');
+  const ctl = document.getElementById('r-qs-ctl');
+  const box = document.querySelector('.r-canvas .search');
+  if (!list) return;
+  _qsUnmark(list);
+  _qsRestore(list);
+  const q = _qsQuery.trim().toLowerCase();
+  if (ctl) ctl.hidden = !q;
+  if (box) box.classList.toggle('has-q', !!q);
+  if (!q) return;
+  // Open the cards (and their sections) whose content matches.
+  const hitIds = new Set(APP.questions.filter(x => _qsText(x).includes(q)).map(x => x.id));
+  list.querySelectorAll('.qc[data-qid]').forEach(card => {
+    if (!hitIds.has(card.dataset.qid)) return;
+    if (!card.classList.contains('open')) card.classList.add('open', 'qs-opened');
+    const sec = card.closest('.qsection');
+    if (sec && sec.classList.contains('closed')) sec.classList.add('qs-opened'), sec.classList.remove('closed');
+  });
+  // Wrap every visible occurrence in <mark>.
+  const walker = document.createTreeWalker(list, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => {
+      const el = n.parentElement;
+      if (!el || !n.nodeValue.toLowerCase().includes(q)) return NodeFilter.FILTER_REJECT;
+      if (el.closest('button, input, textarea, .qcheck, .grip')) return NodeFilter.FILTER_REJECT;
+      return el.getClientRects().length ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const text = node.nodeValue, lower = text.toLowerCase();
+    const frag = document.createDocumentFragment();
+    let pos = 0, i;
+    while ((i = lower.indexOf(q, pos)) !== -1) {
+      if (i > pos) frag.appendChild(document.createTextNode(text.slice(pos, i)));
+      const m = document.createElement('mark');
+      m.className = 'qs-hit';
+      m.textContent = text.slice(i, i + q.length);
+      frag.appendChild(m);
+      pos = i + q.length;
+    }
+    if (pos < text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
+    node.parentNode.replaceChild(frag, node);
+  });
+  const marks = list.querySelectorAll('mark.qs-hit');
+  if (!keepIndex) _qsIndex = 0;
+  if (_qsIndex >= marks.length) _qsIndex = 0;
+  _qsFocusCurrent(!keepIndex);
+}
+
+function _qsFocusCurrent(scroll) {
+  const marks = document.querySelectorAll('#q-list mark.qs-hit');
+  const cnt = document.getElementById('r-qs-count');
+  marks.forEach((m, i) => m.classList.toggle('qs-cur', i === _qsIndex));
+  if (cnt) {
+    cnt.textContent = marks.length ? (_qsIndex + 1) + '/' + marks.length : 'No matches';
+    cnt.classList.toggle('none', !marks.length);
+  }
+  if (scroll && marks[_qsIndex]) marks[_qsIndex].scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
+function qsStep(dir) {
+  const n = document.querySelectorAll('#q-list mark.qs-hit').length;
+  if (!n) return;
+  _qsIndex = (_qsIndex + dir + n) % n;
+  _qsFocusCurrent(true);
+}
+
+function qsClear() {
+  const inp = document.getElementById('r-qsearch');
+  if (inp) inp.value = '';
+  _qsQuery = '';
+  _qsApply();
+}
+
+(function () {
+  const inp = document.getElementById('r-qsearch');
+  if (!inp) return;
+  let t = null;
+  inp.addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(() => { _qsQuery = inp.value; _qsApply(); }, 120);
+  });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); clearTimeout(t); if (_qsQuery !== inp.value) { _qsQuery = inp.value; _qsApply(); } else qsStep(e.shiftKey ? -1 : 1); }
+    else if (e.key === 'Escape') { e.preventDefault(); qsClear(); inp.blur(); }
+  });
+  // Cmd/Ctrl+F jumps to the quiz search while the Quiz Builder is open.
+  document.addEventListener('keydown', e => {
+    if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'f' || e.shiftKey || e.altKey) return;
+    const panel = document.getElementById('tab-questions');
+    if (!panel || !panel.classList.contains('active') || document.querySelector('.m-overlay.active')) return;
+    if (!APP.questions.length) return;
+    e.preventDefault();
+    inp.focus();
+    inp.select();
+  });
+})();
+
 // Renders the add row at the bottom of the canvas.
 // 0 questions → spread three "primary" outlined buttons (Write / Pull / Import) + Add section
 // Otherwise   → compact split-button (Add question ▾) + Add section
@@ -9950,6 +10165,7 @@ function renderQuestions() {
   _updateQuestionSelectionBar();
   if (typeof _rRefreshChips === 'function') _rRefreshChips();
   if (typeof renderAddRow === 'function') renderAddRow();
+  if (_qsQuery) _qsApply(true);
 }
 
 /* Old verbose renderer kept under a different name in case we need to reference it.
@@ -15745,7 +15961,26 @@ function downloadWordDoc() {
 // ── What's new / welcome modal ────────────────────────────
 // Changelog — newest first. kind: 'new' | 'improved' | 'fixed'. Add entries here.
 const WELCOME_CHANGELOG = [
-  { v: '2.2', date: 'July 2026', tag: 'Latest', items: [
+  { v: '2.3', date: 'November 2026', tag: 'Latest', items: [
+    { kind: 'new', t: '<b>Import with AI, rebuilt</b> — drop a Word, PowerPoint, PDF or image file and the questions go straight into your quiz. Finds answers marked by highlight, colour or bold, reads text inside images and scanned pages, and keeps sections and multi-answer questions. Flags any question whose answer wasn\'t marked.' },
+    { kind: 'new', t: '<b>Apply settings to all quizzes</b> — push one quiz\'s settings to every quiz in the batch, after a confirmation. Titles, package IDs and sections are kept.' },
+    { kind: 'new', t: '<b>New download dialog</b> — settings summary, learner previews, and optional Word and AIKEN copies downloaded alongside the SCORM package.' },
+    { kind: 'new', t: '<b>Quiz settings in AIKEN files</b> — AIKEN downloads carry every quiz setting as <code># @key: value</code> comment lines, and importing the file restores them. Lines starting with <code>#</code> are comments.' },
+    { kind: 'new', t: '<b>Batch downloads in History</b> — packages downloaded from the Batch tab are saved to History with a Batch label.' },
+    { kind: 'new', t: '<b>Add to section</b> when adding questions from the Bank.' },
+    { kind: 'new', t: '<b>Result-screen message settings</b>, quizzes without a pass mark, and a per-section pass threshold.' },
+    { kind: 'improved', t: '<b>Faster loading</b> — History no longer downloads every stored package when the app opens.' },
+    { kind: 'improved', t: 'The start screen highlights the number of attempts and the cooldown days.' },
+    { kind: 'improved', t: 'Word export lists every quiz setting and custom message.' },
+    { kind: 'improved', t: '<b>Pace by question</b> shows what it will set and uses "Questions per attempt" when that is on.' },
+    { kind: 'improved', t: 'Collapsible sidebar and indicators for custom messages.' },
+    { kind: 'fixed', t: 'Pace by question <b>Apply</b> now updates and saves the time limit.' },
+    { kind: 'fixed', t: 'Quizzes added to a batch no longer share section data with each other.' },
+    { kind: 'fixed', t: 'Answer reveal on the review-on-fail screen.' },
+    { kind: 'fixed', t: 'At-a-glance chips refresh when message fields are edited directly.' },
+    { kind: 'fixed', t: 'Cancel stays to the left of Download in the download dialog.' },
+  ]},
+  { v: '2.2', date: 'July 2026', items: [
     { kind: 'new', t: '<b>Practice mode</b> — passers can retake the quiz for practice without touching their LMS record. Tabbed results (Test vs Practice), unlimited practice runs, dedicated review of practice answers.' },
     { kind: 'new', t: '<b>ALM preflight</b> — when a SCORM file is replaced in ALM, prior passes are preserved automatically. First launch queries the ALM API; subsequent launches read the SCORM data model directly, no extra network calls.' },
     { kind: 'new', t: '<b>Confirm-download modal</b> — settings summary before you export a SCORM package, with a suspend-data size check for SCORM 1.2 packages.' },
