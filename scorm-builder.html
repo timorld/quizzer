@@ -698,6 +698,11 @@ input[type="checkbox"]:indeterminate::after{content:"";position:absolute;left:50
 .r-canvas .custom-mode label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 .r-canvas .custom-mode input{accent-color:var(--green)}
 .r-canvas .qbar{display:flex;align-items:center;justify-content:space-between;margin:26px 0 14px;gap:12px;flex-wrap:wrap}
+/* While a search is active the questions toolbar floats at the top of the list,
+   so the search box and its next/previous buttons stay reachable. × closes it. */
+.r-canvas .qbar.searching{position:sticky;top:-24px;z-index:30;background:var(--bg);padding:12px 0 10px;margin-top:14px;transition:box-shadow .15s}
+.r-canvas .qbar.stuck{box-shadow:0 8px 12px -10px rgba(16,24,40,.25)}
+.r-canvas .qbar.stuck::before{content:'';position:absolute;inset:0 -28px;background:var(--bg);z-index:-1}
 .r-canvas .qbar h2{font-size:16px;font-weight:800;letter-spacing:-.2px}
 .r-canvas .qbar .sub{font-size:12.5px;color:var(--muted);margin-top:1px}
 .r-canvas .qbar-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -1474,6 +1479,10 @@ body.bank-tab-active .r-topbar{display:none}
 .r-stepper .v:focus{background:var(--green-lt,#e8f5c8);border-left-color:var(--green);border-right-color:var(--green)}
 .r-stepper .u{font-size:11px;color:var(--muted);padding:0 8px 0 7px;white-space:nowrap}
 .r-sub{margin:2px 0 4px 0;padding:10px 12px;background:var(--g025);border:1px solid #eef0f3;border-radius:8px}
+.r-rv-note{display:flex;flex-direction:column;gap:6px;padding:10px 12px;margin:2px 0 8px;background:var(--g025);border:1px solid #eef0f3;border-radius:8px;font-size:12px;color:#374151;line-height:1.4}
+.r-rv-line{display:flex;gap:10px;align-items:baseline}
+.r-rv-k{flex:none;width:96px;white-space:nowrap;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.r-rv-k.pass{color:#3f8500}.r-rv-k.fail{color:#be185d}
 .r-sec-split-modes{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap}
 .r-sec-split-modes label{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--g150);border-radius:7px;background:#fff;cursor:pointer;font-size:12.5px;color:var(--text);font-weight:500;font-family:inherit;user-select:none}
 .r-sec-split-modes label.on{border-color:var(--green);background:var(--green-lt);color:var(--green-600);font-weight:600}
@@ -3000,18 +3009,18 @@ body.bank-tab-active .r-topbar{display:none}
 <!-- SHOW ANSWER REVIEW CONFIRMATION MODAL -->
 <div class="m-overlay" id="modal-review-confirm">
   <div class="modal" style="max-width:500px">
-    <div class="m-hdr"><span class="m-title">Enable Show Answer Review?</span></div>
+    <div class="m-hdr"><span class="m-title">Let learners who fail review?</span></div>
     <div class="m-body">
-      <p style="font-size:15px;line-height:1.65;margin-bottom:16px">When Show Answer Review is enabled:</p>
-      <ul style="font-size:14px;line-height:1.8;padding-left:20px;margin-bottom:16px;color:#333">
-        <li>A <strong>Review Quiz</strong> button will appear on the result screen after every attempt — both pass and fail</li>
-        <li>Learners can review the answers they submitted before deciding to retake</li>
+      <p style="font-size:14.5px;line-height:1.6;margin-bottom:14px">A <strong>Review answers</strong> button will also appear when a learner fails, so they can see which questions they got wrong before trying again.</p>
+      <ul style="font-size:13.5px;line-height:1.7;padding-left:20px;margin-bottom:6px;color:#374151">
+        <li>Learners who <strong>pass</strong> can already review their answers. That doesn't change.</li>
+        <li>Correct answers in a review after failing are controlled by <strong>Show the correct answers</strong> (off by default). Learners who pass always see them.</li>
+        <li>To stop learners copying answers into their next try, keep correct answers hidden or use <strong>Only after a number of fails</strong>.</li>
       </ul>
-      <p style="font-size:14px;line-height:1.65;color:#555;border-top:1px solid var(--border);padding-top:14px;margin-top:4px">When this is <strong>off</strong>, the Review Quiz button is only shown to learners who pass, and their correct answers are revealed in the review.</p>
     </div>
     <div class="m-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-review-confirm')">Cancel</button>
-      <button class="btn btn-primary" onclick="enableShowAnswerReview()">Enable</button>
+      <button class="btn btn-primary" onclick="enableShowAnswerReview()">Turn on</button>
     </div>
   </div>
 </div>
@@ -4725,12 +4734,10 @@ function showSection(sectionId) {
     var list = document.getElementById('review-list');
     if (!list) return;
     list.innerHTML = '';
-    // When review-on-fail is off, the review is only ever shown to passed
-    // learners, so auto-reveal correct answers for them regardless of the
-    // explicit toggle. Once review-on-fail is on, both pass and fail can see
-    // the review, so reveal must be governed purely by the explicit toggle.
+    // Learners who have passed always see the correct answers in their review.
+    // The "Show the correct answers" toggle only governs reviews after a fail.
     var origShowCorrect = CONFIG.showCorrectAnswers;
-    CONFIG.showCorrectAnswers = origShowCorrect || (hasPassed && !CONFIG.showAnswerReview);
+    CONFIG.showCorrectAnswers = origShowCorrect || hasPassed;
     // The "Correct answer revealed" legend swatch only applies when the blue
     // reveal color is actually used — hide it otherwise.
     var revealItem = document.querySelector('#review-legend .rl-reveal-item');
@@ -9071,6 +9078,8 @@ function _qsApply(keepIndex) {
   const q = _qsQuery.trim().toLowerCase();
   if (ctl) ctl.hidden = !q;
   if (box) box.classList.toggle('has-q', !!q);
+  const bar = document.querySelector('.r-canvas .qbar');
+  if (bar) { bar.classList.toggle('searching', !!q); if (!q) bar.classList.remove('stuck'); }
   if (!q) return;
   // Open the cards (and their sections) whose content matches.
   const hitIds = new Set(APP.questions.filter(x => _qsText(x).includes(q)).map(x => x.id));
@@ -9121,6 +9130,7 @@ function _qsFocusCurrent(scroll) {
     cnt.classList.toggle('none', !marks.length);
   }
   if (scroll && marks[_qsIndex]) marks[_qsIndex].scrollIntoView({ block: 'center', behavior: 'smooth' });
+  // Keep the cursor in the search box so Enter keeps stepping through matches.
 }
 
 function qsStep(dir) {
@@ -9136,6 +9146,16 @@ function qsClear() {
   _qsQuery = '';
   _qsApply();
 }
+
+// Shadow under the pinned questions toolbar once the list scrolls beneath it.
+(function () {
+  const canvas = document.querySelector('.r-canvas');
+  const bar = canvas && canvas.querySelector('.qbar');
+  if (!bar) return;
+  canvas.addEventListener('scroll', () => {
+    bar.classList.toggle('stuck', bar.classList.contains('searching') && bar.getBoundingClientRect().top - canvas.getBoundingClientRect().top <= 0.5);
+  }, { passive: true });
+})();
 
 (function () {
   const inp = document.getElementById('r-qsearch');
@@ -9441,9 +9461,13 @@ function renderInspector() {
     + _rCtlRow('s-warn-blank', 'Warn before blank submit', '', _rTogHtml('s-warn-blank'))
     + _rCtlRow('s-confirm-submit', 'Confirm before submitting', '', _rTogHtml('s-confirm-submit'));
 
-  const rowsAfter = _rCtlRow('tog-review', 'Show answer review', 'Let learners review their answers', _rTogHtml('tog-review'))
-    + '<div class="r-sub" data-sub="review">' + _rCtlRow('s-show-correct', 'Reveal correct answers', '', _rTogHtml('s-show-correct'))
-    + _rCtlRow('tog-min-attempts-review', 'Only after N failed tries', '', _rStepHtml('s-min-attempts-review', 'fails', 1, 20, 2) + _rTogHtml('tog-min-attempts-review')) + '</div>';
+  // Review after passing is always on in the player; this card controls review
+  // after failing. The summary at the top (filled by _rReviewNote) spells out
+  // what each learner sees with the current toggles.
+  const rowsAfter = '<div class="r-rv-note" id="r-rv-note"></div>'
+    + _rCtlRow('tog-review', 'Let learners who fail review', 'Adds a Review answers button to the fail screen', _rTogHtml('tog-review'))
+    + '<div class="r-sub" data-sub="review">' + _rCtlRow('s-show-correct', 'Show the correct answers', 'Marks the right option on questions they answered wrong. Learners who pass always see them.', _rTogHtml('s-show-correct'))
+    + _rCtlRow('tog-min-attempts-review', 'Only after a number of fails', 'Hides the review on earlier failed attempts, so it can\'t be used to copy answers on the next try', _rStepHtml('s-min-attempts-review', 'fails', 1, 20, 2) + _rTogHtml('tog-min-attempts-review')) + '</div>';
 
   const rowsCert = _rCtlRow('tog-certificate', 'Show certificate link on pass', 'Pass screen · completion quiz only', _rTogHtml('tog-certificate'))
     + '<div class="r-sub" data-sub="certificate"><div class="r-fieldrow"><label>Certificate URL</label><input class="r-ti" type="url" id="r-cert-url" placeholder="https://…" oninput="document.getElementById(\'s-cert-url\').value=this.value;saveSettings()"></div><div class="r-fieldrow"><label>Link text</label><input class="r-ti" type="text" id="r-cert-text" placeholder="Click here to see your certificate" oninput="document.getElementById(\'s-cert-text\').value=this.value;saveSettings()"></div></div>';
@@ -9490,7 +9514,7 @@ function renderInspector() {
     +   _rGroupHtml('pool', 'Question pool', rowsPool)
     +   _rGroupHtml('breakdown', 'Section breakdown', rowsBreakdown)
     +   _rGroupHtml('during', 'Submit behavior', rowsDuring)
-    +   _rGroupHtml('after', 'Review on fail', rowsAfter)
+    +   _rGroupHtml('after', 'Answer review', rowsAfter)
     +   _rGroupHtml('messages', 'Messages', rowsMessages)
     +   _rGroupHtml('cert', 'Certificate', rowsCert)
     + '</div>'
@@ -10012,8 +10036,23 @@ function _rUpdateRowStates() {
 }
 
 // Refresh the "At a glance" chip summary
+// "Answer review" card summary: what a passing and a failing learner can see.
+function _rReviewNote() {
+  const el = document.getElementById('r-rv-note');
+  if (!el) return;
+  const onFail = document.getElementById('tog-review').checked;
+  const reveal = document.getElementById('s-show-correct').checked;
+  const minOn = document.getElementById('tog-min-attempts-review').checked;
+  const minN = parseInt(document.getElementById('s-min-attempts-review').value, 10) || 2;
+  const passTxt = 'Always available, with the correct answers shown';
+  const failTxt = !onFail ? 'No review' : ((minOn ? 'Available from the ' + minN + (minN === 1 ? 'st' : minN === 2 ? 'nd' : minN === 3 ? 'rd' : 'th') + ' failed attempt' : 'Available') + (reveal ? ', with the correct answers shown' : ', correct answers hidden'));
+  el.innerHTML = '<div class="r-rv-line"><span class="r-rv-k pass">After passing</span><span>' + passTxt + '</span></div>'
+    + '<div class="r-rv-line"><span class="r-rv-k fail">After failing</span><span>' + failTxt + '</span></div>';
+}
+
 function _rRefreshChips() {
   _rPacePreview();
+  _rReviewNote();
   const sm = document.getElementById('r-summary');
   if (!sm) return;
   const s = APP.settings;
